@@ -10,7 +10,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <div class="main-content">
     <?php require_once __DIR__ . '/../layouts/navbar.php'; ?>
 
-    <section class="statistics">
+    <section class="statistics <?= $_SESSION['role'] === 'superadmin' ? 'admin-statistics' : 'karyawan-statistics' ?>">
 
         <div class="stat-card">
             <p>TOTAL PESANAN</p>
@@ -27,6 +27,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <h2><?= $selesaiHariIni ?></h2>
         </div>
 
+        <?php if ($_SESSION['role'] === 'superadmin'): ?>
+
         <div class="stat-card">
             <p>PENDAPATAN</p>
             <h2>
@@ -34,42 +36,56 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </h2>
         </div>
 
+        <?php endif; ?>
+
     </section>
 
 
-    <section class="dashboard-content">
+    <section class="dashboard-content <?= $_SESSION['role'] === 'superadmin' ? 'admin-dashboard-content' : 'karyawan-dashboard-content' ?>">
+
+    <?php if ($_SESSION['role'] === 'superadmin'): ?>
 
         <div class="chart-container">
 
             <h3>Grafik Pesanan Mingguan</h3>
 
             <div class="chart-box">
-
                 <div class="chart-placeholder">
                     Grafik
                 </div>
-
             </div>
 
         </div>
 
+    <?php endif; ?>
 
-        <div class="orders-container">
 
-            <h3>Pesanan Terbaru</h3>
+    <div class="orders-container">
 
-            <table>
+        <h3>Pesanan Terbaru</h3>
 
-                <thead>
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Barang</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <?php if (empty($pesananTerbaru)): ?>
+
                     <tr>
-                        <th>ID</th>
-                        <th>Customer</th>
-                        <th>Barang</th>
-                        <th>Total</th>
+                        <td colspan="4">
+                            Belum ada pesanan.
+                        </td>
                     </tr>
-                </thead>
 
-                <tbody>
+                <?php else: ?>
 
                     <?php foreach ($pesananTerbaru as $pesanan): ?>
 
@@ -95,13 +111,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                     <?php endforeach; ?>
 
-                </tbody>
+                <?php endif; ?>
 
-            </table>
+            </tbody>
 
-        </div>
+        </table>
 
-    </section>
+    </div>
+
+</section>
 
 </div>
 
