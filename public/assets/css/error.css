@@ -1,0 +1,130 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+}
+
+.error-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.error-card {
+    width: 100%;
+    max-width: 550px;
+    background: white;
+    border-radius: 20px;
+    padding: 50px 40px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+.error-code {
+    font-size: 100px;
+    font-weight: 800;
+    line-height: 1;
+    color: #111827;
+    letter-spacing: -5px;
+}
+
+.error-icon {
+    width: 70px;
+    height: 70px;
+    margin: 20px auto;
+    border-radius: 50%;
+    background: #f1f5f9;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 32px;
+}
+
+.error-card h1 {
+    font-size: 28px;
+    margin-bottom: 12px;
+    color: #111827;
+}
+
+.error-card p {
+    max-width: 420px;
+    margin: 0 auto 30px;
+    color: #6b7280;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 20px;
+    border-radius: 10px;
+
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: #111827;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #374151;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+    transform: translateY(-2px);
+}
+
+.error-brand {
+    margin-top: 35px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #9ca3af;
+    letter-spacing: 0.5px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+
+    .error-card {
+        padding: 40px 25px;
+    }
+
+    .error-code {
+        font-size: 75px;
+    }
+
+    .error-card h1 {
+        font-size: 23px;
+    }
+
+    .error-card p {
+        font-size: 14px;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}

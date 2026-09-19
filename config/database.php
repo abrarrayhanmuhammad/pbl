@@ -15,7 +15,7 @@ try {
 
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    echo "Koneksi database berhasil!";
+    // echo "Koneksi database berhasil!";
 } catch (PDOException $e) {
     die("Koneksi database gagal: " . $e->getMessage());
 }
