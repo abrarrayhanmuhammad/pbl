@@ -1,7 +1,12 @@
 <?php
 
 $title = 'Dashboard - KickDropShoe';
-$pageTitle = 'DASHBOARD OWNER';
+if ($_SESSION['role'] === 'superadmin') {
+    $pageTitle = 'DASHBOARD OWNER';
+} else {
+    $pageTitle = 'DASHBOARD KARYAWAN';
+}
+
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/sidebar.php';

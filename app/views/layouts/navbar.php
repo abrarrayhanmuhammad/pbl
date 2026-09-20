@@ -1,22 +1,32 @@
 <header class="header">
 
-    <h1>
-        <?= htmlspecialchars($pageTitle ?? 'Dashboard') ?>
-    </h1>
+    <div class="header-left">
 
-    <div class="user-info">
+        <button
+            type="button"
+            class="menu-toggle"
+            id="menu-toggle"
+            aria-label="Buka menu"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
-        User :
-        <span>
-            <?= htmlspecialchars($_SESSION['nama']) ?>
-        </span>
-
-        |
-
-        <span>
-            <?= date('d-m-Y') ?>
-        </span>
+        <h1>
+            <?= htmlspecialchars($pageTitle ?? 'Dashboard') ?>
+        </h1>
 
     </div>
 
+    <div class="user-info">
+        <span>
+            User: <?= htmlspecialchars($_SESSION['nama']) ?>
+        </span>
+        <span>|</span>
+        <span>
+            <?= date('d-m-Y') ?>
+        </span>
+    </div>
+    
 </header>
