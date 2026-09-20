@@ -1,0 +1,548 @@
+/* =========================
+   PAGE ACTION
+========================= */
+
+.page-action {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    width: 100%;
+
+    margin-top: 18px;
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.btn-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 40px;
+
+    padding: 9px 16px;
+
+    border: 1px solid #111827;
+    border-radius: 8px;
+
+    background: #111827;
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.btn-add:hover {
+    background: #374151;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================
+   FILTER
+========================= */
+
+.filter-container {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+
+    gap: 14px;
+
+    margin-top: 18px;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #374151;
+}
+
+.filter-group input,
+.filter-group select {
+    height: 40px;
+
+    padding: 8px 11px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+    color: #111827;
+
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    border-color: #111827;
+
+    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.07);
+}
+
+.filter-group input::placeholder {
+    color: #9ca3af;
+}
+
+.filter-group input {
+    width: 180px;
+}
+
+.filter-group select {
+    width: 180px;
+}
+
+
+/* =========================
+   FILTER BUTTON
+========================= */
+
+.filter-button button {
+    height: 40px;
+
+    padding: 8px 16px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #374151;
+
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.filter-button button:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+
+/* =========================
+   TABLE
+========================= */
+
+.pesanan-table-container {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+.pesanan-table {
+    width: 100%;
+
+    min-width: 760px;
+
+    border-collapse: collapse;
+
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+}
+
+.pesanan-table th,
+.pesanan-table td {
+    padding: 11px 12px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    text-align: left;
+    vertical-align: middle;
+
+    white-space: nowrap;
+}
+
+.pesanan-table th {
+    background: #f9fafb;
+
+    color: #374151;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pesanan-table td {
+    color: #4b5563;
+
+    font-size: 13px;
+}
+
+.pesanan-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.pesanan-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =========================
+   TABLE SCROLLBAR
+========================= */
+
+.pesanan-table-container::-webkit-scrollbar {
+    height: 7px;
+}
+
+.pesanan-table-container::-webkit-scrollbar-track {
+    background: #f3f4f6;
+}
+
+.pesanan-table-container::-webkit-scrollbar-thumb {
+    background: #c7cbd1;
+    border-radius: 10px;
+}
+
+.pesanan-table-container::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+
+/* =========================
+   EMPTY DATA
+========================= */
+
+.empty-data {
+    text-align: center !important;
+
+    padding: 30px 15px !important;
+
+    color: #6b7280 !important;
+
+    font-size: 13px !important;
+}
+
+
+/* =========================
+   ACTION
+========================= */
+
+.action-links {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+}
+
+.action-links a {
+    color: #374151;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+.action-links a:hover {
+    color: #111827;
+    text-decoration: underline;
+}
+
+.detail-button {
+    min-height: 30px;
+
+    padding: 5px 9px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    background: #ffffff;
+    color: #374151;
+
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.detail-button:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+
+/* =========================
+   PAGINATION
+========================= */
+
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 15px;
+
+    margin-top: 18px;
+}
+
+.pagination-info {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.page-button,
+.page-number {
+    min-width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 9px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    background: #ffffff;
+    color: #374151;
+
+    text-decoration: none;
+
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.page-number {
+    min-width: 34px;
+}
+
+.page-button:hover,
+.page-number:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.page-number.active {
+    background: #111827;
+    border-color: #111827;
+    color: #ffffff;
+}
+
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 900px) {
+
+    .page-action {
+        margin-top: 16px;
+    }
+
+    .filter-container {
+        gap: 12px;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 160px;
+    }
+
+    .pesanan-table {
+        font-size: 12px;
+    }
+
+    .pesanan-table th,
+    .pesanan-table td {
+        padding: 10px;
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .page-action {
+        justify-content: stretch;
+    }
+
+    .btn-add {
+        width: 100%;
+    }
+
+
+    /* FILTER */
+
+    .filter-container {
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: 12px;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-group label {
+        font-size: 12px;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        height: 42px;
+    }
+
+    .filter-button {
+        width: 100%;
+    }
+
+    .filter-button button {
+        width: 100%;
+        height: 42px;
+    }
+
+
+    /* TABLE */
+
+    .pesanan-table-container {
+        border-radius: 8px;
+    }
+
+    .pesanan-table {
+        min-width: 720px;
+
+        font-size: 12px;
+    }
+
+    .pesanan-table th,
+    .pesanan-table td {
+        padding: 9px 10px;
+    }
+
+
+    /* PAGINATION */
+
+    .pagination-container {
+        width: 100%;
+
+        gap: 12px;
+    }
+
+    .pagination-info {
+        font-size: 11px;
+    }
+
+    .pagination {
+        width: 100%;
+
+        justify-content: center;
+
+        flex-wrap: wrap;
+    }
+
+    .page-button,
+    .page-number {
+        min-width: 34px;
+        height: 34px;
+    }
+
+}
+
+
+/* =========================
+   SMALL MOBILE
+========================= */
+
+@media (max-width: 380px) {
+
+    .btn-add {
+        min-height: 42px;
+        font-size: 12px;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        height: 40px;
+        font-size: 12px;
+    }
+
+    .filter-button button {
+        height: 40px;
+        font-size: 12px;
+    }
+
+    .pesanan-table {
+        min-width: 680px;
+    }
+
+    .pesanan-table th,
+    .pesanan-table td {
+        padding: 8px;
+    }
+
+    .pagination-info {
+        font-size: 11px;
+    }
+
+}

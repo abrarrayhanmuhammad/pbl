@@ -5,11 +5,11 @@
 }
 
 body {
-    font-family: "Courier New", monospace;
-    background: #ffffff;
-    color: #000000;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+    line-height: 1.5;
 }
-
 
 /* =========================
    LAYOUT
@@ -18,33 +18,49 @@ body {
 .dashboard-container {
     min-height: 100vh;
     display: flex;
+    width: 100%;
 }
 
 .main-content {
     flex: 1;
-    padding: 15px;
+    min-width: 0;
+    padding: 20px;
 }
 
 /* =========================
-   RESPONSIVE
+   TABLET
 ========================= */
 
 @media (max-width: 900px) {
 
+    .main-content {
+        padding: 18px;
+    }
+
     .statistics {
         grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
     }
 
     .dashboard-content {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
 }
 
+/* =========================
+   MOBILE
+========================= */
 
 @media (max-width: 600px) {
 
     .dashboard-container {
         flex-direction: column;
+    }
+
+    .main-content {
+        width: 100%;
+        padding: 15px;
     }
 
     .sidebar {
@@ -59,11 +75,35 @@ body {
     .header {
         flex-direction: column;
         align-items: flex-start;
-
         gap: 8px;
     }
 
     .statistics {
         grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .dashboard-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* =========================
+   SMALL MOBILE
+========================= */
+
+@media (max-width: 380px) {
+
+    .main-content {
+        padding: 12px;
+    }
+
+    .header {
+        gap: 6px;
+    }
+
+    .statistics {
+        gap: 10px;
     }
 }
