@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="/assets/css/navbar.css">
     <link rel="stylesheet"href="/assets/css/dashboard.css">
     <link rel="stylesheet" href="/assets/css/pesanan.css">
+    <link rel="stylesheet" href="/assets/css/detail-pesanan.css">
     <link rel="stylesheet" href="/assets/css/footer.css">
 
 </head>

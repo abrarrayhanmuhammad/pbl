@@ -11,7 +11,7 @@ class Pegawai
 
     public function findByUsername(string $username): ?array
     {
-        $sql = "SELECT * FROM pegawai WHERE username = :username LIMIT 1";
+        $sql = "SELECT * FROM pegawai WHERE uname = :username LIMIT 1";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
