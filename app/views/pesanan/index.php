@@ -76,164 +76,107 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     Semua Status
                 </option>
 
-                <option
-                    value="Menunggu"
-                    <?= $status === 'Menunggu' ? 'selected' : '' ?>
-                >
+                <option value="Menunggu" <?= $status === 'Menunggu' ? 'selected' : '' ?>>
                     Menunggu
                 </option>
 
-                <option
-                    value="Dicuci"
-                    <?= $status === 'Dicuci' ? 'selected' : '' ?>
-                >
+                <option value="Dicuci" <?= $status === 'Dicuci' ? 'selected' : '' ?>>
                     Dicuci
                 </option>
 
-                <option
-                    value="Diproses"
-                    <?= $status === 'Diproses' ? 'selected' : '' ?>
-                >
+                <option value="Diproses" <?= $status === 'Diproses' ? 'selected' : '' ?>>
                     Diproses
                 </option>
 
-                <option
-                    value="Selesai"
-                    <?= $status === 'Selesai' ? 'selected' : '' ?>
-                >
+                <option value="Selesai" <?= $status === 'Selesai' ? 'selected' : '' ?>>
                     Selesai
                 </option>
-
             </select>
-
         </div>
 
 
         <div class="filter-button">
-
-            <button type="submit">
-                Filter
-            </button>
-
+            <button type="submit"> Filter </button>
         </div>
 
     </form>
 
-
-    <!-- Tabel -->
     <div class="pesanan-table-container">
-
         <table class="pesanan-table">
-
             <thead>
-
                 <tr>
                     <th>ID</th>
+                    <th>Kode Customer</th>
                     <th>Customer</th>
                     <th>Jenis</th>
+                    <th>Merk</th>
                     <th>Layanan</th>
+                    <th>Estimasi Selesai</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
-
             </thead>
 
-
             <tbody>
-
                 <?php if (empty($pesanan)): ?>
-
                     <tr>
-
-                        <td
-                            colspan="6"
-                            class="empty-data"
-                        >
+                        <td colspan="8" class="empty-data">
                             Tidak ada pesanan ditemukan.
                         </td>
-
                     </tr>
-
                 <?php else: ?>
-
                     <?php foreach ($pesanan as $item): ?>
-
                         <tr>
-
                             <td>
-                                #<?= str_pad(
-                                    $item['id_pesanan'],
-                                    4,
-                                    '0',
-                                    STR_PAD_LEFT
-                                ) ?>
+                                #<?= str_pad($item['id_pesanan'], 4, '0', STR_PAD_LEFT) ?>
+                            </td>
+
+                             <td>
+                                <?= htmlspecialchars($item['kode_customer']) ?>
                             </td>
 
                             <td>
-                                <?= htmlspecialchars(
-                                    $item['customer']
-                                ) ?>
+                                <?= htmlspecialchars($item['customer']) ?>
                             </td>
 
                             <td>
-                                <?= htmlspecialchars(
-                                    $item['jenis']
-                                ) ?>
+                                <?= htmlspecialchars($item['jenis']) ?>
                             </td>
 
                             <td>
-                                <?= htmlspecialchars(
-                                    $item['layanan']
-                                ) ?>
+                                <?= !empty($item['merk']) ? htmlspecialchars($item['merk']) : '-' ?>
                             </td>
 
                             <td>
-                                <?= htmlspecialchars(
-                                    $item['status']
-                                ) ?>
+                                <?= htmlspecialchars($item['layanan']) ?>
                             </td>
 
                             <td>
+                                <?= !empty($item['estimasi_selesai'])
+                                    ? date('d-m-Y', strtotime($item['estimasi_selesai']))
+                                    : '-' ?>
+                            </td>
 
+                            <td>
+                                <span class="status-badge status-<?= strtolower(str_replace(' ', '-', $item['status'])) ?>">
+                                    <?= htmlspecialchars($item['status']) ?>
+                                </span>
+                            </td>
+
+                            <td>
                                 <div class="action-links">
-
-                                    <a
-                                        href="/pesanan/edit?id=<?= $item['id_pesanan'] ?>"
-                                    >
-                                        Edit
-                                    </a>
-
+                                    <a href="/pesanan/edit?id=<?= $item['id_pesanan'] ?>">Edit</a>
                                     <span>|</span>
-
-                                    <a
-                                        href="/pesanan/hapus?id=<?= $item['id_pesanan'] ?>"
-                                        onclick="return confirm('Yakin ingin menghapus pesanan ini?')"
-                                    >
-                                        Hapus
-                                    </a>
-
-                                    <button
-                                        type="button"
-                                        class="detail-button"
-                                        onclick="alert('Detail pesanan #<?= $item['id_pesanan'] ?>')"
-                                    >
-                                        Detail
-                                    </button>
-
+                                    <a href="/pesanan/hapus?id=<?= $item['id_pesanan'] ?>" onclick="return confirm('Yakin ingin menghapus pesanan ini?')">Hapus</a>
+                                    <span>|</span>
+                                    <a href="/pesanan/detail?id=<?= $item['id_pesanan'] ?>" class="detail-button">Detail</a>
                                 </div>
-
                             </td>
-
                         </tr>
-
                     <?php endforeach; ?>
-
                 <?php endif; ?>
-
             </tbody>
-
         </table>
-
     </div>
 
 

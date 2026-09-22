@@ -19,8 +19,8 @@ class PesananController
         }
 
         $customer = trim($_GET['customer'] ?? '');
-        $jenis = $_GET['jenis'] ?? '';
-        $status = $_GET['status'] ?? '';
+        $jenis = trim($_GET['jenis'] ?? '');
+        $status = trim($_GET['status'] ?? '');
 
         $limit = 10;
 
@@ -49,10 +49,51 @@ class PesananController
             (int) ceil($totalPesanan / $limit)
         );
 
+        if ($page > $totalPages) {
+            $page = $totalPages;
+
+            $offset = ($page - 1) * $limit;
+
+            $pesanan = $this->pesananModel->getPesanan(
+                $customer,
+                $jenis,
+                $status,
+                $limit,
+                $offset
+            );
+        }
+
         $jenisBarang = $this->pesananModel->getJenisBarang();
 
-
         require_once __DIR__ . '/../views/pesanan/index.php';
+    }
+
+    public function detail(): void
+    {
+        if (!isset($_SESSION['id_pegawai'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $id = isset($_GET['id'])
+            ? (int) $_GET['id']
+            : 0;
+
+        if ($id <= 0) {
+            header('Location: /pesanan');
+            exit;
+        }
+
+        $pesanan = $this->pesananModel->getDetailPesanan($id);
+
+        if (!$pesanan) {
+            http_response_code(404);
+
+            require_once __DIR__ . '/../views/errors/404.php';
+            exit;
+        }
+
+        require_once __DIR__ . '/../views/pesanan/detail.php';
     }
 
     public function delete(): void

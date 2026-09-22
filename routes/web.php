@@ -28,6 +28,8 @@ if ($uri === '/' && $method === 'GET') {
     $dashboardController->index();
 } elseif ($uri === '/pesanan' && $method === 'GET') {
     $pesananController->index();
+} elseif ($uri === '/pesanan/detail' && $method === 'GET') {
+    $pesananController->detail();
 }  else {
     http_response_code(404);
     require_once __DIR__ . '/../app/views/errors/404.php';
