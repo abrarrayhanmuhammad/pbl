@@ -79,7 +79,7 @@ CREATE TABLE pesanan (
 
     CONSTRAINT fk_pesanan_pegawai FOREIGN KEY (id_pegawai) REFERENCES pegawai(id_pegawai),
     CONSTRAINT fk_pesanan_customer FOREIGN KEY (id_customer) REFERENCES customer(id_customer),
-    CONSTRAINT fk_pesanan_pembayaranFOREIGN KEY (id_pembayaran) REFERENCES pembayaran(id_pembayaran)
+    CONSTRAINT fk_pesanan_pembayaran FOREIGN KEY (id_pembayaran) REFERENCES pembayaran(id_pembayaran)
 );
 
 
@@ -97,7 +97,7 @@ CREATE TABLE detail_pesanan (
     id_layanan INTEGER NOT NULL,
     id_pesanan INTEGER NOT NULL,
 
-    CONSTRAINT fk_detail_layananFOREIGN KEY (id_layanan) REFERENCES layanan(id_layanan),
+    CONSTRAINT fk_detail_layanan FOREIGN KEY (id_layanan) REFERENCES layanan(id_layanan),
     CONSTRAINT fk_detail_pesanan FOREIGN KEY (id_pesanan) REFERENCES pesanan(id_pesanan) ON DELETE CASCADE
 );
 
