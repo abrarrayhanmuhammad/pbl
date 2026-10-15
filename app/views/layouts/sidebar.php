@@ -1,72 +1,109 @@
 <?php
-$currentUrl = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+/**
+ * Sidebar Component - KickDropShoe MIS (Mobile Responsive Off-Canvas & Desktop Fixed)
+ */
+$current_page = $current_page ?? '';
+$user_role = $user_role ?? ($_SESSION['role'] ?? 'superadmin'); // 'OWNER' or 'KARYAWAN'
+$user_name = $user_name ?? ($_SESSION['nama'] ?? ($user_role === 'karyawan' ? 'Bagas (Karyawan)' : 'Super Admin'));
+$user_initials = $user_initials ?? ($_SESSION['user_initials'] ?? ($user_role === 'karyawan' ? 'BK' : 'SA'));
+$is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
+
+// $dashboard_link = ($user_role === 'karyawan') ? 'dashboard_karyawan.php' : 'dashboard_owner.php';
 ?>
+<!-- Mobile Backdrop Overlay -->
+<div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
 
-<aside class="sidebar" id="sidebar">
-
-    <div class="brand">
-        KICKDROPSHOE
-    </div>
-
-    <div class="sidebar-line"></div>
-
-    <nav class="menu">
-
-        <a
-            href="/dashboard"
-            class="menu-link <?= $currentUrl === '/dashboard' ? 'active' : '' ?>"
-        >
-            Dashboard
-        </a>
-
-        <a
-            href="/pesanan"
-            class="menu-link <?= $currentUrl === '/pesanan' ? 'active' : '' ?>"
-        >
-            Pesanan
-        </a>
-
-        <a
-            href="/pesanan/tambah"
-            class="menu-link <?= $currentUrl === '/pesanan/tambah' ? 'active' : '' ?>"
-        >
-            Tambah Pesanan
-        </a>
-
-        <?php if ($_SESSION['role'] === 'superadmin'): ?>
-
-            <a
-                href="/laporan"
-                class="menu-link <?= $currentUrl === '/laporan' ? 'active' : '' ?>"
-            >
-                Laporan
-            </a>
-
-            <a
-                href="/akun"
-                class="menu-link <?= $currentUrl === '/akun' ? 'active' : '' ?>"
-            >
-                Akun
-            </a>
-
-        <?php endif; ?>
-
-    </nav>
-
-    <div class="sidebar-bottom">
-
-        <div class="operator">
-            Login sebagai:
-
-            <strong>
-                <?= htmlspecialchars($_SESSION['nama']) ?>
-            </strong>
+<!-- Sidebar Navigation -->
+<aside id="main-sidebar" class="fixed lg:static top-0 left-0 w-[280px] bg-brand-navy text-slate-300 flex flex-col justify-between shadow-2xl lg:shadow-xl shrink-0 z-40 h-screen transition-transform duration-300 -translate-x-full lg:translate-x-0 <?= $is_print_hidden ?>">
+    <div class="overflow-y-auto">
+        <!-- Brand Header with Close Button on Mobile -->
+        <div class="p-6 border-b border-slate-800/60 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="assets/logo.png" alt="Logo" class="w-10 h-10 rounded-full shadow-md border-2 border-slate-900 object-cover bg-white">
+                <div>
+                    <h1 class="text-base font-extrabold tracking-tight text-white leading-none">KICKDROPSHOE</h1>
+                    <p class="text-[10px] text-brand-yellow font-bold uppercase tracking-widest mt-1"><?= htmlspecialchars($user_role) ?></p>
+                </div>
+            </div>
+            <button type="button" onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg">
+                <i class="fas fa-times text-lg"></i>
+            </button>
         </div>
 
-        <a href="/logout" class="logout">
-            Logout
-        </a>
+        <!-- Navigation Links -->
+        <nav class="p-4 space-y-2">
+            <!-- Dashboard Link -->
+            <?php if ($current_page === 'dashboard'): ?>
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
+                    <i class="fas fa-pie-chart w-5"></i> Dashboard
+                </a>
+            <?php else: ?>
+                <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                    <i class="fas fa-pie-chart w-5"></i> Dashboard
+                </a>
+            <?php endif; ?>
 
+            <!-- Laporan (Hanya OWNER) -->
+            <?php if ($user_role === 'superadmin'): ?>
+                <?php if ($current_page === 'laporan'): ?>
+                    <a href="/laporan" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
+                        <i class="fas fa-chart-line w-5"></i> Laporan Pendapatan
+                    </a>
+                <?php else: ?>
+                    <a href="/laporan" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                        <i class="fas fa-chart-line w-5"></i> Laporan Pendapatan
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
+
+            <!-- Daftar Pesanan -->
+            <?php if ($current_page === 'pesanan'): ?>
+                <a href="/pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
+                    <i class="fas fa-list-ul w-5"></i> Daftar Pesanan
+                </a>
+            <?php else: ?>
+                <a href="/pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                    <i class="fas fa-list-ul w-5"></i> Daftar Pesanan
+                </a>
+            <?php endif; ?>
+
+            <!-- Tambah Pesanan (Selalu Kuning Mencolok) -->
+             <?php if ($current_page === 'tambah_pesanan'): ?>
+                <a href="/tambah_pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-yellow text-slate-900 font-extrabold shadow-lg shadow-brand-yellow/20 transition-all">
+                <i class="fas fa-plus w-5"></i> Tambah Pesanan
+            </a>
+            <?php else: ?>
+                <a href="/tambah_pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                    <i class="fas fa-plus w-5"></i> Tambah Pesanan
+                </a>
+            <?php endif; ?>
+
+            <!-- Profil Akun -->
+            <?php if ($current_page === 'akun'): ?>
+                <a href="akun.php" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
+                    <i class="fas fa-user w-5"></i> Profil Akun
+                </a>
+            <?php else: ?>
+                <a href="akun.php" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                    <i class="fas fa-user w-5"></i> Profil Akun
+                </a>
+            <?php endif; ?>
+        </nav>
     </div>
 
+    <!-- User Profile Pill at Bottom -->
+    <div class="p-4 border-t border-slate-800/60 m-4 bg-slate-800/40 rounded-2xl shrink-0">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-brand-yellow text-slate-900 font-extrabold rounded-full flex items-center justify-center text-xs shadow-sm">
+                <?= htmlspecialchars($user_initials) ?>
+            </div>
+            <div>
+                <p class="text-xs font-extrabold text-white leading-tight"><?= htmlspecialchars($user_name) ?></p>
+                <p class="text-[10px] text-emerald-400 font-semibold">Online</p>
+            </div>
+        </div>
+        <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all border border-slate-700/50">
+            <i class="fas fa-sign-out-alt"></i> Keluar
+        </a>
+    </div>
 </aside>

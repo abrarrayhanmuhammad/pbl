@@ -59,8 +59,10 @@ class DashboardController
             ]
         ];
 
-        require_once __DIR__ . '/../views/dashboard/index.php';
-
-
+        if ($_SESSION['role'] === 'superadmin') {
+            require_once __DIR__ . '/../views/dashboard/dashboard_owner.php';
+        }else {
+            require_once __DIR__ . '/../views/dashboard/dashboard.php';
+        }
     }
 }

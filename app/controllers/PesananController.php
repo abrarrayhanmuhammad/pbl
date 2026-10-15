@@ -18,54 +18,64 @@ class PesananController
             exit;
         }
 
-        $customer = trim($_GET['customer'] ?? '');
-        $jenis = trim($_GET['jenis'] ?? '');
-        $status = trim($_GET['status'] ?? '');
+        // $customer = trim($_GET['customer'] ?? '');
+        // $jenis = trim($_GET['jenis'] ?? '');
+        // $status = trim($_GET['status'] ?? '');
 
-        $limit = 10;
+        // $limit = 10;
 
-        $page = isset($_GET['page'])
-            ? max(1, (int) $_GET['page'])
-            : 1;
+        // $page = isset($_GET['page'])
+        //     ? max(1, (int) $_GET['page'])
+        //     : 1;
 
-        $offset = ($page - 1) * $limit;
+        // $offset = ($page - 1) * $limit;
 
-        $pesanan = $this->pesananModel->getPesanan(
-            $customer,
-            $jenis,
-            $status,
-            $limit,
-            $offset
-        );
+        // $pesanan = $this->pesananModel->getPesanan(
+        //     $customer,
+        //     $jenis,
+        //     $status,
+        //     $limit,
+        //     $offset
+        // );
 
-        $totalPesanan = $this->pesananModel->countPesanan(
-            $customer,
-            $jenis,
-            $status
-        );
+        // $totalPesanan = $this->pesananModel->countPesanan(
+        //     $customer,
+        //     $jenis,
+        //     $status
+        // );
 
-        $totalPages = max(
-            1,
-            (int) ceil($totalPesanan / $limit)
-        );
+        // $totalPages = max(
+        //     1,
+        //     (int) ceil($totalPesanan / $limit)
+        // );
 
-        if ($page > $totalPages) {
-            $page = $totalPages;
+        // if ($page > $totalPages) {
+        //     $page = $totalPages;
 
-            $offset = ($page - 1) * $limit;
+        //     $offset = ($page - 1) * $limit;
 
-            $pesanan = $this->pesananModel->getPesanan(
-                $customer,
-                $jenis,
-                $status,
-                $limit,
-                $offset
-            );
+        //     $pesanan = $this->pesananModel->getPesanan(
+        //         $customer,
+        //         $jenis,
+        //         $status,
+        //         $limit,
+        //         $offset
+        //     );
+        // }
+
+        // $jenisBarang = $this->pesananModel->getJenisBarang();
+
+        require_once __DIR__ . '/../views/pesanan/pesanan.php';
+    }
+
+    public function tambahPesanan(): void
+    {
+        if (!isset($_SESSION['id_pegawai'])) {
+            header('Location: /login');
+            exit;
         }
 
-        $jenisBarang = $this->pesananModel->getJenisBarang();
-
-        require_once __DIR__ . '/../views/pesanan/index.php';
+        require_once __DIR__ . '/../views/pesanan/tambah_pesanan.php';
     }
 
     public function detail(): void
