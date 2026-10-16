@@ -45,9 +45,9 @@ require_once __DIR__ . '/../layouts/header.php';
                         <div class="flex justify-between items-center mt-2">
                             <p class="text-sm font-black text-slate-900">Rp 105.000</p>
                             <!-- Tanda panah mobile -->
-                            <span class="lg:hidden text-xs font-extrabold text-slate-700 flex items-center gap-1">
+                           <a href="/pesanan/detail" class="lg:hidden text-xs font-extrabold text-slate-700 flex items-center gap-1">
                                 Detail <i class="fas fa-chevron-right text-[10px]"></i>
-                            </span>
+                            </a>
                         </div>
                     </div>
 
@@ -61,9 +61,9 @@ require_once __DIR__ . '/../layouts/header.php';
                         <div class="flex justify-between items-center mt-2">
                             <p class="text-sm font-black text-slate-900">Rp 35.000</p>
                             <!-- Tanda panah mobile -->
-                            <span class="lg:hidden text-xs font-extrabold text-slate-700 flex items-center gap-1">
+                             <a href="/pesanan/detail" class="lg:hidden text-xs font-extrabold text-slate-700 flex items-center gap-1">
                                 Detail <i class="fas fa-chevron-right text-[10px]"></i>
-                            </span>
+                            </a>
                         </div>
                     </div>
 
@@ -77,9 +77,9 @@ require_once __DIR__ . '/../layouts/header.php';
                         <div class="flex justify-between items-center mt-2">
                             <p class="text-sm font-black text-slate-900">Rp 55.000</p>
                             <!-- Tanda panah mobile -->
-                            <span class="lg:hidden text-xs font-extrabold text-slate-700 flex items-center gap-1">
+                            <a href="/pesanan/detail" class="lg:hidden text-xs font-extrabold text-slate-700 flex items-center gap-1">
                                 Detail <i class="fas fa-chevron-right text-[10px]"></i>
-                            </span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -93,10 +93,10 @@ require_once __DIR__ . '/../layouts/header.php';
                         <p class="text-xs font-semibold text-slate-500 mt-1 detail-subtitle">Budi Santoso • 08123456789</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <a href="edit_pesanan.php" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
+                        <a href="/pesanan/edit" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <?php if ($user_role === 'OWNER'): ?>
+                        <?php if ($user_role === 'superadmin'): ?>
                         <button type="button" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
                             <i class="fas fa-trash"></i> Hapus
                         </button>
@@ -194,7 +194,7 @@ require_once __DIR__ . '/../layouts/header.php';
 
                 <div class="p-6 border-t border-slate-100 flex justify-between items-center shrink-0 bg-white">
                     <div><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Keseluruhan</p><h3 class="text-2xl font-black text-slate-900 detail-total">Rp 105.000</h3></div>
-                    <a href="invoice.php" class="px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition shadow-lg flex items-center gap-2"><i class="fas fa-print"></i> Cetak Invoice</a>
+                    <a href="/invoice" class="px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition shadow-lg flex items-center gap-2"><i class="fas fa-print"></i> Cetak Invoice</a>
                 </div>
             </div>
         </div>

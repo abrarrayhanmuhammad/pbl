@@ -78,6 +78,16 @@ class PesananController
         require_once __DIR__ . '/../views/pesanan/tambah_pesanan.php';
     }
 
+    public function editPesanan(): void
+    {
+        if (!isset($_SESSION['id_pegawai'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        require_once __DIR__ . '/../views/pesanan/edit_pesanan.php';
+    }
+
     public function detail(): void
     {
         if (!isset($_SESSION['id_pegawai'])) {
@@ -85,25 +95,35 @@ class PesananController
             exit;
         }
 
-        $id = isset($_GET['id'])
-            ? (int) $_GET['id']
-            : 0;
+        // $id = isset($_GET['id'])
+        //     ? (int) $_GET['id']
+        //     : 0;
 
-        if ($id <= 0) {
-            header('Location: /pesanan');
+        // if ($id <= 0) {
+        //     header('Location: /pesanan');
+        //     exit;
+        // }
+
+        // $pesanan = $this->pesananModel->getDetailPesanan($id);
+
+        // if (!$pesanan) {
+        //     http_response_code(404);
+
+        //     require_once __DIR__ . '/../views/errors/404.php';
+        //     exit;
+        // }
+
+        require_once __DIR__ . '/../views/pesanan/detail_pesanan.php';
+    }
+
+        public function invoice(): void
+    {
+        if (!isset($_SESSION['id_pegawai'])) {
+            header('Location: /login');
             exit;
         }
 
-        $pesanan = $this->pesananModel->getDetailPesanan($id);
-
-        if (!$pesanan) {
-            http_response_code(404);
-
-            require_once __DIR__ . '/../views/errors/404.php';
-            exit;
-        }
-
-        require_once __DIR__ . '/../views/pesanan/detail.php';
+        require_once __DIR__ . '/../views/pesanan/invoice.php';
     }
 
     public function delete(): void

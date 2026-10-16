@@ -38,8 +38,7 @@ CREATE TABLE pegawai (
 CREATE TABLE customer (
     id_customer SERIAL PRIMARY KEY,
     nama VARCHAR(50) NOT NULL,
-    no_hp VARCHAR(15) NOT NULL,
-    kode_customer VARCHAR(15) UNIQUE
+    no_hp VARCHAR(15) NOT NULL
 );
 
 
@@ -125,8 +124,6 @@ CREATE TABLE detail_pesanan (
     subtotal DECIMAL(10,2) NOT NULL,
     estimasi_min INTEGER NOT NULL,
     estimasi_max INTEGER NOT NULL,
-    foto_before VARCHAR(255),
-    foto_after VARCHAR(255),
 
     FOREIGN KEY (id_pesanan)
         REFERENCES pesanan(id_pesanan)

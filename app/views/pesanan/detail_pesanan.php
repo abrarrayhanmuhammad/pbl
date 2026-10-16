@@ -103,29 +103,29 @@ $order = $orders_database[$order_id] ?? $orders_database['0881'];
 
 $page_title = 'Detail Pesanan ' . $order['id'] . ' - KickDropShoe';
 $current_page = 'pesanan';
-require_once 'includes/header.php';
+require_once __DIR__ . '/../layouts/header.php';
 ?>
 <div class="flex h-screen overflow-hidden bg-brand-slateBg">
-    <?php require_once 'includes/sidebar.php'; ?>
+    <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
     
     <main class="flex-1 flex flex-col h-full overflow-y-auto">
         <?php 
         $header_title = 'Detail Pesanan ' . htmlspecialchars($order['id']);
         $header_subtitle = htmlspecialchars($order['customer']) . ' • ' . htmlspecialchars($order['whatsapp']);
-        require 'includes/topbar.php'; 
+        require_once __DIR__ . '/../layouts/topbar.php'; 
         ?>
 
         <div class="p-4 md:p-8 max-w-5xl mx-auto w-full space-y-6">
             <!-- Navigation Back & Quick Action Buttons -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <a href="pesanan.php" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition shadow-sm">
+                <a href="/pesanan" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition shadow-sm">
                     <i class="fas fa-arrow-left"></i> Kembali ke Daftar Pesanan
                 </a>
                 <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                    <a href="edit_pesanan.php" class="flex-1 sm:flex-none justify-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
+                    <a href="/pesanan/edit" class="flex-1 sm:flex-none justify-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
                         <i class="fas fa-edit"></i> Edit Pesanan
                     </a>
-                    <?php if ($user_role === 'OWNER'): ?>
+                    <?php if ($user_role === 'superadmin'): ?>
                     <button type="button" onclick="if(confirm('Yakin ingin menghapus pesanan ini?')) window.location.href='pesanan.php';" class="flex-1 sm:flex-none justify-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
                         <i class="fas fa-trash"></i> Hapus
                     </button>
@@ -262,4 +262,4 @@ require_once 'includes/header.php';
         </div>
     </main>
 </div>
-<?php require_once 'includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

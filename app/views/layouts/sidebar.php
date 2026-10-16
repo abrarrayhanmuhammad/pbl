@@ -19,7 +19,7 @@ $is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
         <!-- Brand Header with Close Button on Mobile -->
         <div class="p-6 border-b border-slate-800/60 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <img src="assets/logo.png" alt="Logo" class="w-10 h-10 rounded-full shadow-md border-2 border-slate-900 object-cover bg-white">
+            <img src="<?= BASE_URL ?>/assets/logo.png" alt="Logo" class="w-10 h-10 rounded-full shadow-md border-2 border-slate-900 object-cover bg-white">
                 <div>
                     <h1 class="text-base font-extrabold tracking-tight text-white leading-none">KICKDROPSHOE</h1>
                     <p class="text-[10px] text-brand-yellow font-bold uppercase tracking-widest mt-1"><?= htmlspecialchars($user_role) ?></p>
@@ -69,22 +69,22 @@ $is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
 
             <!-- Tambah Pesanan (Selalu Kuning Mencolok) -->
              <?php if ($current_page === 'tambah_pesanan'): ?>
-                <a href="/tambah_pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-yellow text-slate-900 font-extrabold shadow-lg shadow-brand-yellow/20 transition-all">
+                <a href="/pesanan/tambah" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-yellow text-slate-900 font-extrabold shadow-lg shadow-brand-yellow/20 transition-all">
                 <i class="fas fa-plus w-5"></i> Tambah Pesanan
             </a>
             <?php else: ?>
-                <a href="/tambah_pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                <a href="/pesanan/tambah" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
                     <i class="fas fa-plus w-5"></i> Tambah Pesanan
                 </a>
             <?php endif; ?>
 
             <!-- Profil Akun -->
             <?php if ($current_page === 'akun'): ?>
-                <a href="akun.php" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
+                <a href="/akun" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
                     <i class="fas fa-user w-5"></i> Profil Akun
                 </a>
             <?php else: ?>
-                <a href="akun.php" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                <a href="/akun" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
                     <i class="fas fa-user w-5"></i> Profil Akun
                 </a>
             <?php endif; ?>
