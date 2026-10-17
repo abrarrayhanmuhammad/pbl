@@ -187,10 +187,10 @@ CREATE TABLE treatment_tambahan (
 INSERT INTO treatment_tambahan
 (nama_treatment, harga_min, harga_max, estimasi_min_hari, estimasi_max_hari, keterangan)
 VALUES
-('Express', 10000, 10000, 1, 2, 'Estimasi 1-2 hari'),
-('Prioritas', 5000, 5000, 3, 3, 'Estimasi 3 hari'),
-('Pipis Hewan', 15000, 15000, 8, 8, 'Estimasi 8 hari'),
-('Noda Berat', 5000, 10000, 5, 8, 'Estimasi 5-8 hari; harga Rp5.000-Rp10.000');
+('Express', 10000, 10000, 1, 2, '1-2 hari'),
+('Prioritas', 5000, 5000, 3, 3, '3 hari'),
+('Pipis Hewan', 15000, 15000, 8, 8, '8 hari'),
+('Noda Berat', 5000, 10000, 5, 8, '5-8 hari');
 
 -- =========================================================
 -- 7. PAKET
@@ -230,8 +230,10 @@ JOIN layanan l ON
 -- =========================================================
 -- 8. PESANAN
 -- =========================================================
+
 CREATE TABLE pesanan (
     id_pesanan SERIAL PRIMARY KEY,
+    kode_pesanan VARCHAR(20) UNIQUE NOT NULL,
     id_pegawai INTEGER REFERENCES pegawai(id_pegawai),
     id_customer INTEGER NOT NULL REFERENCES customer(id_customer),
     id_drop_point INTEGER REFERENCES drop_point(id_drop_point),
@@ -247,6 +249,7 @@ CREATE TABLE pesanan (
     catatan TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- =========================================================
 -- 9. DETAIL PESANAN
@@ -278,24 +281,6 @@ CREATE TABLE detail_treatment_tambahan (
     id_treatment_tambahan INTEGER NOT NULL REFERENCES treatment_tambahan(id_treatment_tambahan),
     harga INTEGER NOT NULL CHECK (harga >= 0)
 );
-
--- =========================================================
--- CONTOH PESANAN DEMO (boleh dihapus jika belum diperlukan)
--- =========================================================
-INSERT INTO pesanan
-(id_pegawai, id_customer, id_drop_point, tanggal_masuk, status, metode_bayar, status_bayar, total_bayar, catatan)
-VALUES
-(2, 1, 1, CURRENT_DATE, 'Diproses', 'Cash', 'Belum Bayar', 30000, 'Contoh pesanan Basic & White Shoes');
-
-INSERT INTO detail_pesanan
-(id_pesanan, id_layanan, nama_barang, merk, warna, jumlah, harga_satuan, subtotal, status_pengerjaan, foto_before, foto_sesudah)
-SELECT p.id_pesanan, l.id_layanan, 'Sepatu', 'Nike', 'Putih', 1, 30000, 30000,
-       'Diproses', NULL, NULL
-FROM pesanan p
-JOIN layanan l ON l.nama_layanan = 'Basic & White Shoes'
-WHERE p.catatan = 'Contoh pesanan Basic & White Shoes'
-ORDER BY p.id_pesanan DESC
-LIMIT 1;
 
 -- Indeks untuk pencarian pesanan dan relasi yang sering digunakan
 CREATE INDEX idx_pesanan_customer ON pesanan(id_customer);
