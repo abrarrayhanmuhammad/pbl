@@ -36,7 +36,7 @@ require_once __DIR__ . '/../layouts/header.php';
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">NAMA PELANGGAN</label>
-                            <input type="text" name="nama_pelanggang" id="nama_pelanggan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="Masukkan nama" required>
+                            <input type="text" name="nama_pelanggan" id="nama_pelanggan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="Masukkan nama" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">NO WHATSAPP</label>
@@ -69,106 +69,6 @@ require_once __DIR__ . '/../layouts/header.php';
                         </div>
                     </div>
                 </div>
-
-                <!-- Item 1 Dark Container -->
-                <!-- <div id="item-container-1" data-item-id="1" class="item-dark-container bg-brand-darkCard text-white rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-                        <h3 class="text-sm font-extrabold flex items-center gap-3">
-                            <span class="bg-brand-yellow text-slate-900 w-6 h-6 rounded-md flex items-center justify-center text-xs font-black">1</span> Detail Barang
-                        </h3>
-                        <button type="button" onclick="deleteItemCard(1)" class="px-3 py-1 bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-400 rounded-lg text-xs font-semibold transition">
-                            <i class="fas fa-trash mr-1"></i> Hapus
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">NAMA BARANG</label>
-                                    <input name="nama_barang" type="text" class="w-full bg-brand-darkInput border border-slate-700 rounded-xl px-4 py-3 text-xs font-medium text-white outline-none" placeholder="Sepatu Nike" required>
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">WARNA</label>
-                                    <input name="warna_barang" type="text" class="w-full bg-brand-darkInput border border-slate-700 rounded-xl px-4 py-3 text-xs font-medium text-white outline-none" placeholder="Putih" required>
-                                </div>
-                            </div>
-                            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-3">
-                                <label class="block text-[10px] font-extrabold text-brand-yellow uppercase">KATEGORI & LAYANAN UTAMA</label>
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                    <?php foreach ($layanan as $item): ?>
-                                        <button type="button" data-category="<?= $item['kategori'] ?>" class="cat-btn py-2 text-[10px] font-bold border rounded-lg border-slate-700 text-slate-400"><?= $item['kategori'] ?></button>
-                                    <?php endforeach; ?>
-                                    <button type="button" data-category="Package" class="cat-btn py-2 text-[10px] font-bold border rounded-lg border-slate-700 text-slate-400">Package</button>
-                                </div>
-                                <p class="category-caption text-[9px] text-slate-500 font-semibold">Pilih Layanan</p>
-                                <div>
-                                    <select id="service-select-1" onchange="updateItemSubtotal(1)" class="service-select w-full bg-brand-darkInput border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white outline-none font-semibold" required>
-                                        <option value="" selected>Pilih Layanan</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4 flex flex-col justify-between">
-                            <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                                <label class="block text-[10px] font-extrabold text-brand-yellow uppercase tracking-wider">EXTRA TREATMENT</label>
-
-                                <div class="grid grid-cols-3 gap-2">
-                                    <label class="p-3 border-2 border-brand-yellow bg-brand-yellow/10 rounded-xl flex flex-col items-center justify-center cursor-pointer transition">
-                                        <input type="radio" name="speed-1" data-price="0" checked onchange="updateItemSubtotal(1)" class="text-brand-yellow mb-1">
-                                        <span class="speed-title text-[10px] font-bold text-brand-yellow">Reguler</span>
-                                        <span class="text-[9px] text-slate-400">4–5 Hari • Free</span>
-                                    </label>
-                                    <?php foreach ($treatmentKecepatan as $item): ?>
-                                        <label class="treatment-speed p-3 border border-slate-700 rounded-xl flex flex-col items-center justify-center cursor-pointer transition">
-                                            <input type="radio" name="speed-1" value="<?= (int) $item['id_treatment_tambahan'] ?>" data-price="<?= (float) $item['harga_min'] ?>" data-harga-max="<?= (float) $item['harga_max'] ?>" onchange="updateItemSubtotal(1)" class="text-brand-yellow mb-1">
-                                            <span class="speed-title text-[10px] font-bold text-slate-400"><?= htmlspecialchars($item['nama_treatment']) ?></span>
-                                            <span class="text-[9px] text-slate-400"><?= htmlspecialchars($item['keterangan'] ?? '') ?> • +Rp<?= number_format((float) $item['harga_min'], 0, ',', '.') ?></span>
-                                        </label>
-                                    <?php endforeach; ?>
-                                </div>
-
-                                <div class="space-y-2 pt-1">
-                                    <?php foreach ($treatmentTambahan as $item): ?>
-                                        <label class="flex justify-between items-center p-3.5 border border-slate-700/90 bg-slate-800/50 rounded-xl cursor-pointer hover:border-slate-500 transition">
-                                            <div class="flex items-center gap-3">
-                                                <input type="checkbox" name="treatment_tambahan[1][]" value="<?= (int) $item['id_treatment_tambahan'] ?>" data-price="<?= (int) $item['id_treatment_tambahan'] === 4 ? (float) $item['harga_max'] : (float) $item['harga_min'] ?>" data-harga-max="<?= (float) $item['harga_max'] ?>" onchange="updateItemSubtotal(1)" class="extra-check-1 w-4 h-4 rounded text-brand-yellow bg-slate-900 border-slate-600 focus:ring-brand-yellow">
-                                                <span class="text-xs font-bold text-white"><?= htmlspecialchars($item['nama_treatment']) ?> (<?= htmlspecialchars($item['keterangan'] ?? '') ?>)</span>
-                                            </div>
-                                            <span class="text-xs font-bold text-brand-yellow">
-                                                <?php if ((float) $item['harga_min'] === (float) $item['harga_max']): ?>
-                                                    +Rp<?= number_format((float) $item['harga_min'], 0, ',', '.') ?>
-                                                <?php else: ?>
-                                                    +Rp<?= number_format((float) $item['harga_min'], 0, ',', '.') ?> – Rp<?= number_format((float) $item['harga_max'], 0, ',', '.') ?>
-                                                <?php endif; ?>
-                                            </span>
-                                        </label>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-
-                            <div class="bg-black/60 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
-                                <span class="text-xs font-bold text-slate-400">Subtotal Barang Ini:</span>
-                                <span id="subtotal-val-1" class="subtotal-val text-lg font-black text-brand-yellow">Rp 0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 sm:gap-6 pt-3 border-t border-slate-800 items-stretch">
-                        <div class="flex flex-col">
-                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-2 h-7 sm:h-auto flex items-end leading-tight">FOTO BEFORE (SEBELUM)</label>
-                            <div class="upload-box-trigger border-2 border-dashed border-slate-700 rounded-2xl p-3 sm:p-4 h-28 sm:h-32 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-800/40 transition">
-                                <i class="fas fa-upload text-slate-400 text-base sm:text-lg mb-1"></i>
-                                <span class="text-[11px] sm:text-xs font-bold text-white">Upload Foto</span>
-                                <span class="text-[9px] sm:text-[10px] text-slate-500 mt-0.5">Maks. 5 MB</span>
-                            </div>
-                        </div>
-                        <div class="flex flex-col">
-                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-2 h-7 sm:h-auto flex items-end leading-tight">CATATAN TAMBAHAN</label>
-                            <textarea name="catatan" class="w-full bg-brand-darkInput border border-slate-700 rounded-2xl p-3 sm:p-4 text-xs font-medium text-white outline-none h-28 sm:h-32 resize-none placeholder:text-slate-500" placeholder="Ketik noda khusus, robek, atau keluhan di sini..."></textarea>
-                        </div>
-                    </div>
-                </div> -->
 
                 <!-- Dynamic Add Item Button Trigger -->
                 <button type="button" class="add-item-btn-trigger w-full py-4 border-2 border-dashed border-slate-300 rounded-3xl text-slate-500 font-extrabold text-xs hover:bg-white hover:border-slate-400 hover:text-slate-800 transition flex items-center justify-center gap-2">

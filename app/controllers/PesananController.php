@@ -56,10 +56,6 @@ class PesananController
 
     public function simpanPesanan(): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
         if (!isset($_SESSION['id_pegawai'])) {
             header('Location: /login');
             exit;
@@ -78,7 +74,7 @@ class PesananController
             exit('Token keamanan tidak valid.');
         }
 
-        $nama = trim($_POST['nama_pelanggang'] ?? '');
+        $nama = trim($_POST['nama_pelanggan'] ?? '');
         $noWa = trim($_POST['no_wa'] ?? '');
         $tglMasuk = $_POST['tgl_masuk'] ?? '';
         $tglSelesai = $_POST['tgl_selesai'] ?? null;
@@ -425,7 +421,145 @@ class PesananController
             exit;
         }
 
-        require_once __DIR__ . '/../views/pesanan/edit_pesanan.php';
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /pesanan');
+            exit;
+        }
+
+        $idPesanan = filter_input(INPUT_POST, 'id_pesanan', FILTER_VALIDATE_INT);
+
+        if (!$idPesanan || $idPesanan < 1) {
+            header('Location: /pesanan');
+            exit;
+        }
+
+        try {
+            $sql = "
+            SELECT
+                p.id_pesanan,
+                p.kode_pesanan,
+                p.tanggal_masuk,
+                p.tanggal_selesai,
+                p.status,
+                p.status_bayar,
+                p.metode_bayar,
+                p.total_bayar,
+                p.catatan AS catatan_pesanan,
+                c.id_customer,
+                c.nama AS nama_customer,
+                c.no_hp,
+                p.id_drop_point,
+                dp.alamat_lokasi
+            FROM pesanan p
+            JOIN customer c
+                ON c.id_customer = p.id_customer
+            LEFT JOIN drop_point dp
+                ON dp.id_drop_point = p.id_drop_point
+            WHERE p.id_pesanan = :id
+            LIMIT 1
+        ";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id' => $idPesanan]);
+
+            $pesanan = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$pesanan) {
+                http_response_code(404);
+                exit('Pesanan tidak ditemukan.');
+            }
+
+            $sqlBarang = "
+            SELECT
+                dp.id_detail_pesanan,
+                dp.nama_barang,
+                dp.merk,
+                dp.warna,
+                dp.jumlah,
+                dp.id_layanan,
+                dp.harga_satuan,
+                dp.subtotal,
+                dp.status_pengerjaan,
+                dp.foto_before,
+                dp.foto_sesudah,
+                dp.catatan,
+                l.nama_layanan,
+                l.kategori,
+                l.estimasi_min_hari,
+                l.estimasi_max_hari
+            FROM detail_pesanan dp
+            LEFT JOIN layanan l
+                ON l.id_layanan = dp.id_layanan
+            WHERE dp.id_pesanan = :id
+            ORDER BY dp.id_detail_pesanan
+        ";
+
+            $stmtBarang = $this->db->prepare($sqlBarang);
+            $stmtBarang->execute(['id' => $idPesanan]);
+
+            $barang = $stmtBarang->fetchAll(PDO::FETCH_ASSOC);
+
+            $sqlTreatment = "
+            SELECT
+                dtt.id_detail_pesanan,
+                dtt.id_treatment_tambahan,
+                tt.nama_treatment,
+                dtt.harga
+            FROM detail_treatment_tambahan dtt
+            JOIN treatment_tambahan tt
+                ON tt.id_treatment_tambahan = dtt.id_treatment_tambahan
+            JOIN detail_pesanan dp
+                ON dp.id_detail_pesanan = dtt.id_detail_pesanan
+            WHERE dp.id_pesanan = :id
+            ORDER BY dtt.id_detail_pesanan
+        ";
+
+            $stmtTreatment = $this->db->prepare($sqlTreatment);
+            $stmtTreatment->execute(['id' => $idPesanan]);
+
+            $treatments = $stmtTreatment->fetchAll(PDO::FETCH_ASSOC);
+
+            $treatmentByDetail = [];
+
+            foreach ($treatments as $treatment) {
+                $detailId = $treatment['id_detail_pesanan'];
+                $treatmentByDetail[$detailId][] = $treatment;
+            }
+
+            foreach ($barang as &$item) {
+                $detailId = $item['id_detail_pesanan'];
+
+                $item['treatments'] = $treatmentByDetail[$detailId] ?? [];
+            }
+
+            unset($item);
+
+            $sqlDropPoint = "
+            SELECT id_drop_point, alamat_lokasi
+            FROM drop_point
+            ORDER BY alamat_lokasi
+            ";
+
+            $stmtDropPoint = $this->db->query($sqlDropPoint);
+            $dropPoints = $stmtDropPoint->fetchAll(PDO::FETCH_ASSOC);
+
+            $dropPoint = $this->dropPointModel->getDropPoint();
+            $layanan = $this->layananModel->getLayanan();
+            $getAllLayanan = $this->layananModel->getAllLayanan();
+            $getAllPaket = $this->layananModel->getAllPaket();
+            $treatment = $this->treatmentTambahanModel->getTreatmentTambahan();
+
+            $treatmentKecepatan = $treatment['kecepatan'];
+            $treatmentTambahan = $treatment['tambahan'];
+
+            require_once __DIR__ . '/../views/pesanan/edit_pesanan.php';
+        } catch (\Throwable $e) {
+            echo '<h3>Terjadi Kesalahan</h3>';
+            echo '<p><strong>Pesan:</strong> ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
+            echo '<p><strong>File:</strong> ' . htmlspecialchars($e->getFile(), ENT_QUOTES, 'UTF-8') . '</p>';
+            echo '<p><strong>Baris:</strong> ' . $e->getLine() . '</p>';
+            exit('Terjadi kesalahan saat mengambil data pesanan.');
+        }
     }
 
     public function detail(): void
@@ -435,7 +569,122 @@ class PesananController
             exit;
         }
 
-        require_once __DIR__ . '/../views/pesanan/detail_pesanan.php';
+        $idPesanan = filter_input(INPUT_POST, 'id_pesanan', FILTER_VALIDATE_INT);
+
+        if (!$idPesanan || $idPesanan < 1) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'ID pesanan tidak valid.']);
+            return;
+        }
+
+        try {
+            $sql = "
+            SELECT
+                p.id_pesanan,
+                p.kode_pesanan,
+                p.tanggal_masuk,
+                p.tanggal_selesai,
+                p.status,
+                p.status_bayar,
+                p.metode_bayar,
+                p.total_bayar,
+                p.catatan AS catatan_pesanan,
+                c.nama AS nama_customer,
+                c.no_hp,
+                d.alamat_lokasi,
+                (
+                    SELECT MAX(
+                        p.tanggal_masuk + COALESCE(l2.estimasi_max_hari, l2.estimasi_min_hari) * INTERVAL '1 day'
+                    )
+                    FROM detail_pesanan dp2
+                    LEFT JOIN layanan l2 ON l2.id_layanan = dp2.id_layanan
+                    WHERE dp2.id_pesanan = p.id_pesanan
+                ) AS estimasi_selesai
+            FROM pesanan p
+            JOIN customer c ON c.id_customer = p.id_customer
+            LEFT JOIN drop_point d ON d.id_drop_point = p.id_drop_point
+            WHERE p.id_pesanan = :id
+            LIMIT 1
+        ";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id' => $idPesanan]);
+            $pesanan = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$pesanan) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'Pesanan tidak ditemukan.']);
+                return;
+            }
+
+            $sqlDetail = "
+            SELECT
+                dp.id_detail_pesanan,
+                dp.nama_barang,
+                dp.merk,
+                dp.warna,
+                dp.jumlah,
+                dp.harga_satuan,
+                dp.subtotal,
+                dp.status_pengerjaan,
+                dp.foto_before,
+                dp.foto_sesudah,
+                dp.catatan,
+                l.nama_layanan,
+                l.kategori
+            FROM detail_pesanan dp
+            LEFT JOIN layanan l ON l.id_layanan = dp.id_layanan
+            WHERE dp.id_pesanan = :id
+            ORDER BY dp.id_detail_pesanan
+        ";
+
+            $stmtDetail = $this->db->prepare($sqlDetail);
+            $stmtDetail->execute(['id' => $idPesanan]);
+            $detailBarang = $stmtDetail->fetchAll(PDO::FETCH_ASSOC);
+
+            $stmtTreatment = $this->db->prepare("
+            SELECT
+                dtt.id_detail_pesanan,
+                tt.nama_treatment,
+                dtt.harga
+            FROM detail_treatment_tambahan dtt
+            JOIN treatment_tambahan tt
+                ON tt.id_treatment_tambahan = dtt.id_treatment_tambahan
+            JOIN detail_pesanan dp
+                ON dp.id_detail_pesanan = dtt.id_detail_pesanan
+            WHERE dp.id_pesanan = :id
+            ORDER BY dtt.id_detail_pesanan
+        ");
+
+            $stmtTreatment->execute(['id' => $idPesanan]);
+            $treatments = $stmtTreatment->fetchAll(PDO::FETCH_ASSOC);
+
+            $treatmentByDetail = [];
+
+            foreach ($treatments as $treatment) {
+                $detailId = $treatment['id_detail_pesanan'];
+                $treatmentByDetail[$detailId][] = $treatment;
+            }
+
+            foreach ($detailBarang as &$barang) {
+                $detailId = $barang['id_detail_pesanan'];
+                $barang['treatments'] = $treatmentByDetail[$detailId] ?? [];
+            }
+
+            $pesanan;
+            $detailBarang;
+
+            require_once __DIR__ . '/../views/pesanan/detail_pesanan.php';
+        } catch (\Throwable $e) {
+            error_log('Detail pesanan error: ' . $e->getMessage());
+
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+
+            exit;
+        }
     }
 
     public function invoice(): void
@@ -480,7 +729,15 @@ class PesananController
                 p.catatan AS catatan_pesanan,
                 c.nama AS nama_customer,
                 c.no_hp,
-                d.alamat_lokasi
+                d.alamat_lokasi,
+                (
+                    SELECT MAX(
+                        p.tanggal_masuk + COALESCE(l2.estimasi_max_hari, l2.estimasi_min_hari) * INTERVAL '1 day'
+                    )
+                    FROM detail_pesanan dp2
+                    LEFT JOIN layanan l2 ON l2.id_layanan = dp2.id_layanan
+                    WHERE dp2.id_pesanan = p.id_pesanan
+                ) AS estimasi_selesai
             FROM pesanan p
             JOIN customer c ON c.id_customer = p.id_customer
             LEFT JOIN drop_point d ON d.id_drop_point = p.id_drop_point

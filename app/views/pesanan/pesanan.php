@@ -45,12 +45,15 @@ require_once __DIR__ . '/../layouts/header.php';
                                 'Selesai'   => 'bg-emerald-100 text-emerald-700',
                                 'Diambil'   => 'bg-emerald-100 text-emerald-700'
                             };
-                            ?>
+                        ?>
                             <div class="order-card-item p-5 rounded-2xl border-2 border-brand-yellow bg-yellow-50/30 shadow-sm cursor-pointer relative transition-all" data-id="<?= (int) $pesanan['id_pesanan'] ?>">
+                                <form id="form-detail-pesanan" action="/pesanan/detail" method="POST">
+                                    <input type="hidden" id="detail-id-pesanan" name="id_pesanan">
+                                    <button type="submit" id="detail-submit" class="hidden"></button>
+                                </form>
                                 <div class="flex justify-between items-start mb-1">
                                     <h4 class="font-extrabold text-slate-900 text-sm">
-                                        <?= htmlspecialchars($pesanan['kode_pesanan'] ?? '-') ?>
-                                        – <?= htmlspecialchars($pesanan['nama_customer'] ?? '-') ?>
+                                        <?= htmlspecialchars($pesanan['kode_pesanan'] ?? '-') ?> – <?= htmlspecialchars($pesanan['nama_customer'] ?? '-') ?>
                                     </h4>
 
                                     <span class="px-2.5 py-1 <?= $statusClass ?> rounded-md text-[10px] font-extrabold">
@@ -91,9 +94,12 @@ require_once __DIR__ . '/../layouts/header.php';
                         <p id="detail-subtitle" class="text-xs font-semibold text-slate-500 mt-1 detail-subtitle">Pilih pesanan</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <a id="detail-edit-link" href="/pesanan/edit" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
+                        <form id="form-edit-pesanan" action="/pesanan/edit" method="POST">
+                            <input type="hidden" id="edit-id-pesanan" name="id_pesanan">
+                            <button type="submit" id="detail-edit-link" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
+                                <i class="fas fa-edit"></i> Edit Pesanan
+                            </button>
+                        </form>
                         <?php if ($user_role === 'superadmin'): ?>
                             <button type="button" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
                                 <i class="fas fa-trash"></i> Hapus
@@ -108,6 +114,7 @@ require_once __DIR__ . '/../layouts/header.php';
                             <div class="flex justify-between"><span class="text-slate-400">Tanggal Masuk:</span><span id="detail-date-in" class="font-bold text-slate-800 detail-date-in">-</span></div>
                             <div class="flex justify-between"><span class="text-slate-400">Status Bayar:</span><span class="detail-status-pay"><span id="detail-status-pay" class="detail-status-pay">-</span></span></div>
                             <div class="flex justify-between"><span class="text-slate-400">Drop Point:</span><span id="detail-drop-point" class="font-bold text-slate-800 detail-drop-point">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-400">Estimasi Selesai:</span><span id="detail-estimasi" class="font-bold text-slate-500 detail-date-out">-</span></div>
                             <div class="flex justify-between"><span class="text-slate-400">Tanggal Selesai:</span><span id="detail-date-out" class="font-bold text-slate-500 detail-date-out">-</span></div>
                         </div>
                         <div class="bg-brand-darkCard text-white p-5 rounded-2xl flex flex-col justify-center">

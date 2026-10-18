@@ -73,18 +73,6 @@ const ordersData = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('KickDropShoe Engine Loaded.');
-
-    initCategoryButtons();
-    initExtraTreatmentCalculations();
-    initPhotoUploads();
-    initOrderFilter();
-    initMasterDetailOrders();
-    initAddItemButton();
-    initDetailPesanan();
-});
-
 // Mobile Sidebar Toggle
 function toggleSidebar() {
     const sidebar = document.getElementById('main-sidebar');
@@ -348,6 +336,115 @@ function generateCategoryButtons(itemId) {
     });
 }
 
+function generateEditCategoryButtons(itemId) {
+    const categories = window.LAYANAN_DATA || [];
+    const container = document.querySelector(
+        `#item-container-${itemId} .category-buttons`
+    );
+
+    const card = document.querySelector(`#item-container-${itemId}`);
+
+    if (!container || !card) return;
+
+    const selectedCategory = card.dataset.selectedCategory;
+    const allCategories = [...new Set([...categories, 'Package'])];
+
+    container.innerHTML = '';
+
+    allCategories.forEach(category => {
+        const button = document.createElement('button');
+        const active = category === selectedCategory;
+
+        button.type = 'button';
+        button.dataset.category = category;
+        button.className = `cat-btn py-2 text-[10px] font-bold border rounded-lg ${active
+            ? 'border-brand-yellow bg-brand-yellow/10 text-brand-yellow'
+            : 'border-slate-700 text-slate-400'
+            }`;
+
+        button.textContent = category;
+
+        button.addEventListener('click', () => {
+            selectEditCategory(itemId, category);
+        });
+
+        container.appendChild(button);
+    });
+}
+
+function loadServicesForItem(itemId, category) {
+    const card = document.querySelector(`#item-container-${itemId}`);
+    const select = document.querySelector(`#service-select-${itemId}`);
+
+    if (!card || !select) return;
+
+    const selectedService = String(card.dataset.selectedService || '');
+    const services = window.PRICELIST_DATA[category] || [];
+
+    select.innerHTML = '<option value="">Pilih Layanan</option>';
+
+    services.forEach(service => {
+        const option = document.createElement('option');
+
+        option.value = service.id;
+        option.textContent = `${service.name}${service.variasi ? ` (${service.variasi})` : ''} – Rp ${Number(service.price).toLocaleString('id-ID')} (${service.estimasi_min} hari - ${service.estimasi_max} hari)`;
+        option.dataset.price = service.price;
+
+        if (String(service.id) === selectedService) {
+            option.selected = true;
+        }
+
+        select.appendChild(option);
+    });
+
+    const caption = card.querySelector('.category-caption');
+
+    if (caption) {
+        caption.textContent = category;
+    }
+}
+
+function selectEditCategory(itemId, category) {
+    const card = document.querySelector(`#item-container-${itemId}`);
+
+    if (!card) return;
+
+    card.dataset.selectedCategory = category;
+
+    card.querySelectorAll('.cat-btn').forEach(button => {
+        const active = button.dataset.category === category;
+
+        button.classList.toggle('border-brand-yellow', active);
+        button.classList.toggle('bg-brand-yellow/10', active);
+        button.classList.toggle('text-brand-yellow', active);
+        button.classList.toggle('border-slate-700', !active);
+        button.classList.toggle('text-slate-400', !active);
+    });
+
+    const caption = card.querySelector('.category-caption');
+
+    if (caption) {
+        caption.textContent = category;
+    }
+
+    const select = card.querySelector('.service-select');
+    const previousService = card.dataset.selectedService || '';
+
+    if (category !== card.dataset.previousCategory) {
+        card.dataset.selectedService = '';
+    }
+
+    card.dataset.previousCategory = category;
+
+    loadServicesForItem(itemId, category);
+
+    if (select) {
+        select.value = card.dataset.selectedService || '';
+    }
+
+    updateItemSubtotal(itemId);
+}
+
 function deleteItemCard(id) {
     const card = document.getElementById(`item-container-${id}`);
 
@@ -475,61 +572,382 @@ function initPhotoUploads() {
 // - On Desktop: Seamless in-place switch on right panel (Persis 100% Desain Asli)
 // - On Mobile: Navigate to detail_pesanan.php without scrolling
 function initMasterDetailOrders() {
-    const orderCards = document.querySelectorAll('.order-card-item');
-    orderCards.forEach(card => {
-        card.addEventListener('click', (e) => {
-            const titleEl = card.querySelector('h4');
-            const orderId = titleEl ? titleEl.innerText.split(' ')[0] : '#0881'; // e.g. #0881
-            const orderNum = orderId.replace('#', '');
+    const cards = document.querySelectorAll('.order-card-item');
 
-            // Jika di Mobile (< 1024px): Buka halaman detail_pesanan.php
+    if (!cards.length) return;
+
+    const el = {
+        title: document.getElementById('detail-title'),
+        subtitle: document.getElementById('detail-subtitle'),
+        dateIn: document.getElementById('detail-date-in'),
+        dateOut: document.getElementById('detail-date-out'),
+        dateEstimasi: document.getElementById('detail-estimasi'),
+        statusPay: document.getElementById('detail-status-pay'),
+        dropPoint: document.getElementById('detail-drop-point'),
+        status: document.getElementById('detail-status-select'),
+        itemsCount: document.getElementById('detail-items-count'),
+        items: document.getElementById('detail-items-container'),
+        total: document.getElementById('detail-total'),
+        whatsappCustomer: document.getElementById('detail-whatsapp-customer'),
+        edit: document.getElementById('detail-edit-link'),
+        invoice: document.getElementById('detail-invoice-link')
+    };
+
+    function rupiah(value) {
+        return 'Rp ' + Number(value || 0).toLocaleString('id-ID');
+    }
+
+    function tanggal(value) {
+        if (!value) return 'Belum selesai';
+
+        const date = new Date(value + 'T00:00:00');
+
+        return Number.isNaN(date.getTime())
+            ? value
+            : date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+    }
+
+    function buatElemen(tag, className, text) {
+        const node = document.createElement(tag);
+
+        node.className = className;
+        node.textContent = text ?? '';
+
+        return node;
+    }
+
+    function tampilkanBarang(barang) {
+        if (!el.items) return;
+
+        el.items.replaceChildren();
+
+        if (!barang.length) {
+            el.items.appendChild(
+                buatElemen(
+                    'p',
+                    'text-xs text-slate-500',
+                    'Belum ada detail barang.'
+                )
+            );
+
+            return;
+        }
+
+        barang.forEach(function (item) {
+            const card = buatElemen(
+                'div',
+                'p-4 border border-slate-200 rounded-2xl flex justify-between items-center bg-white',
+                ''
+            );
+
+            const left = buatElemen(
+                'div',
+                'flex items-center gap-4',
+                ''
+            );
+
+            const photoBox = buatElemen(
+                'div',
+                'w-14 h-14 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 overflow-hidden',
+                ''
+            );
+
+            if (item.foto_before) {
+                const img = document.createElement('img');
+
+                img.src = '/' + String(item.foto_before).replace(/^\/+/, '');
+                img.alt = 'Foto ' + (item.nama_barang || 'barang');
+                img.className = 'w-full h-full object-cover';
+
+                photoBox.appendChild(img);
+            } else {
+                photoBox.appendChild(
+                    buatElemen('i', 'fas fa-camera text-lg', '')
+                );
+            }
+
+            const info = buatElemen('div', '', '');
+
+            const heading = buatElemen(
+                'h5',
+                'font-extrabold text-slate-900 text-sm',
+                ''
+            );
+
+            heading.appendChild(
+                document.createTextNode(
+                    [item.nama_barang, item.merk]
+                        .filter(Boolean)
+                        .join(' ')
+                )
+            );
+
+            if (item.warna) {
+                heading.appendChild(document.createTextNode(' '));
+
+                heading.appendChild(
+                    buatElemen(
+                        'span',
+                        'text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded ml-1',
+                        item.warna
+                    )
+                );
+            }
+
+            const serviceList = buatElemen(
+                'div',
+                'text-xs text-slate-500 space-y-0.5 mt-1 font-medium',
+                ''
+            );
+
+            if (item.nama_layanan) {
+                serviceList.appendChild(
+                    buatElemen(
+                        'p',
+                        '',
+                        item.nama_layanan + ' (' + rupiah(item.harga_satuan) + ')'
+                    )
+                );
+            }
+
+            (item.treatments || []).forEach(function (treatment) {
+                serviceList.appendChild(
+                    buatElemen(
+                        'p',
+                        '',
+                        treatment.nama_treatment + ' (' + rupiah(treatment.harga) + ')'
+                    )
+                );
+            });
+
+            if (item.catatan) {
+                serviceList.appendChild(
+                    buatElemen(
+                        'p',
+                        '',
+                        'Catatan: ' + item.catatan
+                    )
+                );
+            }
+
+            info.append(heading, serviceList);
+            left.append(photoBox, info);
+
+            const price = buatElemen(
+                'span',
+                'font-black text-slate-900 text-sm',
+                rupiah(item.subtotal)
+            );
+
+            card.append(left, price);
+            el.items.appendChild(card);
+        });
+    }
+
+    async function pilihPesanan(card) {
+        const id = card.dataset.id;
+
+        if (!id) {
+            console.error('ID pesanan tidak ditemukan pada kartu.');
+            return;
+        }
+
+        cards.forEach(function (item) {
+            item.classList.remove(
+                'border-brand-yellow',
+                'border-2',
+                'bg-yellow-50/30',
+                'shadow-sm',
+                'relative'
+            );
+
+            item.classList.add(
+                'border',
+                'border-slate-200',
+                'bg-white'
+            );
+        });
+
+        card.classList.remove(
+            'border',
+            'border-slate-200',
+            'bg-white'
+        );
+
+        card.classList.add(
+            'border-2',
+            'border-brand-yellow',
+            'bg-yellow-50/30',
+            'shadow-sm',
+            'relative'
+        );
+
+        if (el.title) {
+            el.title.textContent = 'Memuat detail pesanan...';
+        }
+
+        if (el.items) {
+            el.items.replaceChildren(
+                buatElemen(
+                    'p',
+                    'text-xs text-slate-500',
+                    'Mengambil data dari database...'
+                )
+            );
+        }
+
+        try {
+            const response = await fetch(
+                '/pesanan/detail-data?id=' + encodeURIComponent(id),
+                {
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || 'Gagal memuat detail pesanan.'
+                );
+            }
+
+            const p = result.pesanan;
+            const barang = result.barang || [];
+
+            if (el.title) {
+                el.title.textContent =
+                    'Detail Pesanan ' + (p.kode_pesanan || '');
+            }
+
+            if (el.subtitle) {
+                el.subtitle.textContent =
+                    (p.nama_customer || '-') + ' • ' + (p.no_hp || '-');
+            }
+
+            if (el.dateIn) {
+                el.dateIn.textContent = tanggal(p.tanggal_masuk);
+            }
+
+            if (el.dateOut) {
+                el.dateOut.textContent = tanggal(p.tanggal_selesai);
+            }
+
+            if (el.dateEstimasi) {
+                el.dateEstimasi.textContent = p.estimasi_selesai
+                    ? new Date(p.estimasi_selesai).toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                        timeZone: 'UTC'
+                    })
+                    : '-';
+            }
+
+            if (el.dropPoint) {
+                el.dropPoint.textContent = p.alamat_lokasi || '-';
+            }
+
+            if (el.total) {
+                el.total.textContent = rupiah(p.total_bayar);
+            }
+
+            if (el.statusPay) {
+                el.statusPay.replaceChildren();
+
+                const payment = buatElemen(
+                    'span',
+                    'font-extrabold px-2 py-0.5 rounded text-[10px]',
+                    (p.status_bayar || '-') + (p.metode_bayar ? ' – ' + p.metode_bayar : '')
+                );
+
+                if (p.status_bayar === 'Lunas') {
+                    payment.classList.add(
+                        'text-emerald-600',
+                        'bg-emerald-100'
+                    );
+                } else {
+                    payment.classList.add(
+                        'text-slate-600',
+                        'bg-slate-100'
+                    );
+                }
+
+                el.statusPay.appendChild(payment);
+            }
+
+            if (el.status) {
+                el.status.value = p.status || '';
+            }
+
+            if (el.itemsCount) {
+                el.itemsCount.textContent =
+                    'Daftar Barang (' + barang.length + ' Item)';
+            }
+
+            tampilkanBarang(barang);
+
+            if (typeof tampilkanDokumentasiFoto === 'function') {
+                tampilkanDokumentasiFoto(barang);
+            }
+
+            if (el.whatsappCustomer) {
+                el.whatsappCustomer.textContent =
+                    (p.nama_customer || '-') + ' • ' + (p.no_hp || '-');
+            }
+
+            const editId = document.getElementById('edit-id-pesanan');
+
+            if (editId) {
+                editId.value = p.id_pesanan;
+            }
+
+            if (el.invoice) {
+                el.invoice.href =
+                    '/invoice?id=' + encodeURIComponent(p.id_pesanan);
+            }
+
+        } catch (error) {
+            console.error('Gagal memuat detail pesanan:', error);
+
+            if (el.title) {
+                el.title.textContent = 'Gagal memuat detail';
+            }
+
+            if (el.items) {
+                el.items.replaceChildren(
+                    buatElemen(
+                        'p',
+                        'text-xs text-red-600',
+                        error.message || 'Terjadi kesalahan saat memuat data.'
+                    )
+                );
+            }
+        }
+    }
+
+    cards.forEach(function (card) {
+        card.addEventListener('click', function () {
             if (window.innerWidth < 1024) {
-                window.location.href = `/pesanan/detail`;
+                document.getElementById('detail-id-pesanan').value = card.dataset.id;
+                document.getElementById('form-detail-pesanan').submit();
                 return;
             }
 
-            // detail_pesanan.php?id=${orderNum}
-
-            // Jika di Desktop (>= 1024px): Ganti panel kanan di tempat (Desain Asli)
-            orderCards.forEach(c => {
-                c.className = 'order-card-item p-5 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 cursor-pointer transition-all';
-            });
-            card.className = 'order-card-item p-5 rounded-2xl border-2 border-brand-yellow bg-yellow-50/30 shadow-sm cursor-pointer relative transition-all';
-
-            const data = ordersData[orderId];
-            if (data) {
-                const elTitle = document.querySelector('.detail-title');
-                if (elTitle) elTitle.innerText = data.title;
-                const elSub = document.querySelector('.detail-subtitle');
-                if (elSub) elSub.innerText = data.subtitle;
-                const elDateIn = document.querySelector('.detail-date-in');
-                if (elDateIn) elDateIn.innerText = data.dateIn;
-                const elStatusPay = document.querySelector('.detail-status-pay');
-                if (elStatusPay) elStatusPay.innerHTML = data.statusPay;
-                const elDropPoint = document.querySelector('.detail-drop-point');
-                if (elDropPoint) elDropPoint.innerText = data.dropPoint;
-                const elDateOut = document.querySelector('.detail-date-out');
-                if (elDateOut) elDateOut.innerText = data.dateOut;
-                const elItemsCount = document.querySelector('.detail-items-count');
-                if (elItemsCount) elItemsCount.innerText = 'Daftar Barang (' + data.itemsCount + ')';
-                const elTotal = document.querySelector('.detail-total');
-                if (elTotal) elTotal.innerText = data.total;
-                const elItemsContainer = document.querySelector('.detail-items-container');
-                if (elItemsContainer) elItemsContainer.innerHTML = data.items;
-
-                const detailSelect = document.querySelector('#detail-status-select');
-                if (detailSelect) {
-                    Array.from(detailSelect.options).forEach(opt => {
-                        if (opt.text.includes(data.status)) {
-                            opt.selected = true;
-                        } else {
-                            opt.selected = false;
-                        }
-                    });
-                }
-            }
+            pilihPesanan(card);
         });
     });
+
+    if (window.innerWidth >= 1024) {
+        pilihPesanan(cards[0]);
+    }
 }
 
 // 7. Order Filter
@@ -654,321 +1072,135 @@ function tampilkanDokumentasiFoto(barang) {
     });
 }
 
+function generateSpeedTreatments(itemId, selectedTreatmentId = 'reguler') {
+    const container = document.querySelector(
+        `#item-container-${itemId} .speed-container`
+    );
 
+    if (!container) return;
 
-function initDetailPesanan() {
-    const cards = document.querySelectorAll('.order-card-item');
-    const el = {
-        title: document.getElementById('detail-title'),
-        subtitle: document.getElementById('detail-subtitle'),
-        dateIn: document.getElementById('detail-date-in'),
-        dateOut: document.getElementById('detail-date-out'),
-        statusPay: document.getElementById('detail-status-pay'),
-        dropPoint: document.getElementById('detail-drop-point'),
-        status: document.getElementById('detail-status-select'),
-        itemsCount: document.getElementById('detail-items-count'),
-        items: document.getElementById('detail-items-container'),
-        total: document.getElementById('detail-total'),
-        photoBefore: document.getElementById('detail-photo-before'),
-        photoAfter: document.getElementById('detail-photo-after'),
-        whatsappCustomer: document.getElementById('detail-whatsapp-customer'),
-        edit: document.getElementById('detail-edit-link'),
-        invoice: document.getElementById('detail-invoice-link'),
-    };
+    const treatments = window.TREATMENT_KECEPATAN || [];
 
-    // Pastikan elemen utama tersedia pada halaman ini.
-    if (!cards.length || !el.title || !el.items) {
-        return;
-    }
+    const options = [
+        {
+            id_treatment_tambahan: 'reguler',
+            nama_treatment: 'Reguler',
+            harga_min: 0,
+            estimasi_min_hari: 4,
+            estimasi_max_hari: 5
+        },
+        ...treatments
+    ];
 
-    function rupiah(value) {
-        return 'Rp ' + Number(value || 0).toLocaleString('id-ID');
-    }
+    container.innerHTML = options.map(item => {
+        const id = String(item.id_treatment_tambahan);
+        const checked = id === String(selectedTreatmentId);
+        const price = Number(item.harga_min || 0);
+        const min = Number(item.estimasi_min_hari || 0);
+        const max = Number(item.estimasi_max_hari || min);
 
-    function tanggal(value) {
-        if (!value) return 'Belum selesai';
+        return `
+            <label class="p-3 border ${checked
+                ? 'border-2 border-brand-yellow bg-brand-yellow/10'
+                : 'border-slate-700'
+            } rounded-xl flex flex-col items-center justify-center cursor-pointer transition">
+                <input
+                    type="radio"
+                    name="speed[${itemId}]"
+                    value="${id}"
+                    data-price="${price}"
+                    ${checked ? 'checked' : ''}
+                    onchange="updateItemSubtotal(${itemId})"
+                    class="text-brand-yellow mb-1"
+                >
+                <span class="speed-title text-[10px] font-bold ${checked ? 'text-brand-yellow' : 'text-slate-400'
+            }">${item.nama_treatment}</span>
 
-        const date = new Date(value + 'T00:00:00');
+                ${id !== 'reguler' ? `
+                    <span class="text-[9px] text-slate-400">
+                        ${min}–${max} Hari • +${price.toLocaleString('id-ID')}
+                    </span>
+                ` : ''}
+            </label>
+        `;
+    }).join('');
+}
 
-        return Number.isNaN(date.getTime())
-            ? value
-            : date.toLocaleDateString('id-ID', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            });
-    }
+function generateExtraTreatments(itemId, selectedTreatmentIds = []) {
+    const container = document.querySelector(
+        `#item-container-${itemId} .extra-treatment-container`
+    );
 
-    function buatElemen(tag, className, text) {
-        const node = document.createElement(tag);
-        node.className = className;
-        node.textContent = text ?? '';
-        return node;
-    }
+    if (!container) return;
 
-    function tampilkanBarang(barang) {
-        el.items.replaceChildren();
+    const treatments = window.TREATMENT_TAMBAHAN || [];
+    const selectedIds = selectedTreatmentIds.map(String);
 
-        if (!barang.length) {
-            el.items.appendChild(
-                buatElemen(
-                    'p',
-                    'text-xs text-slate-500',
-                    'Belum ada detail barang.'
-                )
-            );
-            return;
-        }
+    container.innerHTML = treatments.map(item => {
+        const id = String(item.id_treatment_tambahan);
+        const checked = selectedIds.includes(id);
+        const price = Number(item.harga_min || 0);
+        const min = Number(item.estimasi_min_hari || 0);
+        const max = Number(item.estimasi_max_hari || min);
 
-        barang.forEach(function (item) {
-            const card = buatElemen(
-                'div',
-                'p-4 border border-slate-200 rounded-2xl flex justify-between items-center bg-white',
-                ''
-            );
-
-            const left = buatElemen(
-                'div',
-                'flex items-center gap-4',
-                ''
-            );
-
-            const photoBox = buatElemen(
-                'div',
-                'w-14 h-14 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 overflow-hidden',
-                ''
-            );
-
-            if (item.foto_before) {
-                const img = document.createElement('img');
-                img.src = '/' + String(item.foto_before).replace(/^\/+/, '');
-                img.alt = 'Foto ' + (item.nama_barang || 'barang');
-                img.className = 'w-full h-full object-cover';
-                photoBox.appendChild(img);
-            } else {
-                photoBox.appendChild(
-                    buatElemen('i', 'fas fa-camera text-lg', '')
-                );
+        return `
+            <label class="flex justify-between items-center p-3.5 border border-slate-700/90 bg-slate-800/50 rounded-xl cursor-pointer hover:border-slate-500 transition">
+                <div class="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        name="treatment_tambahan[${itemId}][]"
+                        value="${id}"
+                        data-price="${price}"
+                        ${checked ? 'checked' : ''}
+                        onchange="updateItemSubtotal(${itemId})"
+                        class="extra-check-${itemId} w-4 h-4 rounded text-brand-yellow bg-slate-900 border-slate-600 focus:ring-brand-yellow"
+                    >
+                    <span class="text-xs font-bold text-white">
+                        ${item.nama_treatment} (${min}–${max} Hari)
+                    </span>
+                </div>
+                <span class="text-xs font-bold text-brand-yellow">
+                    ${price > 0
+                ? '+' + price.toLocaleString('id-ID')
+                : 'Free'
             }
+                </span>
+            </label>
+        `;
+    }).join('');
+}
 
-            const info = buatElemen('div', '', '');
-            const heading = buatElemen(
-                'h5',
-                'font-extrabold text-slate-900 text-sm',
-                ''
-            );
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('KickDropShoe Engine Loaded.');
 
-            heading.appendChild(
-                document.createTextNode(
-                    [item.nama_barang, item.merk]
-                        .filter(Boolean)
-                        .join(' ')
-                )
-            );
+    const selectedData = window.TREATMENT_SELECTED || {};
 
-            if (item.warna) {
-                heading.appendChild(document.createTextNode(' '));
-                heading.appendChild(
-                    buatElemen(
-                        'span',
-                        'text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded ml-1',
-                        item.warna
-                    )
-                );
-            }
+    document.querySelectorAll('.item-dark-container').forEach(card => {
+        const itemId = card.dataset.itemId;
+        const saved = selectedData[itemId] || {
+            speed_id: null,
+            extra_ids: []
+        };
 
-            const serviceList = buatElemen(
-                'div',
-                'text-xs text-slate-500 space-y-0.5 mt-1 font-medium',
-                ''
-            );
-
-            if (item.nama_layanan) {
-                serviceList.appendChild(
-                    buatElemen(
-                        'p',
-                        '',
-                        item.nama_layanan + ' (' + rupiah(item.harga_satuan) + ')'
-                    )
-                );
-            }
-
-            (item.treatments || []).forEach(function (treatment) {
-                serviceList.appendChild(
-                    buatElemen(
-                        'p',
-                        '',
-                        treatment.nama_treatment + ' (' + rupiah(treatment.harga) + ')'
-                    )
-                );
-            });
-
-            if (item.catatan) {
-                serviceList.appendChild(
-                    buatElemen('p', '', 'Catatan: ' + item.catatan)
-                );
-            }
-
-            info.append(heading, serviceList);
-            left.append(photoBox, info);
-
-            const price = buatElemen(
-                'span',
-                'font-black text-slate-900 text-sm',
-                rupiah(item.subtotal)
-            );
-
-            card.append(left, price);
-            el.items.appendChild(card);
-        });
-    }
-
-    async function pilihPesanan(card) {
-        const id = card.dataset.id;
-
-        cards.forEach(function (item) {
-            item.classList.remove(
-                'border-brand-yellow',
-                'bg-yellow-50/30'
-            );
-
-            item.classList.add('border-slate-200', 'bg-white');
-        });
-
-        card.classList.remove('border-slate-200', 'bg-white');
-        card.classList.add('border-brand-yellow', 'bg-yellow-50/30');
-
-        el.title.textContent = 'Memuat detail pesanan...';
-
-        el.items.replaceChildren(
-            buatElemen(
-                'p',
-                'text-xs text-slate-500',
-                'Mengambil data dari database...'
-            )
+        generateSpeedTreatments(
+            itemId,
+            saved.speed_id ?? 'reguler'
         );
 
-        try {
-            const response = await fetch(
-                '/pesanan/detail-data?id=' + encodeURIComponent(id),
-                {
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin'
-                }
-            );
+        generateExtraTreatments(
+            itemId,
+            saved.extra_ids
+        );
 
-            const result = await response.json();
-
-            if (!response.ok || !result.success) {
-                throw new Error(
-                    result.message || 'Gagal memuat detail pesanan.'
-                );
-            }
-
-            const p = result.pesanan;
-            const barang = result.barang || [];
-
-            el.title.textContent =
-                'Detail Pesanan ' + (p.kode_pesanan || '');
-
-            if (el.subtitle) {
-                el.subtitle.textContent =
-                    (p.nama_customer || '-') + ' • ' + (p.no_hp || '-');
-            }
-
-            if (el.dateIn) {
-                el.dateIn.textContent = tanggal(p.tanggal_masuk);
-            }
-
-            if (el.dateOut) {
-                el.dateOut.textContent = tanggal(p.tanggal_selesai);
-            }
-
-            if (el.dropPoint) {
-                el.dropPoint.textContent = p.alamat_lokasi || '-';
-            }
-
-            if (el.total) {
-                el.total.textContent = rupiah(p.total_bayar);
-            }
-
-            if (el.statusPay) {
-                el.statusPay.replaceChildren();
-
-                const payment = buatElemen(
-                    'span',
-                    'font-extrabold px-2 py-0.5 rounded text-[10px]',
-                    (p.status_bayar || '-') +
-                    (p.metode_bayar ? ' – ' + p.metode_bayar : '')
-                );
-
-                if (p.status_bayar === 'Lunas') {
-                    payment.classList.add(
-                        'text-emerald-600',
-                        'bg-emerald-100'
-                    );
-                } else if (p.status_bayar === 'DP') {
-                    payment.classList.add(
-                        'text-yellow-800',
-                        'bg-yellow-100'
-                    );
-                } else {
-                    payment.classList.add(
-                        'text-slate-600',
-                        'bg-slate-100'
-                    );
-                }
-
-                el.statusPay.appendChild(payment);
-            }
-
-            if (el.status) {
-                el.status.value = p.status || '';
-            }
-
-            if (el.itemsCount) {
-                el.itemsCount.textContent =
-                    'Daftar Barang (' + barang.length + ' Item)';
-            }
-
-            tampilkanBarang(barang);
-            tampilkanDokumentasiFoto(barang);
-
-            if (el.whatsappCustomer) {
-                el.whatsappCustomer.textContent =
-                    (p.nama_customer || '-') + ' • ' + (p.no_hp || '-');
-            }
-
-            if (el.edit) {
-                el.edit.href =
-                    '/pesanan/edit?id=' + encodeURIComponent(p.id_pesanan);
-            }
-
-            if (el.invoice) {
-                el.invoice.href =
-                    '/invoice?id=' + encodeURIComponent(p.id_pesanan);
-            }
-
-        } catch (error) {
-            el.title.textContent = 'Gagal memuat detail';
-
-            el.items.replaceChildren(
-                buatElemen(
-                    'p',
-                    'text-xs text-red-600',
-                    error.message
-                )
-            );
-        }
-    }
-
-    cards.forEach(function (card) {
-        card.addEventListener('click', function () {
-            pilihPesanan(card);
-        });
+        generateEditCategoryButtons(itemId);
+        loadServicesForItem(itemId, card.dataset.selectedCategory);
     });
 
-    pilihPesanan(cards[0]);
-}
+    initCategoryButtons();
+    initExtraTreatmentCalculations();
+    initPhotoUploads();
+    initOrderFilter();
+    initMasterDetailOrders();
+    initAddItemButton();
+    recalculateGrandTotal();
+});

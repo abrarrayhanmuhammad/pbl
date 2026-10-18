@@ -16,7 +16,6 @@ $laporanController = new LaporanController($pdo);
 $pegawaiController = new PegawaiController($pdo);
 
 if ($uri === '/' && $method === 'GET') {
-
     header('Location: /login');
     exit;
 } elseif ($uri === '/login' && $method === 'GET') {
@@ -35,6 +34,10 @@ if ($uri === '/' && $method === 'GET') {
     $pesananController->simpanPesanan();
 } elseif ($uri === '/pesanan/edit' && $method === 'GET') {
     $pesananController->editPesanan();
+} elseif ($uri === '/pesanan/edit' && $method === 'POST') {
+    $pesananController->editPesanan();
+} elseif ($uri === '/pesanan/detail' && $method === 'POST') {
+    $pesananController->detail();
 } elseif ($uri === '/pesanan/detail' && $method === 'GET') {
     $pesananController->detail();
 } elseif ($uri === '/pesanan/detail-data' && $method === 'GET') {

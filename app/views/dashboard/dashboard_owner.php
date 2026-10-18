@@ -27,7 +27,7 @@ require_once __DIR__ . '/../layouts/header.php';
             
             <!-- Mobile Quick Actions Grid (Hanya Tampil di Mobile) -->
             <div class="grid grid-cols-2 gap-3 lg:hidden">
-                <a href="laporan.php" class="p-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-sm flex items-center gap-3 transition">
+                <a href="/laporan" class="p-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-sm flex items-center gap-3 transition">
                     <div class="w-9 h-9 rounded-xl bg-brand-yellow text-slate-900 flex items-center justify-center text-sm shrink-0 font-extrabold">
                         <i class="fas fa-chart-line"></i>
                     </div>
@@ -36,7 +36,7 @@ require_once __DIR__ . '/../layouts/header.php';
                         <p class="text-[10px] font-semibold text-slate-400 mt-0.5">Analisis omset</p>
                     </div>
                 </a>
-                <a href="pesanan.php" class="p-3.5 bg-white border border-slate-200 text-slate-800 rounded-2xl shadow-sm flex items-center gap-3 transition">
+                <a href="/pesanan" class="p-3.5 bg-white border border-slate-200 text-slate-800 rounded-2xl shadow-sm flex items-center gap-3 transition">
                     <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-sm text-slate-600 shrink-0">
                         <i class="fas fa-list-ul"></i>
                     </div>
