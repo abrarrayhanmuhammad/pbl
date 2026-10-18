@@ -288,18 +288,49 @@ function initAddItemButton() {
 
             <div class="grid grid-cols-2 gap-3 sm:gap-6 pt-3 border-t border-slate-800 items-stretch">
                 <div class="flex flex-col">
-                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-2 h-7 sm:h-auto flex items-end leading-tight">FOTO BEFORE (SEBELUM)</label>
-                    <div class="upload-box-trigger border-2 border-dashed border-slate-700 rounded-2xl p-3 sm:p-4 h-28 sm:h-32 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-800/40 transition">
-                        <i class="fas fa-upload text-slate-400 text-base sm:text-lg mb-1"></i>
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-2 h-7 sm:h-auto flex items-end leading-tight">
+                        FOTO BEFORE (SEBELUM)
+                    </label>
+
+                    <div id="upload-before-trigger" class="upload-box-trigger border-2 border-dashed border-slate-700 rounded-2xl p-3 sm:p-4 h-28 sm:h-32 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-800/40 transition">
+                        <i class="fas fa-camera text-slate-400 text-base sm:text-lg mb-1"></i>
                         <span class="text-[11px] sm:text-xs font-bold text-white">Upload Foto</span>
                         <span class="text-[9px] sm:text-[10px] text-slate-500 mt-0.5">Maks. 5 MB</span>
                     </div>
-                </div>
 
+                    <p id="foto-before-name" class="text-xs text-slate-400 mt-2"></p>
+                    <img id="foto-before-preview" class="hidden mt-2 w-full max-h-48 object-contain rounded-xl" alt="Preview foto Before">
+                </div>
                 <div class="flex flex-col">
                     <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-2 h-7 sm:h-auto flex items-end leading-tight">CATATAN TAMBAHAN</label>
                     <textarea name="catatan[${newId}]" class="w-full bg-brand-darkInput border border-slate-700 rounded-2xl p-3 sm:p-4 text-xs font-medium text-white outline-none h-28 sm:h-32 resize-none placeholder:text-slate-500" placeholder="Ketik noda khusus, robek, atau keluhan di sini..."></textarea>
                 </div>
+            </div>
+        </div>
+
+        <div id="photo-source-sheet" class="fixed inset-0 z-[9999] hidden">
+            <div id="photo-source-backdrop" class="absolute inset-0 bg-black/60"></div>
+            <div id="photo-source-panel" class="absolute bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 rounded-t-3xl p-5 pb-8 transition-transform duration-300 translate-y-full">
+                <div class="w-12 h-1.5 rounded-full bg-slate-600 mx-auto mb-5"></div>
+                <h3 class="text-white font-extrabold text-base">Upload Foto Before</h3>
+                <p class="text-slate-400 text-xs mt-1 mb-5">Pilih sumber foto</p>
+                <button type="button" id="photo-source-camera" class="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-700 bg-slate-800 text-left mb-3">
+                    <i class="fas fa-camera text-yellow-400 text-xl w-8 text-center"></i>
+                    <div>
+                        <p class="text-white text-sm font-bold">Buka Kamera</p>
+                        <p class="text-slate-400 text-xs mt-1">Ambil foto langsung</p>
+                    </div>
+                </button>
+                <button type="button" id="photo-source-gallery" class="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-700 bg-slate-800 text-left">
+                    <i class="fas fa-images text-blue-400 text-xl w-8 text-center"></i>
+                    <div>
+                        <p class="text-white text-sm font-bold">Pilih dari Galeri</p>
+                        <p class="text-slate-400 text-xs mt-1">Pilih foto yang tersimpan</p>
+                    </div>
+                </button>
+                <button type="button" id="photo-source-cancel" class="w-full mt-4 py-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-bold">
+                    Batal
+                </button>
             </div>
         </div>
         `;
@@ -515,58 +546,158 @@ function renumberItems() {
 
 // 5. Photo Upload Preview Simulation
 function initPhotoUploads() {
-    document.querySelectorAll('.upload-box-trigger').forEach(box => {
-        box.addEventListener('click', () => {
-            const container = box.closest('.item-dark-container');
-            const form = box.closest('form');
+    const sheet = document.getElementById('photo-source-sheet');
+    const panel = document.getElementById('photo-source-panel');
+    const cameraBtn = document.getElementById('photo-source-camera');
+    const galleryBtn = document.getElementById('photo-source-gallery');
+    const cancelBtn = document.getElementById('photo-source-cancel');
+    const backdrop = document.getElementById('photo-source-backdrop');
 
-            if (!container || !form) {
-                console.error('Container barang atau form tidak ditemukan.');
+    if (!sheet || !panel || !cameraBtn || !galleryBtn || !cancelBtn || !backdrop) {
+        console.error('HTML bottom sheet foto tidak ditemukan.');
+        return;
+    }
+
+    if (sheet.dataset.initialized === 'true') return;
+    sheet.dataset.initialized = 'true';
+
+    let activeBox = null;
+    let activeForm = null;
+    let activeItemId = null;
+
+    function bukaSheet() {
+        sheet.classList.remove('hidden');
+
+        requestAnimationFrame(() => {
+            panel.classList.remove('translate-y-full');
+        });
+    }
+
+    function tutupSheet() {
+        panel.classList.add('translate-y-full');
+
+        setTimeout(() => {
+            sheet.classList.add('hidden');
+        }, 300);
+    }
+
+    function buatInput(form, itemId, box, capture = false) {
+        if (!form || !itemId || !box) return;
+
+        const container = box.closest('.item-dark-container');
+
+        if (!container) {
+            console.error('Card barang tidak ditemukan.');
+            return;
+        }
+
+        const input = document.createElement('input');
+
+        input.type = 'file';
+        input.name = `foto_before[${itemId}]`;
+        input.accept = 'image/jpeg,image/png,image/webp';
+        input.hidden = true;
+        input.dataset.beforeUpload = 'true';
+        input.dataset.itemId = String(itemId);
+
+        if (capture) {
+            input.setAttribute('capture', 'environment');
+        }
+
+        input.addEventListener('change', function () {
+            const file = input.files?.[0];
+
+            if (!file) {
+                input.remove();
                 return;
             }
 
-            const itemId = container.dataset.itemId;
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ukuran foto maksimal 5 MB.');
+                input.remove();
+                return;
+            }
 
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.name = `foto_before[${itemId}]`;
-            input.accept = 'image/jpeg,image/png,image/webp';
-            input.hidden = true;
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                alert('Foto harus berformat JPG, PNG, atau WEBP.');
+                input.remove();
+                return;
+            }
 
-            form.appendChild(input);
-
-            input.addEventListener('change', () => {
-                const file = input.files[0];
-                if (!file) return;
-
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('Ukuran foto maksimal 5 MB.');
-                    input.remove();
-                    return;
+            form.querySelectorAll('input[data-before-upload="true"]').forEach(oldInput => {
+                if (oldInput !== input && oldInput.dataset.itemId === String(itemId)) {
+                    oldInput.remove();
                 }
+            });
 
-                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-                    alert('Foto harus berformat JPG, PNG, atau WEBP.');
-                    input.remove();
-                    return;
-                }
+            const reader = new FileReader();
 
-                const reader = new FileReader();
+            reader.onload = function (event) {
+                box.innerHTML = `
+                    <img src="${event.target.result}"
+                         class="w-full h-full object-cover rounded-2xl"
+                         alt="Foto sebelum">
+                `;
 
-                reader.onload = event => {
-                    box.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover rounded-2xl" alt="Foto sebelum">`;
-                    box.classList.remove('border-2', 'border-dashed');
-                    box.dataset.photoSelected = 'true';
-                };
+                box.classList.remove('border-dashed');
+                box.dataset.photoSelected = 'true';
+            };
 
-                reader.readAsDataURL(file);
-            }, { once: true });
-
-            input.click();
+            reader.readAsDataURL(file);
         });
-    });
-}
 
+        form.appendChild(input);
+        input.click();
+    }
+
+    document.addEventListener('click', function (event) {
+        const box = event.target.closest('.upload-box-trigger');
+
+        if (!box) return;
+
+        const container = box.closest('.item-dark-container');
+        const form = box.closest('form');
+
+        if (!container || !form) {
+            console.error('Container barang atau form tidak ditemukan.');
+            return;
+        }
+
+        const itemId = container.dataset.itemId;
+
+        if (!itemId) {
+            console.error('data-item-id tidak ditemukan.');
+            return;
+        }
+
+        activeBox = box;
+        activeForm = form;
+        activeItemId = String(itemId);
+
+        bukaSheet();
+    });
+
+    cameraBtn.addEventListener('click', function () {
+        const box = activeBox;
+        const form = activeForm;
+        const itemId = activeItemId;
+
+        tutupSheet();
+        buatInput(form, itemId, box, true);
+    });
+
+    galleryBtn.addEventListener('click', function () {
+        const box = activeBox;
+        const form = activeForm;
+        const itemId = activeItemId;
+
+        tutupSheet();
+        buatInput(form, itemId, box, false);
+    });
+
+    cancelBtn.addEventListener('click', tutupSheet);
+    backdrop.addEventListener('click', tutupSheet);
+}
 
 // 6. Master-Detail Order Selection:
 // - On Desktop: Seamless in-place switch on right panel (Persis 100% Desain Asli)
@@ -756,35 +887,37 @@ function initMasterDetailOrders() {
             return;
         }
 
-        cards.forEach(function (item) {
-            item.classList.remove(
-                'border-brand-yellow',
-                'border-2',
-                'bg-yellow-50/30',
-                'shadow-sm',
-                'relative'
-            );
+        if (window.innerWidth >= 1024) {
+            cards.forEach(function (item) {
+                item.classList.remove(
+                    'border-brand-yellow',
+                    'border-2',
+                    'bg-yellow-50/30',
+                    'shadow-sm',
+                    'relative'
+                );
 
-            item.classList.add(
+                item.classList.add(
+                    'border',
+                    'border-slate-200',
+                    'bg-white'
+                );
+            });
+
+            card.classList.remove(
                 'border',
                 'border-slate-200',
                 'bg-white'
             );
-        });
 
-        card.classList.remove(
-            'border',
-            'border-slate-200',
-            'bg-white'
-        );
-
-        card.classList.add(
-            'border-2',
-            'border-brand-yellow',
-            'bg-yellow-50/30',
-            'shadow-sm',
-            'relative'
-        );
+            card.classList.add(
+                'border-2',
+                'border-brand-yellow',
+                'bg-yellow-50/30',
+                'shadow-sm',
+                'relative'
+            );
+        }
 
         if (el.title) {
             el.title.textContent = 'Memuat detail pesanan...';

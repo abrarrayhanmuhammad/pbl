@@ -46,7 +46,7 @@ require_once __DIR__ . '/../layouts/header.php';
                                 'Diambil'   => 'bg-emerald-100 text-emerald-700'
                             };
                         ?>
-                            <div class="order-card-item p-5 rounded-2xl border-2 border-brand-yellow bg-yellow-50/30 shadow-sm cursor-pointer relative transition-all" data-id="<?= (int) $pesanan['id_pesanan'] ?>">
+                            <div class="order-card-item p-5 rounded-2xl border-2 border-slate-200 bg-white shadow-sm cursor-pointer relative transition-all" data-id="<?= (int) $pesanan['id_pesanan'] ?>">
                                 <form id="form-detail-pesanan" action="/pesanan/detail" method="POST">
                                     <input type="hidden" id="detail-id-pesanan" name="id_pesanan">
                                     <button type="submit" id="detail-submit" class="hidden"></button>
