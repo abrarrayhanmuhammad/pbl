@@ -1,5 +1,5 @@
 <?php
-$page_title = 'Pratinjau Invoice #0881 - KickDropShoe';
+$page_title = 'Pratinjau Invoice ' . $pesanan['kode_pesanan'] . '- KickDropShoe';
 $current_page = 'pesanan';
 $is_invoice = true;
 $body_class = 'font-sans antialiased bg-brand-slateBg print:bg-white';
@@ -8,7 +8,7 @@ require_once __DIR__ . '/../layouts/header.php';
 <div class="flex h-screen overflow-hidden">
     <!-- Sidebar (Hilang hanya saat dicetak) -->
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
-    
+
     <main class="flex-1 flex flex-col h-full overflow-y-auto print:overflow-visible">
         <!-- Header (Hilang hanya saat dicetak) -->
         <header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 md:py-5 flex justify-between items-center sticky top-0 z-10 shrink-0 print:hidden">
@@ -18,7 +18,7 @@ require_once __DIR__ . '/../layouts/header.php';
                 </button>
                 <div>
                     <h2 class="text-lg md:text-xl font-extrabold text-slate-900 tracking-tight">Pratinjau Invoice</h2>
-                    <p class="text-xs md:text-sm font-medium text-slate-500 mt-0.5">Periksa rincian pesanan #0881 sebelum mencetak.</p>
+                    <p class="text-xs md:text-sm font-medium text-slate-500 mt-0.5">Periksa rincian pesanan <?= htmlspecialchars($pesanan['kode_pesanan']) ?> sebelum mencetak.</p>
                 </div>
             </div>
             <div class="bg-slate-100 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-slate-200 text-[11px] md:text-xs font-bold text-slate-600 flex items-center gap-2">
@@ -46,7 +46,7 @@ require_once __DIR__ . '/../layouts/header.php';
             <div class="w-full max-w-4xl bg-white shadow-xl border border-slate-200 print:shadow-none print:border-none print:max-w-full rounded-2xl md:rounded-3xl overflow-hidden">
                 <!-- Garis Kuning Atas -->
                 <div class="h-2 w-full bg-brand-yellow"></div>
-                
+
                 <div class="p-10 space-y-8">
                     <!-- Header Invoice -->
                     <div class="flex justify-between items-start">
@@ -56,15 +56,15 @@ require_once __DIR__ . '/../layouts/header.php';
                                 <img src="assets/logo.png" alt="Logo" class="w-10 h-10 rounded-full shadow-md border-1.5 border-slate-900 object-cover bg-white">
                                 <h2 class="text-2xl font-black text-slate-900">KickDropShoe</h2>
                             </div>
-                            <p class="text-sm font-medium text-slate-500">Jl. Soekarno Hatta No. 12, Malang</p>
-                            <p class="text-sm font-medium text-slate-500">Telp 0812-3456-7890</p>
+                            <p class="text-sm font-medium text-slate-500">Jl. Klayatan GG II NO 19, Malang</p>
+                            <p class="text-sm font-medium text-slate-500">Telp 0851-7958-3250</p>
                         </div>
-                        
+
                         <!-- Bagian Kanan (Nomor Invoice) -->
                         <div class="text-right space-y-1">
                             <p class="text-lg font-black text-slate-900">NOTA TRANSAKSI</p>
-                            <h1 class="text-3xl font-black text-slate-900">#0881</h1>
-                            <p class="text-sm font-medium text-slate-500 mt-2">Tanggal: 17 Okt 2026</p>
+                            <h1 class="text-3xl font-black text-slate-900"><?= htmlspecialchars($pesanan['kode_pesanan']) ?></h1>
+                            <p class="text-sm font-medium text-slate-500 mt-2">Tanggal: <?= date('d-m-Y', strtotime($pesanan['tanggal_masuk'])) ?></p>
                         </div>
                     </div>
 
@@ -72,14 +72,14 @@ require_once __DIR__ . '/../layouts/header.php';
                     <div class="flex justify-between items-start">
                         <div class="space-y-1">
                             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">PELANGGAN</p>
-                            <p class="text-lg font-black text-slate-900">Budi Santoso</p>
-                            <p class="text-sm font-medium text-slate-500">No WhatsApp: 08123456789</p>
-                            <p class="text-sm font-medium text-slate-500">Drop Point: Oro-oro Dowo</p>
+                            <p class="text-lg font-black text-slate-900"><?= htmlspecialchars($pesanan['nama_customer']) ?></p>
+                            <p class="text-sm font-medium text-slate-500">No WhatsApp: <?= htmlspecialchars($pesanan['no_hp']) ?></p>
+                            <p class="text-sm font-medium text-slate-500">Drop Point: <?= htmlspecialchars($pesanan['alamat_lokasi']) ?></p>
                         </div>
                         <div class="text-right space-y-2">
                             <div class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold mb-1">LUNAS - QRIS</div>
-                            <p class="text-sm font-medium text-slate-500">Status: Sedang Diproses</p>
-                            <p class="text-sm font-medium text-slate-500">Tanggal Selesai: Belum selesai</p>
+                            <p class="text-sm font-medium text-slate-500">Status: <?= htmlspecialchars($pesanan['status']) ?></p>
+                            <p class="text-sm font-medium text-slate-500">Tanggal Selesai: <?= ($pesanan['tanggal_selesai'] === '' ? htmlspecialchars($pesanan['tanggal_selesai']) : 'Belum Selesai') ?></p>
                         </div>
                     </div>
 
@@ -92,51 +92,41 @@ require_once __DIR__ . '/../layouts/header.php';
                                 <div class="w-32 text-right">Harga</div>
                                 <div class="w-32 text-right">Subtotal</div>
                             </div>
-                        
-                        <!-- Item 1 -->
-                        <div class="px-5 py-4 border-b border-slate-200 flex text-sm">
-                            <div class="flex-1 space-y-1">
-                                <p class="font-extrabold text-slate-900">Sepatu Nike Air Max • Putih</p>
-                                <p class="text-xs font-medium text-slate-500">Basic & White Shoes: Rp 30.000<br>Unyellowing: Rp 30.000<br>Express (1-2 Hari): Rp 10.000</p>
+
+                            <!-- Item 1 -->
+                            <?php foreach ($barang as $item): ?>
+                                <div class="px-5 py-4 border-b border-slate-200 flex text-sm">
+                                    <div class="flex-1 space-y-1">
+                                        <p class="font-extrabold text-slate-900"><?= htmlspecialchars($item['nama_barang']) ?> • <?= htmlspecialchars($item['warna']) ?></p>
+                                        <p class="text-xs font-medium text-slate-500"><?= htmlspecialchars($item['nama_layanan']) ?>: Rp <?= htmlspecialchars(number_format(($item['harga_satuan'] ?? 0), 0, ',', '.')) ?><br>Unyellowing: Rp 30.000<br>Express (1-2 Hari): Rp 10.000</p>
+                                    </div>
+                                    <div class="w-20 text-center font-medium text-slate-700">1</div>
+                                    <div class="w-32 text-right font-medium text-slate-700">Rp 70.000</div>
+                                    <div class="w-32 text-right font-extrabold text-slate-900">Rp 70.000</div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- Total Akhir -->
+                        <div class="bg-slate-50 p-5 rounded-xl flex justify-between items-center border border-slate-100">
+                            <p class="text-base font-bold text-slate-700">Total Akhir</p>
+                            <p class="text-3xl font-black text-slate-900">Rp 105.000</p>
+                        </div>
+
+                        <!-- Ketentuan & Footer -->
+                        <div class="space-y-6 pt-4">
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">KETENTUAN</p>
+                                <p class="text-xs font-medium text-slate-700">* Barang yang sudah diambil tidak dapat dikembalikan.</p>
                             </div>
-                            <div class="w-20 text-center font-medium text-slate-700">1</div>
-                            <div class="w-32 text-right font-medium text-slate-700">Rp 70.000</div>
-                            <div class="w-32 text-right font-extrabold text-slate-900">Rp 70.000</div>
+                            <hr class="border-slate-200">
+                            <p class="text-center font-bold text-slate-900">Terima kasih atas kepercayaan Anda!</p>
                         </div>
-
-                        <!-- Item 2 -->
-                        <div class="px-5 py-4 border-b border-slate-200 flex text-sm">
-                            <div class="flex-1 space-y-1">
-                                <p class="font-extrabold text-slate-900">Tas Coach • Hitam</p>
-                                <p class="text-xs font-medium text-slate-500">Deep Clean Tas M: Rp 35.000<br>Reguler (4-5 Hari): Free</p>
-                            </div>
-                            <div class="w-20 text-center font-medium text-slate-700">1</div>
-                            <div class="w-32 text-right font-medium text-slate-700">Rp 35.000</div>
-                            <div class="w-32 text-right font-extrabold text-slate-900">Rp 35.000</div>
-                        </div>
-                        </div>
-                    </div>
-
-                    <!-- Total Akhir -->
-                    <div class="bg-slate-50 p-5 rounded-xl flex justify-between items-center border border-slate-100">
-                        <p class="text-base font-bold text-slate-700">Total Akhir</p>
-                        <p class="text-3xl font-black text-slate-900">Rp 105.000</p>
-                    </div>
-
-                    <!-- Ketentuan & Footer -->
-                    <div class="space-y-6 pt-4">
-                        <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">KETENTUAN</p>
-                            <p class="text-xs font-medium text-slate-700">* Barang yang sudah diambil tidak dapat dikembalikan.</p>
-                        </div>
-                        <hr class="border-slate-200">
-                        <p class="text-center font-bold text-slate-900">Terima kasih atas kepercayaan Anda!</p>
                     </div>
                 </div>
+
+                <p class="text-xs font-medium text-slate-400 print:hidden mt-2">Tombol dan navigasi tidak termasuk dalam hasil cetak.</p>
             </div>
-            
-            <p class="text-xs font-medium text-slate-400 print:hidden mt-2">Tombol dan navigasi tidak termasuk dalam hasil cetak.</p>
-        </div>
     </main>
 </div>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

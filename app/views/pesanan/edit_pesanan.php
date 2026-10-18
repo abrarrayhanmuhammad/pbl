@@ -89,7 +89,7 @@ require_once __DIR__ . '/../layouts/header.php';
 
             <?php foreach ($barang as $index => $item): ?>
                 <input type="hidden" name="id_detail_pesanan[<?= $item['id_detail_pesanan'] ?>]" value="<?= $item['id_detail_pesanan'] ?>">
-                <div id="item-container-<?= $item['id_detail_pesanan'] ?>" data-item-id="<?= $item['id_detail_pesanan'] ?>" data-selected-category="<?= htmlspecialchars($item['kategori']) ?>" data-selected-service="<?= $item['id_layanan'] ?>" data-previous-category="<?= htmlspecialchars($item['kategori']) ?>" class="item-dark-container bg-brand-darkCard text-white rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+                <div id="item-container-<?= $item['id_detail_pesanan'] ?>" data-item-id="<?= $item['id_detail_pesanan'] ?>" data-selected-category="<?= htmlspecialchars($item['kategori']) ?>" data-selected-service="<?= (int) ($item['id_layanan'] ?? $item['id_paket'] ?? 0) ?>" data-selected-type="<?= !empty($item['id_layanan']) ? 'layanan' : 'package' ?>"  class="item-dark-container bg-brand-darkCard text-white rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
                     <div class="flex justify-between items-center border-b border-slate-800 pb-4">
                         <h3 class="text-sm font-extrabold flex items-center gap-3">
                             <span class="bg-brand-yellow text-slate-900 w-6 h-6 rounded-md flex items-center justify-center text-xs font-black"><?= $index + 1 ?></span> Detail Barang
@@ -121,6 +121,8 @@ require_once __DIR__ . '/../layouts/header.php';
                                 <select name="layanan_id[<?= $item['id_detail_pesanan'] ?>]" id="service-select-<?= $item['id_detail_pesanan'] ?>" class="service-select w-full bg-brand-darkInput border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white font-semibold" required>
                                     <option value="">Pilih Layanan</option>
                                 </select>
+                                
+                                <input type="hidden" name="tipe_layanan" class="tipe-layanan" value="<?= !empty($item['id_layanan']) ? 'layanan' : 'package' ?>">
                             </div>
                         </div>
 
@@ -234,41 +236,46 @@ require_once __DIR__ . '/../layouts/header.php';
     </main>
 </div>
 <script>
-    window.PRICELIST_DATA = <?= json_encode(
-                                array_reduce($getAllLayanan, function ($result, $item) {
-                                    $kategori = $item['kategori'];
+window.PRICELIST_DATA = <?= json_encode(
+    array_reduce(
+        $getAllLayanan,
+        function ($result, $item) {
+            $kategori = $item['kategori'];
 
-                                    if ($kategori === 'Package') {
-                                        return $result;
-                                    }
+            if ($kategori === 'Package') {
+                return $result;
+            }
 
-                                    if (!isset($result[$kategori])) {
-                                        $result[$kategori] = [];
-                                    }
+            $result[$kategori][] = [
+                'id' => (int) $item['id_layanan'],
+                'tipe' => 'layanan',
+                'name' => $item['nama_layanan'],
+                'price' => (float) $item['harga_min'],
+                'estimasi_min' => $item['estimasi_min_hari'],
+                'estimasi_max' => $item['estimasi_max_hari'],
+                'variasi' => $item['variasi']
+            ];
 
-                                    $result[$kategori][] = [
-                                        'id' => (int) $item['id_layanan'],
-                                        'name' => $item['nama_layanan'],
-                                        'price' => (float) $item['harga_min'],
-                                        'estimasi_min' => (int) $item['estimasi_min_hari'],
-                                        'estimasi_max' => (int) $item['estimasi_max_hari'],
-                                        'variasi' => $item['variasi']
-                                    ];
-
-                                    return $result;
-                                }, [
-                                    'Package' => array_map(function ($paket) {
-                                        return [
-                                            'id' => (int) $paket['id_paket'],
-                                            'name' => $paket['nama_paket'],
-                                            'price' => (float) $paket['harga'],
-                                            'estimasi_min' => (int) $paket['estimasi_min_hari'],
-                                            'estimasi_max' => (int) $paket['estimasi_max_hari'],
-                                            'variasi' => null
-                                        ];
-                                    }, $getAllPaket)
-                                ])
-                            ) ?>;
+            return $result;
+        },
+        [
+            'Package' => array_map(
+                function ($paket) {
+                    return [
+                        'id' => (int) $paket['id_paket'],
+                        'tipe' => 'package',
+                        'name' => $paket['nama_paket'],
+                        'price' => (float) $paket['harga'],
+                        'estimasi_min' => $paket['estimasi_min_hari'],
+                        'estimasi_max' => $paket['estimasi_max_hari'],
+                        'variasi' => null
+                    ];
+                },
+                $getAllPaket
+            )
+        ]
+    )
+) ?>;
 
     window.LAYANAN_DATA = <?= json_encode(
                                 array_values(array_unique(array_column($layanan, 'kategori')))

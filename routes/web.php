@@ -34,15 +34,10 @@ if ($uri === '/' && $method === 'GET') {
     $pesananController->simpanPesanan();
 } elseif ($uri === '/pesanan/edit' && $method === 'GET') {
     $pesananController->editPesanan();
-} elseif ($uri === '/pesanan/edit' && $method === 'POST') {
-    $pesananController->editPesanan();
-} elseif ($uri === '/pesanan/detail' && $method === 'POST') {
-    $pesananController->detail();
 } elseif ($uri === '/pesanan/detail' && $method === 'GET') {
     $pesananController->detail();
 } elseif ($uri === '/pesanan/detail-data' && $method === 'GET') {
     $pesananController->detailData();
-    exit;
 } elseif ($uri === '/invoice' && $method === 'GET') {
     $pesananController->invoice();
 } elseif ($uri === '/laporan' && $method === 'GET') {

@@ -1,5 +1,5 @@
 <?php
-$page_title = 'Detail Pesanan ' . $pesanan['id_pesanan'] . ' - KickDropShoe';
+$page_title = 'Detail Pesanan ' . $pesanan['kode_pesanan'] . ' - KickDropShoe';
 $current_page = 'pesanan';
 require_once __DIR__ . '/../layouts/header.php';
 ?>
@@ -8,7 +8,7 @@ require_once __DIR__ . '/../layouts/header.php';
 
     <main class="flex-1 flex flex-col h-full overflow-y-auto">
         <?php
-        $header_title = 'Detail Pesanan ' . htmlspecialchars($pesanan['id_pesanan']);
+        $header_title = 'Detail Pesanan ' . htmlspecialchars($pesanan['kode_pesanan']);
         $header_subtitle = htmlspecialchars($pesanan['nama_customer']) . ' • ' . htmlspecialchars($pesanan['no_hp']);
         require_once __DIR__ . '/../layouts/topbar.php';
         ?>
@@ -20,12 +20,9 @@ require_once __DIR__ . '/../layouts/header.php';
                     <i class="fas fa-arrow-left"></i> Kembali ke Daftar Pesanan
                 </a>
                 <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                    <form id="form-edit-pesanan" action="/pesanan/edit" method="POST">
-                        <input type="hidden" id="edit-id-pesanan-mobile" value="<?= htmlspecialchars($pesanan['id_pesanan']) ?>" name="id_pesanan">
-                        <button type="submit" id="detail-edit-link-mobile" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
-                            <i class="fas fa-edit"></i> Edit Pesanan
-                        </button>
-                    </form>
+                    <a href="/pesanan/edit?id=<?= htmlspecialchars($pesanan['id_pesanan']) ?>" id="detail-edit-link" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
+                        <i class="fas fa-edit"></i> Edit Pesanan
+                    </a>
                     <?php if ($user_role === 'superadmin'): ?>
                         <button type="button" onclick="if(confirm('Yakin ingin menghapus pesanan ini?')) window.location.href='pesanan.php';" class="flex-1 sm:flex-none justify-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
                             <i class="fas fa-trash"></i> Hapus
@@ -109,9 +106,13 @@ require_once __DIR__ . '/../layouts/header.php';
                                 </div>
 
                                 <div class="text-xs text-slate-500 space-y-0.5 mt-1 font-medium">
+                                    <p class="leading-relaxed break-words">
+                                        <?= htmlspecialchars($item['nama_layanan']) ?> (<?= htmlspecialchars(number_format(($item['harga_satuan'] ?? 0), 0, ',', '.')); ?>)
+                                    </p>
+
                                     <?php foreach ($item['treatments'] as $treat): ?>
                                         <p class="leading-relaxed break-words">
-                                            <?= htmlspecialchars($treat['nama_treatment']) ?>
+                                            <?= htmlspecialchars($treat['nama_treatment']) ?> (<?= htmlspecialchars(number_format(($treat['harga'] ?? 0), 0, ',', '.')); ?>)
                                         </p>
                                     <?php endforeach; ?>
                                 </div>
@@ -119,7 +120,7 @@ require_once __DIR__ . '/../layouts/header.php';
 
                             <div class="shrink-0 self-center text-right">
                                 <span class="font-black text-slate-900 text-sm whitespace-nowrap">
-                                    <?= htmlspecialchars($item['subtotal']) ?>
+                                    <?= htmlspecialchars(number_format(($item['subtotal'] ?? 0), 0, ',', '.')) ?>
                                 </span>
                             </div>
 
@@ -180,7 +181,7 @@ require_once __DIR__ . '/../layouts/header.php';
                     <h3 class="text-2xl md:text-3xl font-black text-slate-900">Rp <?= htmlspecialchars(number_format(($pesanan['total_bayar'] ?? 0), 0, ',', '.')) ?></h3>
                 </div>
                 <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <a href="invoice.php" class="w-full sm:w-auto text-center px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition shadow-lg flex items-center justify-center gap-2">
+                    <a href="/invoice?id= <?= htmlspecialchars($pesanan['id_pesanan']) ?>" class="w-full sm:w-auto text-center px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition shadow-lg flex items-center justify-center gap-2">
                         <i class="fas fa-print"></i> Cetak Invoice
                     </a>
                 </div>

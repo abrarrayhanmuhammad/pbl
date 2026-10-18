@@ -237,13 +237,12 @@ CREATE TABLE pesanan (
     id_pegawai INTEGER REFERENCES pegawai(id_pegawai),
     id_customer INTEGER NOT NULL REFERENCES customer(id_customer),
     id_drop_point INTEGER REFERENCES drop_point(id_drop_point),
-    id_paket INTEGER REFERENCES paket(id_paket),
     tanggal_masuk DATE NOT NULL DEFAULT CURRENT_DATE,
     status VARCHAR(30) NOT NULL DEFAULT 'Menunggu'
-        CHECK (status IN ('Menunggu', 'Diproses', 'Selesai', 'Diambil', 'Dibatalkan')),
+        CHECK (status IN ('Menunggu', 'Diproses', 'Selesai', 'Diambil')),
     metode_bayar VARCHAR(30),
     status_bayar VARCHAR(20) NOT NULL DEFAULT 'Belum Bayar'
-        CHECK (status_bayar IN ('Belum Bayar', 'DP', 'Lunas')),
+        CHECK (status_bayar IN ('Belum Bayar', 'Lunas')),
     tanggal_selesai DATE,
     total_bayar INTEGER NOT NULL DEFAULT 0 CHECK (total_bayar >= 0),
     catatan TEXT,
@@ -259,6 +258,7 @@ CREATE TABLE detail_pesanan (
     id_detail_pesanan SERIAL PRIMARY KEY,
     id_pesanan INTEGER NOT NULL REFERENCES pesanan(id_pesanan) ON DELETE CASCADE,
     id_layanan INTEGER REFERENCES layanan(id_layanan),
+    id_paket INTEGER REFERENCES paket(id_paket),
     nama_barang VARCHAR(100) NOT NULL,
     merk VARCHAR(100),
     warna VARCHAR(50),

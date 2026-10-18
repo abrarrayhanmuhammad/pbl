@@ -114,6 +114,7 @@ require_once __DIR__ . '/../layouts/header.php';
 
                                     $result[$kategori][] = [
                                         'id' => (int) $item['id_layanan'],
+                                        'tipe' => 'layanan',
                                         'name' => $item['nama_layanan'],
                                         'price' => (float) $item['harga_min'],
                                         'estimasi_min' => $item['estimasi_min_hari'],
@@ -126,6 +127,7 @@ require_once __DIR__ . '/../layouts/header.php';
                                     'Package' => array_map(function ($paket) {
                                         return [
                                             'id' => (int) $paket['id_paket'],
+                                            'tipe' => 'package',
                                             'name' => $paket['nama_paket'],
                                             'price' => (float) $paket['harga'],
                                             'estimasi_min' => $paket['estimasi_min_hari'],
@@ -136,7 +138,7 @@ require_once __DIR__ . '/../layouts/header.php';
                             ); ?>;
 </script>
 <script>
-    window.LAYANAN_DATA = <?= json_encode( array_values(array_unique(array_column($layanan, 'kategori')))) ?>;
+    window.LAYANAN_DATA = <?= json_encode(array_values(array_unique(array_column($layanan, 'kategori')))) ?>;
 </script>
 <script>
     window.TREATMENT_KECEPATAN = <?= json_encode($treatmentKecepatan) ?>;

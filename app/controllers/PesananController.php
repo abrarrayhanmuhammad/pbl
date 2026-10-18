@@ -84,6 +84,7 @@ class PesananController
         $namaBarang = $_POST['nama_barang'] ?? [];
         $warnaBarang = $_POST['warna_barang'] ?? [];
         $layananIds = $_POST['layanan_id'] ?? [];
+        $tipeLayanan = $_POST['tipe_layanan'] ?? [];
         $speed = $_POST['speed'] ?? [];
         $treatments = $_POST['treatment_tambahan'] ?? [];
         $catatan = $_POST['catatan'] ?? [];
@@ -127,6 +128,7 @@ class PesananController
             count($namaBarang) > 20 ||
             !is_array($warnaBarang) ||
             !is_array($layananIds) ||
+            !is_array($tipeLayanan) ||
             !is_array($speed) ||
             !is_array($treatments) ||
             !is_array($catatan)
@@ -136,7 +138,7 @@ class PesananController
 
         $itemIds = array_keys($namaBarang);
 
-        foreach ([$warnaBarang, $layananIds, $speed] as $field) {
+        foreach ([$warnaBarang, $layananIds, $tipeLayanan, $speed] as $field) {
             if (array_keys($field) !== $itemIds) {
                 exit('Data barang tidak lengkap.');
             }
@@ -144,11 +146,12 @@ class PesananController
 
         foreach ($itemIds as $id) {
             if (
-                !isset($warnaBarang[$id], $layananIds[$id], $speed[$id]) ||
+                !isset($warnaBarang[$id], $layananIds[$id], $tipeLayanan[$id], $speed[$id]) ||
                 trim((string) $namaBarang[$id]) === '' ||
                 trim((string) $warnaBarang[$id]) === '' ||
                 !ctype_digit((string) $layananIds[$id]) ||
                 (int) $layananIds[$id] < 1 ||
+                !in_array($tipeLayanan[$id], ['layanan', 'package'], true) ||
                 !is_string($speed[$id]) ||
                 !is_array($treatments[$id] ?? []) ||
                 !is_string($catatan[$id] ?? '')
@@ -224,60 +227,111 @@ class PesananController
             ]);
 
             $idPesanan = (int) $stmt->fetchColumn();
+
             $totalBayar = 0;
 
             $stmtLayanan = $this->db->prepare(
                 'SELECT id_layanan, harga_min
-             FROM layanan WHERE id_layanan = :id'
+                FROM layanan
+                WHERE id_layanan = :id'
+            );
+
+            $stmtPaket = $this->db->prepare(
+                'SELECT id_paket, harga
+                FROM paket
+                WHERE id_paket = :id'
             );
 
             $stmtTreatment = $this->db->prepare(
                 'SELECT id_treatment_tambahan, nama_treatment, harga_min
-             FROM treatment_tambahan
-             WHERE id_treatment_tambahan = :id'
+                FROM treatment_tambahan
+                WHERE id_treatment_tambahan = :id'
             );
 
             $stmtDetail = $this->db->prepare(
                 "INSERT INTO detail_pesanan
-                (id_pesanan, id_layanan, nama_barang, warna, jumlah,
-                 harga_satuan, subtotal, status_pengerjaan,
-                 foto_before, catatan)
-             VALUES
-                (:pesanan, :layanan, :barang, :warna, 1,
-                 :harga, :subtotal, 'Menunggu', :foto, :catatan)
-             RETURNING id_detail_pesanan"
+                (
+                    id_pesanan,
+                    id_layanan,
+                    id_paket,
+                    nama_barang,
+                    warna,
+                    jumlah,
+                    harga_satuan,
+                    subtotal,
+                    status_pengerjaan,
+                    foto_before,
+                    catatan
+                )
+                VALUES
+                (
+                    :pesanan,
+                    :layanan,
+                    :paket,
+                    :barang,
+                    :warna,
+                    1,
+                    :harga,
+                    :subtotal,
+                    'Menunggu',
+                    :foto,
+                    :catatan
+                )
+                RETURNING id_detail_pesanan"
             );
 
             $stmtDetailTreatment = $this->db->prepare(
                 'INSERT INTO detail_treatment_tambahan
                 (id_detail_pesanan, id_treatment_tambahan, harga)
-             VALUES (:detail, :treatment, :harga)'
+                VALUES (:detail, :treatment, :harga)'
             );
 
             foreach ($itemIds as $id) {
-                $stmtLayanan->execute([
-                    'id' => (int) $layananIds[$id]
-                ]);
-                $layananRow = $stmtLayanan->fetch(PDO::FETCH_ASSOC);
+                $referensiId = (int) $layananIds[$id];
+                $tipe = $tipeLayanan[$id];
 
-                if (!$layananRow) {
-                    throw new RuntimeException('Layanan tidak ditemukan.');
-                }
-
-                $hargaLayanan = (int) $layananRow['harga_min'];
+                $idLayanan = null;
+                $idPaket = null;
+                $hargaTambahan = [];
                 $selectedTreatments = [];
 
-                if ($speed[$id] !== 'reguler') {
-                    if (!ctype_digit((string) $speed[$id])) {
-                        throw new RuntimeException('Kecepatan tidak valid.');
+
+                if ($tipe === 'layanan') {
+                    $stmtLayanan->execute([
+                        'id' => $referensiId
+                    ]);
+
+                    $referensiRow = $stmtLayanan->fetch(PDO::FETCH_ASSOC);
+
+                    if (!$referensiRow) {
+                        throw new RuntimeException('Layanan tidak ditemukan.');
                     }
 
-                    $speedId = (int) $speed[$id];
+                    $idLayanan = $referensiId;
+                    $hargaLayanan = (int) $referensiRow['harga_min'];
+                } elseif ($tipe === 'package') {
+                    $stmtPaket->execute([
+                        'id' => $referensiId
+                    ]);
 
-                    $selectedTreatments[] = $speedId;
+                    $referensiRow = $stmtPaket->fetch(PDO::FETCH_ASSOC);
+
+                    if (!$referensiRow) {
+                        throw new RuntimeException('Paket tidak ditemukan.');
+                    }
+
+                    $idPaket = $referensiId;
+                    $hargaLayanan = (int) $referensiRow['harga'];
+                } else {
+                    throw new RuntimeException('Tipe layanan tidak valid.');
+                }
+
+                if ($speed[$id] !== 'reguler') {
+                    $selectedTreatments[] = (int) $speed[$id];
                 }
 
                 foreach (($treatments[$id] ?? []) as $treatmentId) {
+
                     $treatmentId = (int) $treatmentId;
 
                     if (!in_array($treatmentId, $selectedTreatments, true)) {
@@ -285,9 +339,11 @@ class PesananController
                     }
                 }
 
-                $hargaTambahan = [];
                 foreach ($selectedTreatments as $treatmentId) {
-                    $stmtTreatment->execute(['id' => $treatmentId]);
+                    $stmtTreatment->execute([
+                        'id' => $treatmentId
+                    ]);
+
                     $row = $stmtTreatment->fetch(PDO::FETCH_ASSOC);
 
                     if (!$row) {
@@ -298,6 +354,7 @@ class PesananController
                 }
 
                 $subtotal = $hargaLayanan + array_sum($hargaTambahan);
+
 
                 $fotoPath = null;
                 $files = $_FILES['foto_before'] ?? null;
@@ -316,11 +373,18 @@ class PesananController
                     $tmpName = $files['tmp_name'][$id];
                     $size = (int) $files['size'][$id];
 
-                    if (!is_uploaded_file($tmpName) || $size < 1 || $size > 5 * 1024 * 1024) {
-                        throw new RuntimeException('Foto tidak valid atau melebihi 5 MB.');
+                    if (
+                        !is_uploaded_file($tmpName) ||
+                        $size < 1 ||
+                        $size > 5 * 1024 * 1024
+                    ) {
+                        throw new RuntimeException(
+                            'Foto tidak valid atau melebihi 5 MB.'
+                        );
                     }
 
                     $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmpName);
+
                     $extensions = [
                         'image/jpeg' => 'jpg',
                         'image/png' => 'png',
@@ -328,16 +392,23 @@ class PesananController
                     ];
 
                     if (!isset($extensions[$mime])) {
-                        throw new RuntimeException('Foto harus JPG, PNG, atau WEBP.');
+                        throw new RuntimeException(
+                            'Foto harus JPG, PNG, atau WEBP.'
+                        );
                     }
 
                     $folder = dirname(__DIR__, 2) . '/public/uploads/pesanan';
 
                     if (!is_dir($folder) && !mkdir($folder, 0755, true)) {
-                        throw new RuntimeException('Folder upload gagal dibuat.');
+                        throw new RuntimeException(
+                            'Folder upload gagal dibuat.'
+                        );
                     }
 
-                    $filename = bin2hex(random_bytes(16)) . '.' . $extensions[$mime];
+                    $filename = bin2hex(random_bytes(16))
+                        . '.'
+                        . $extensions[$mime];
+
                     $destination = $folder . '/' . $filename;
 
                     if (!move_uploaded_file($tmpName, $destination)) {
@@ -348,9 +419,11 @@ class PesananController
                     $uploadedFiles[] = $destination;
                 }
 
+
                 $stmtDetail->execute([
                     'pesanan' => $idPesanan,
-                    'layanan' => (int) $layananIds[$id],
+                    'layanan' => $idLayanan,
+                    'paket' => $idPaket,
                     'barang' => trim($namaBarang[$id]),
                     'warna' => trim($warnaBarang[$id]),
                     'harga' => $hargaLayanan,
@@ -373,8 +446,11 @@ class PesananController
             }
 
             $stmt = $this->db->prepare(
-                'UPDATE pesanan SET total_bayar = :total WHERE id_pesanan = :id'
+                'UPDATE pesanan
+                SET total_bayar = :total
+                WHERE id_pesanan = :id'
             );
+
             $stmt->execute([
                 'total' => $totalBayar,
                 'id' => $idPesanan
@@ -421,12 +497,320 @@ class PesananController
             exit;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             header('Location: /pesanan');
             exit;
         }
 
-        $idPesanan = filter_input(INPUT_POST, 'id_pesanan', FILTER_VALIDATE_INT);
+        $idPesanan = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+        if (!$idPesanan || $idPesanan < 1) {
+            header('Location: /pesanan');
+            exit;
+        }
+
+        try {
+            $sql = "
+                SELECT
+                    p.id_pesanan,
+                    p.kode_pesanan,
+                    p.tanggal_masuk,
+                    p.tanggal_selesai,
+                    p.status,
+                    p.status_bayar,
+                    p.metode_bayar,
+                    p.total_bayar,
+                    p.catatan AS catatan_pesanan,
+                    c.nama AS nama_customer,
+                    c.no_hp,
+                    d.alamat_lokasi,
+                    p.id_drop_point,
+                    (
+                        SELECT MAX(
+                            p.tanggal_masuk
+                            + COALESCE(
+                                l2.estimasi_max_hari,
+                                l2.estimasi_min_hari,
+                                pk.estimasi_max_hari,
+                                pk.estimasi_min_hari
+                            ) * INTERVAL '1 day'
+                        )
+                        FROM detail_pesanan dp2
+                        LEFT JOIN layanan l2
+                            ON l2.id_layanan = dp2.id_layanan
+                        LEFT JOIN paket pk
+                            ON pk.id_paket = dp2.id_paket
+                        WHERE dp2.id_pesanan = p.id_pesanan
+                    ) AS estimasi_selesai
+                FROM pesanan p
+                JOIN customer c
+                    ON c.id_customer = p.id_customer
+                LEFT JOIN drop_point d
+                    ON d.id_drop_point = p.id_drop_point
+                WHERE p.id_pesanan = :id
+                LIMIT 1
+            ";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id' => $idPesanan]);
+            $pesanan = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$pesanan) {
+                http_response_code(404);
+                exit('Pesanan tidak ditemukan.');
+            }
+
+            $sqlDetail = "
+                SELECT
+                    dp.id_detail_pesanan,
+                    dp.nama_barang,
+                    dp.merk,
+                    dp.warna,
+                    dp.jumlah,
+                    dp.harga_satuan,
+                    dp.subtotal,
+                    dp.status_pengerjaan,
+                    dp.foto_before,
+                    dp.foto_sesudah,
+                    dp.catatan,
+                    COALESCE(l.nama_layanan, pk.nama_paket) AS nama_layanan,
+                    COALESCE(l.kategori, 'Package') AS kategori,
+                    dp.id_layanan,
+                    dp.id_paket
+                FROM detail_pesanan dp
+                LEFT JOIN layanan l
+                    ON l.id_layanan = dp.id_layanan
+                LEFT JOIN paket pk
+                    ON pk.id_paket = dp.id_paket
+                WHERE dp.id_pesanan = :id
+                ORDER BY dp.id_detail_pesanan
+            ";
+
+            $stmtBarang = $this->db->prepare($sqlDetail);
+            $stmtBarang->execute(['id' => $idPesanan]);
+
+            $barang = $stmtBarang->fetchAll(PDO::FETCH_ASSOC);
+
+            $sqlTreatment = "
+                SELECT
+                    dtt.id_detail_pesanan,
+                    dtt.id_treatment_tambahan,
+                    tt.nama_treatment,
+                    dtt.harga
+                FROM detail_treatment_tambahan dtt
+                JOIN treatment_tambahan tt
+                    ON tt.id_treatment_tambahan = dtt.id_treatment_tambahan
+                JOIN detail_pesanan dp
+                    ON dp.id_detail_pesanan = dtt.id_detail_pesanan
+                WHERE dp.id_pesanan = :id
+                ORDER BY dtt.id_detail_pesanan
+            ";
+
+            $stmtTreatment = $this->db->prepare($sqlTreatment);
+            $stmtTreatment->execute(['id' => $idPesanan]);
+
+            $treatments = $stmtTreatment->fetchAll(PDO::FETCH_ASSOC);
+
+            $treatmentByDetail = [];
+
+            foreach ($treatments as $treatment) {
+                $detailId = $treatment['id_detail_pesanan'];
+                $treatmentByDetail[$detailId][] = $treatment;
+            }
+
+            foreach ($barang as &$item) {
+                $detailId = $item['id_detail_pesanan'];
+
+                $item['treatments'] = $treatmentByDetail[$detailId] ?? [];
+            }
+
+            unset($item);
+
+            $sqlDropPoint = "
+                SELECT id_drop_point, alamat_lokasi
+                FROM drop_point
+                ORDER BY alamat_lokasi
+            ";
+
+            $stmtDropPoint = $this->db->query($sqlDropPoint);
+            $dropPoints = $stmtDropPoint->fetchAll(PDO::FETCH_ASSOC);
+
+            $layanan = $this->layananModel->getLayanan();
+            $getAllLayanan = $this->layananModel->getAllLayanan();
+            $getAllPaket = $this->layananModel->getAllPaket();
+            $treatment = $this->treatmentTambahanModel->getTreatmentTambahan();
+
+            $treatmentKecepatan = $treatment['kecepatan'];
+            $treatmentTambahan = $treatment['tambahan'];
+
+            require_once __DIR__ . '/../views/pesanan/edit_pesanan.php';
+        } catch (\Throwable $e) {
+            echo '<h3>Terjadi Kesalahan</h3>';
+            echo '<p><strong>Pesan:</strong> ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
+            echo '<p><strong>File:</strong> ' . htmlspecialchars($e->getFile(), ENT_QUOTES, 'UTF-8') . '</p>';
+            echo '<p><strong>Baris:</strong> ' . $e->getLine() . '</p>';
+            exit('Terjadi kesalahan saat mengambil data pesanan.');
+        }
+    }
+
+    public function detail(): void
+    {
+        if (!isset($_SESSION['id_pegawai'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            header('Location: /pesanan');
+            exit;
+        }
+
+        $idPesanan = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+        if (!$idPesanan || $idPesanan < 1) {
+            header('Location: /pesanan');
+            exit;
+        }
+
+        try {
+            $sql = "
+                SELECT
+                    p.id_pesanan,
+                    p.kode_pesanan,
+                    p.tanggal_masuk,
+                    p.tanggal_selesai,
+                    p.status,
+                    p.status_bayar,
+                    p.metode_bayar,
+                    p.total_bayar,
+                    p.catatan AS catatan_pesanan,
+                    c.nama AS nama_customer,
+                    c.no_hp,
+                    d.alamat_lokasi,
+                    (
+                        SELECT MAX(
+                            p.tanggal_masuk
+                            + COALESCE(
+                                l2.estimasi_max_hari,
+                                l2.estimasi_min_hari,
+                                pk.estimasi_max_hari,
+                                pk.estimasi_min_hari
+                            ) * INTERVAL '1 day'
+                        )
+                        FROM detail_pesanan dp2
+                        LEFT JOIN layanan l2
+                            ON l2.id_layanan = dp2.id_layanan
+                        LEFT JOIN paket pk
+                            ON pk.id_paket = dp2.id_paket
+                        WHERE dp2.id_pesanan = p.id_pesanan
+                    ) AS estimasi_selesai
+                FROM pesanan p
+                JOIN customer c
+                    ON c.id_customer = p.id_customer
+                LEFT JOIN drop_point d
+                    ON d.id_drop_point = p.id_drop_point
+                WHERE p.id_pesanan = :id
+                LIMIT 1
+            ";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id' => $idPesanan]);
+            $pesanan = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$pesanan) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'Pesanan tidak ditemukan.']);
+                return;
+            }
+
+            $sqlDetail = "
+                SELECT
+                    dp.id_detail_pesanan,
+                    dp.nama_barang,
+                    dp.merk,
+                    dp.warna,
+                    dp.jumlah,
+                    dp.harga_satuan,
+                    dp.subtotal,
+                    dp.status_pengerjaan,
+                    dp.foto_before,
+                    dp.foto_sesudah,
+                    dp.catatan,
+                    COALESCE(l.nama_layanan, pk.nama_paket) AS nama_layanan,
+                    COALESCE(l.kategori, 'Package') AS kategori,
+                    dp.id_layanan,
+                    dp.id_paket
+                FROM detail_pesanan dp
+                LEFT JOIN layanan l
+                    ON l.id_layanan = dp.id_layanan
+                LEFT JOIN paket pk
+                    ON pk.id_paket = dp.id_paket
+                WHERE dp.id_pesanan = :id
+                ORDER BY dp.id_detail_pesanan
+            ";
+
+            $stmtDetail = $this->db->prepare($sqlDetail);
+            $stmtDetail->execute(['id' => $idPesanan]);
+            $detailBarang = $stmtDetail->fetchAll(PDO::FETCH_ASSOC);
+
+            $stmtTreatment = $this->db->prepare("
+                SELECT
+                    dtt.id_detail_pesanan,
+                    tt.nama_treatment,
+                    dtt.harga
+                FROM detail_treatment_tambahan dtt
+                JOIN treatment_tambahan tt
+                    ON tt.id_treatment_tambahan = dtt.id_treatment_tambahan
+                JOIN detail_pesanan dp
+                    ON dp.id_detail_pesanan = dtt.id_detail_pesanan
+                WHERE dp.id_pesanan = :id
+                ORDER BY dtt.id_detail_pesanan
+            ");
+
+            $stmtTreatment->execute(['id' => $idPesanan]);
+            $treatments = $stmtTreatment->fetchAll(PDO::FETCH_ASSOC);
+
+            $treatmentByDetail = [];
+
+            foreach ($treatments as $treatment) {
+                $detailId = $treatment['id_detail_pesanan'];
+                $treatmentByDetail[$detailId][] = $treatment;
+            }
+
+            foreach ($detailBarang as &$barang) {
+                $detailId = $barang['id_detail_pesanan'];
+                $barang['treatments'] = $treatmentByDetail[$detailId] ?? [];
+            }
+
+            $pesanan;
+            $detailBarang;
+
+            require_once __DIR__ . '/../views/pesanan/detail_pesanan.php';
+        } catch (\Throwable $e) {
+            error_log('Detail pesanan error: ' . $e->getMessage());
+
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+
+            exit;
+        }
+    }
+
+    public function invoice(): void
+    {
+        if (!isset($_SESSION['id_pegawai'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            header('Location: /pesanan');
+            exit;
+        }
+
+        $idPesanan = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
         if (!$idPesanan || $idPesanan < 1) {
             header('Location: /pesanan');
@@ -552,7 +936,14 @@ class PesananController
             $treatmentKecepatan = $treatment['kecepatan'];
             $treatmentTambahan = $treatment['tambahan'];
 
-            require_once __DIR__ . '/../views/pesanan/edit_pesanan.php';
+            echo '<pre>';
+            print_r($pesanan);
+            print_r($barang);
+            echo '</pre>';
+
+
+
+            require_once __DIR__ . '/../views/pesanan/invoice.php';
         } catch (\Throwable $e) {
             echo '<h3>Terjadi Kesalahan</h3>';
             echo '<p><strong>Pesan:</strong> ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
@@ -560,141 +951,6 @@ class PesananController
             echo '<p><strong>Baris:</strong> ' . $e->getLine() . '</p>';
             exit('Terjadi kesalahan saat mengambil data pesanan.');
         }
-    }
-
-    public function detail(): void
-    {
-        if (!isset($_SESSION['id_pegawai'])) {
-            header('Location: /login');
-            exit;
-        }
-
-        $idPesanan = filter_input(INPUT_POST, 'id_pesanan', FILTER_VALIDATE_INT);
-
-        if (!$idPesanan || $idPesanan < 1) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'ID pesanan tidak valid.']);
-            return;
-        }
-
-        try {
-            $sql = "
-            SELECT
-                p.id_pesanan,
-                p.kode_pesanan,
-                p.tanggal_masuk,
-                p.tanggal_selesai,
-                p.status,
-                p.status_bayar,
-                p.metode_bayar,
-                p.total_bayar,
-                p.catatan AS catatan_pesanan,
-                c.nama AS nama_customer,
-                c.no_hp,
-                d.alamat_lokasi,
-                (
-                    SELECT MAX(
-                        p.tanggal_masuk + COALESCE(l2.estimasi_max_hari, l2.estimasi_min_hari) * INTERVAL '1 day'
-                    )
-                    FROM detail_pesanan dp2
-                    LEFT JOIN layanan l2 ON l2.id_layanan = dp2.id_layanan
-                    WHERE dp2.id_pesanan = p.id_pesanan
-                ) AS estimasi_selesai
-            FROM pesanan p
-            JOIN customer c ON c.id_customer = p.id_customer
-            LEFT JOIN drop_point d ON d.id_drop_point = p.id_drop_point
-            WHERE p.id_pesanan = :id
-            LIMIT 1
-        ";
-
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $idPesanan]);
-            $pesanan = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$pesanan) {
-                http_response_code(404);
-                echo json_encode(['success' => false, 'message' => 'Pesanan tidak ditemukan.']);
-                return;
-            }
-
-            $sqlDetail = "
-            SELECT
-                dp.id_detail_pesanan,
-                dp.nama_barang,
-                dp.merk,
-                dp.warna,
-                dp.jumlah,
-                dp.harga_satuan,
-                dp.subtotal,
-                dp.status_pengerjaan,
-                dp.foto_before,
-                dp.foto_sesudah,
-                dp.catatan,
-                l.nama_layanan,
-                l.kategori
-            FROM detail_pesanan dp
-            LEFT JOIN layanan l ON l.id_layanan = dp.id_layanan
-            WHERE dp.id_pesanan = :id
-            ORDER BY dp.id_detail_pesanan
-        ";
-
-            $stmtDetail = $this->db->prepare($sqlDetail);
-            $stmtDetail->execute(['id' => $idPesanan]);
-            $detailBarang = $stmtDetail->fetchAll(PDO::FETCH_ASSOC);
-
-            $stmtTreatment = $this->db->prepare("
-            SELECT
-                dtt.id_detail_pesanan,
-                tt.nama_treatment,
-                dtt.harga
-            FROM detail_treatment_tambahan dtt
-            JOIN treatment_tambahan tt
-                ON tt.id_treatment_tambahan = dtt.id_treatment_tambahan
-            JOIN detail_pesanan dp
-                ON dp.id_detail_pesanan = dtt.id_detail_pesanan
-            WHERE dp.id_pesanan = :id
-            ORDER BY dtt.id_detail_pesanan
-        ");
-
-            $stmtTreatment->execute(['id' => $idPesanan]);
-            $treatments = $stmtTreatment->fetchAll(PDO::FETCH_ASSOC);
-
-            $treatmentByDetail = [];
-
-            foreach ($treatments as $treatment) {
-                $detailId = $treatment['id_detail_pesanan'];
-                $treatmentByDetail[$detailId][] = $treatment;
-            }
-
-            foreach ($detailBarang as &$barang) {
-                $detailId = $barang['id_detail_pesanan'];
-                $barang['treatments'] = $treatmentByDetail[$detailId] ?? [];
-            }
-
-            $pesanan;
-            $detailBarang;
-
-            require_once __DIR__ . '/../views/pesanan/detail_pesanan.php';
-        } catch (\Throwable $e) {
-            error_log('Detail pesanan error: ' . $e->getMessage());
-
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-
-            exit;
-        }
-    }
-
-    public function invoice(): void
-    {
-        if (!isset($_SESSION['id_pegawai'])) {
-            header('Location: /login');
-            exit;
-        }
-
-        require_once __DIR__ . '/../views/pesanan/invoice.php';
     }
 
     public function detailData(): void
@@ -717,33 +973,44 @@ class PesananController
 
         try {
             $sql = "
-            SELECT
-                p.id_pesanan,
-                p.kode_pesanan,
-                p.tanggal_masuk,
-                p.tanggal_selesai,
-                p.status,
-                p.status_bayar,
-                p.metode_bayar,
-                p.total_bayar,
-                p.catatan AS catatan_pesanan,
-                c.nama AS nama_customer,
-                c.no_hp,
-                d.alamat_lokasi,
-                (
-                    SELECT MAX(
-                        p.tanggal_masuk + COALESCE(l2.estimasi_max_hari, l2.estimasi_min_hari) * INTERVAL '1 day'
-                    )
-                    FROM detail_pesanan dp2
-                    LEFT JOIN layanan l2 ON l2.id_layanan = dp2.id_layanan
-                    WHERE dp2.id_pesanan = p.id_pesanan
-                ) AS estimasi_selesai
-            FROM pesanan p
-            JOIN customer c ON c.id_customer = p.id_customer
-            LEFT JOIN drop_point d ON d.id_drop_point = p.id_drop_point
-            WHERE p.id_pesanan = :id
-            LIMIT 1
-        ";
+                SELECT
+                    p.id_pesanan,
+                    p.kode_pesanan,
+                    p.tanggal_masuk,
+                    p.tanggal_selesai,
+                    p.status,
+                    p.status_bayar,
+                    p.metode_bayar,
+                    p.total_bayar,
+                    p.catatan AS catatan_pesanan,
+                    c.nama AS nama_customer,
+                    c.no_hp,
+                    d.alamat_lokasi,
+                    (
+                        SELECT MAX(
+                            p.tanggal_masuk
+                            + COALESCE(
+                                l2.estimasi_max_hari,
+                                l2.estimasi_min_hari,
+                                pk.estimasi_max_hari,
+                                pk.estimasi_min_hari
+                            ) * INTERVAL '1 day'
+                        )
+                        FROM detail_pesanan dp2
+                        LEFT JOIN layanan l2
+                            ON l2.id_layanan = dp2.id_layanan
+                        LEFT JOIN paket pk
+                            ON pk.id_paket = dp2.id_paket
+                        WHERE dp2.id_pesanan = p.id_pesanan
+                    ) AS estimasi_selesai
+                FROM pesanan p
+                JOIN customer c
+                    ON c.id_customer = p.id_customer
+                LEFT JOIN drop_point d
+                    ON d.id_drop_point = p.id_drop_point
+                WHERE p.id_pesanan = :id
+                LIMIT 1
+            ";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['id' => $idPesanan]);
@@ -756,43 +1023,48 @@ class PesananController
             }
 
             $sqlDetail = "
-            SELECT
-                dp.id_detail_pesanan,
-                dp.nama_barang,
-                dp.merk,
-                dp.warna,
-                dp.jumlah,
-                dp.harga_satuan,
-                dp.subtotal,
-                dp.status_pengerjaan,
-                dp.foto_before,
-                dp.foto_sesudah,
-                dp.catatan,
-                l.nama_layanan,
-                l.kategori
-            FROM detail_pesanan dp
-            LEFT JOIN layanan l ON l.id_layanan = dp.id_layanan
-            WHERE dp.id_pesanan = :id
-            ORDER BY dp.id_detail_pesanan
-        ";
+                SELECT
+                    dp.id_detail_pesanan,
+                    dp.nama_barang,
+                    dp.merk,
+                    dp.warna,
+                    dp.jumlah,
+                    dp.harga_satuan,
+                    dp.subtotal,
+                    dp.status_pengerjaan,
+                    dp.foto_before,
+                    dp.foto_sesudah,
+                    dp.catatan,
+                    COALESCE(l.nama_layanan, pk.nama_paket) AS nama_layanan,
+                    COALESCE(l.kategori, 'Package') AS kategori,
+                    dp.id_layanan,
+                    dp.id_paket
+                FROM detail_pesanan dp
+                LEFT JOIN layanan l
+                    ON l.id_layanan = dp.id_layanan
+                LEFT JOIN paket pk
+                    ON pk.id_paket = dp.id_paket
+                WHERE dp.id_pesanan = :id
+                ORDER BY dp.id_detail_pesanan
+            ";
 
             $stmtDetail = $this->db->prepare($sqlDetail);
             $stmtDetail->execute(['id' => $idPesanan]);
             $detailBarang = $stmtDetail->fetchAll(PDO::FETCH_ASSOC);
 
             $stmtTreatment = $this->db->prepare("
-            SELECT
-                dtt.id_detail_pesanan,
-                tt.nama_treatment,
-                dtt.harga
-            FROM detail_treatment_tambahan dtt
-            JOIN treatment_tambahan tt
-                ON tt.id_treatment_tambahan = dtt.id_treatment_tambahan
-            JOIN detail_pesanan dp
-                ON dp.id_detail_pesanan = dtt.id_detail_pesanan
-            WHERE dp.id_pesanan = :id
-            ORDER BY dtt.id_detail_pesanan
-        ");
+                SELECT
+                    dtt.id_detail_pesanan,
+                    tt.nama_treatment,
+                    dtt.harga
+                FROM detail_treatment_tambahan dtt
+                JOIN treatment_tambahan tt
+                    ON tt.id_treatment_tambahan = dtt.id_treatment_tambahan
+                JOIN detail_pesanan dp
+                    ON dp.id_detail_pesanan = dtt.id_detail_pesanan
+                WHERE dp.id_pesanan = :id
+                ORDER BY dtt.id_detail_pesanan
+            ");
 
             $stmtTreatment->execute(['id' => $idPesanan]);
             $treatments = $stmtTreatment->fetchAll(PDO::FETCH_ASSOC);
@@ -814,7 +1086,7 @@ class PesananController
                 'success' => true,
                 'pesanan' => $pesanan,
                 'barang' => $detailBarang
-            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            ]);
         } catch (\Throwable $e) {
             error_log('Detail pesanan error: ' . $e->getMessage());
 

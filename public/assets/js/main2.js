@@ -111,7 +111,7 @@ function initCategoryButtons() {
         const select = container.querySelector('.service-select');
         if (select && PRICELIST_DATA[category]) {
             select.innerHTML = PRICELIST_DATA[category].map(item =>
-                `<option name="${item.id}" value="${item.id}" data-price="${item.price}">${item.name} ${item.variasi ? ` (${item.variasi})` : ''} – Rp ${item.price.toLocaleString('id-ID')} (${item.estimasi_min} hari - ${item.estimasi_max} hari)</option>`
+                `<option name="${item.id}" value="${item.id}" data-type="${item.tipe}" data-price="${item.price}">${item.name} ${item.variasi ? ` (${item.variasi})` : ''} – Rp ${item.price.toLocaleString('id-ID')} (${item.estimasi_min} hari - ${item.estimasi_max} hari)</option>`
             ).join('');
 
             const catCaption = container.querySelector('.category-caption');
@@ -143,6 +143,11 @@ function updateItemSubtotal(itemId) {
     const selectedOption = serviceSelect?.selectedOptions[0];
     const speedRadio = container.querySelector(`input[name="speed[${itemId}]"]:checked`);
     const extraCheckboxes = container.querySelectorAll(`.extra-check-${itemId}:checked`);
+
+    const tipeInput = container.querySelector('.tipe-layanan');
+    if (tipeInput) {
+        tipeInput.value = selectedOption.dataset.type || '';
+    }
 
     let total = Number(selectedOption?.dataset.price || 0);
 
@@ -238,6 +243,8 @@ function initAddItemButton() {
                             <select name="layanan_id[${newId}]" id="service-select-${newId}" onchange="updateItemSubtotal(${newId})" class="service-select w-full bg-brand-darkInput border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white outline-none font-semibold" required>
                                 <option value="" selected>Pilih Layanan</option>
                             </select>
+
+                            <input type="hidden" name="tipe_layanan[${newId}]" class="tipe-layanan">
                         </div>
                     </div>
                 </div>
@@ -410,6 +417,7 @@ function loadServicesForItem(itemId, category) {
     if (!card || !select) return;
 
     const selectedService = String(card.dataset.selectedService || '');
+    const selectedType = String(card.dataset.selectedType || '');
     const services = window.PRICELIST_DATA[category] || [];
 
     select.innerHTML = '<option value="">Pilih Layanan</option>';
@@ -418,10 +426,19 @@ function loadServicesForItem(itemId, category) {
         const option = document.createElement('option');
 
         option.value = service.id;
-        option.textContent = `${service.name}${service.variasi ? ` (${service.variasi})` : ''} – Rp ${Number(service.price).toLocaleString('id-ID')} (${service.estimasi_min} hari - ${service.estimasi_max} hari)`;
+        option.dataset.type = service.tipe;
         option.dataset.price = service.price;
 
-        if (String(service.id) === selectedService) {
+        const variasi = service.variasi ? ` (${service.variasi})` : '';
+        const estimasi = `${service.estimasi_min}–${service.estimasi_max} hari`;
+
+        option.textContent =
+            `${service.name}${variasi} – Rp ${Number(service.price).toLocaleString('id-ID')} (${estimasi})`;
+
+        if (
+            String(service.id) === selectedService &&
+            service.tipe === selectedType
+        ) {
             option.selected = true;
         }
 
@@ -433,6 +450,8 @@ function loadServicesForItem(itemId, category) {
     if (caption) {
         caption.textContent = category;
     }
+
+    select.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 function selectEditCategory(itemId, category) {
@@ -1036,10 +1055,9 @@ function initMasterDetailOrders() {
                     (p.nama_customer || '-') + ' • ' + (p.no_hp || '-');
             }
 
-            const editId = document.getElementById('edit-id-pesanan');
-
-            if (editId) {
-                editId.value = p.id_pesanan;
+            if (el.edit) {
+                el.edit.href =
+                    '/pesanan/edit?id=' + encodeURIComponent(p.id_pesanan);
             }
 
             if (el.invoice) {
@@ -1069,8 +1087,11 @@ function initMasterDetailOrders() {
     cards.forEach(function (card) {
         card.addEventListener('click', function () {
             if (window.innerWidth < 1024) {
-                document.getElementById('detail-id-pesanan').value = card.dataset.id;
-                document.getElementById('form-detail-pesanan').submit();
+                if (event.target.closest('a')) {
+                    return;
+                }
+
+                window.location.href = '/pesanan/detail?id=' + encodeURIComponent(card.dataset.id);
                 return;
             }
 

@@ -47,10 +47,6 @@ require_once __DIR__ . '/../layouts/header.php';
                             };
                         ?>
                             <div class="order-card-item p-5 rounded-2xl border-2 border-slate-200 bg-white shadow-sm cursor-pointer relative transition-all" data-id="<?= (int) $pesanan['id_pesanan'] ?>">
-                                <form id="form-detail-pesanan" action="/pesanan/detail" method="POST">
-                                    <input type="hidden" id="detail-id-pesanan" name="id_pesanan">
-                                    <button type="submit" id="detail-submit" class="hidden"></button>
-                                </form>
                                 <div class="flex justify-between items-start mb-1">
                                     <h4 class="font-extrabold text-slate-900 text-sm">
                                         <?= htmlspecialchars($pesanan['kode_pesanan'] ?? '-') ?> – <?= htmlspecialchars($pesanan['nama_customer'] ?? '-') ?>
@@ -94,12 +90,9 @@ require_once __DIR__ . '/../layouts/header.php';
                         <p id="detail-subtitle" class="text-xs font-semibold text-slate-500 mt-1 detail-subtitle">Pilih pesanan</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <form id="form-edit-pesanan" action="/pesanan/edit" method="POST">
-                            <input type="hidden" id="edit-id-pesanan" name="id_pesanan">
-                            <button type="submit" id="detail-edit-link" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
-                                <i class="fas fa-edit"></i> Edit Pesanan
-                            </button>
-                        </form>
+                        <a id="detail-edit-link" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
+                            <i class="fas fa-edit"></i> Edit Pesanan
+                        </a>
                         <?php if ($user_role === 'superadmin'): ?>
                             <button type="button" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
                                 <i class="fas fa-trash"></i> Hapus
@@ -187,7 +180,7 @@ require_once __DIR__ . '/../layouts/header.php';
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Keseluruhan</p>
                         <h3 id="detail-total" class="text-2xl font-black text-slate-900 detail-total">Rp 0</h3>
                     </div>
-                    <a id="detail-invoice-link" href="/invoice" class="px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition shadow-lg flex items-center gap-2">
+                    <a id="detail-invoice-link" class="px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition shadow-lg flex items-center gap-2">
                         <i class="fas fa-print"></i> Cetak Invoice
                     </a>
                 </div>
