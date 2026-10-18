@@ -78,31 +78,51 @@ require_once __DIR__ . '/../layouts/header.php';
             </div>
 
             <!-- Daftar Barang -->
-            <div class="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div class="bg-white p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
                 <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
                     Daftar Barang (<?= count($detailBarang) ?>)
                 </h4>
+
                 <div class="space-y-3">
                     <?php foreach ($detailBarang as $item): ?>
-                        <div class="p-4 border border-slate-200 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white hover:border-slate-300 transition">
-                            <div class="flex items-center gap-4">
-                                <div class="w-14 h-14 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 overflow-hidden">
-                                    <!-- <i class="fas fa-tshirt text-lg"></i> -->
-                                    <img src="/<?= htmlspecialchars($item['foto_before']) ?>" alt="" class="w-full h-full object-cover">
-                                </div>
-                                <div>
+                        <div class="p-3 sm:p-4 border border-slate-200 rounded-2xl flex items-center gap-3 sm:gap-4 bg-white hover:border-slate-300 transition">
+
+                            <div class="w-14 h-14 sm:w-16 sm:h-16 shrink-0 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 overflow-hidden">
+                                <?php if (!empty($item['foto_before'])): ?>
+                                    <img src="/<?= htmlspecialchars($item['foto_before']) ?>" alt="Foto barang" class="w-full h-full object-cover">
+                                <?php else: ?>
+                                    <i class="fas fa-tshirt text-lg"></i>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-2">
                                     <h5 class="font-extrabold text-slate-900 text-sm">
                                         <?= htmlspecialchars($item['nama_barang']) ?>
-                                        <span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded ml-1"><?= htmlspecialchars($item['warna']) ?></span>
                                     </h5>
-                                    <div class="text-xs text-slate-500 space-y-0.5 mt-1 font-medium">
-                                        <?php foreach ($item['treatments'] as $treat): ?>
-                                            <p> <?= htmlspecialchars($treat['nama_treatment']) ?></p>
-                                        <?php endforeach; ?>
-                                    </div>
+
+                                    <?php if (!empty($item['warna'])): ?>
+                                        <span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                                            <?= htmlspecialchars($item['warna']) ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="text-xs text-slate-500 space-y-0.5 mt-1 font-medium">
+                                    <?php foreach ($item['treatments'] as $treat): ?>
+                                        <p class="leading-relaxed break-words">
+                                            <?= htmlspecialchars($treat['nama_treatment']) ?>
+                                        </p>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
-                            <span class="font-black text-slate-900 text-sm self-end sm:self-center"><?= htmlspecialchars($item['subtotal']) ?></span>
+
+                            <div class="shrink-0 self-center text-right">
+                                <span class="font-black text-slate-900 text-sm whitespace-nowrap">
+                                    <?= htmlspecialchars($item['subtotal']) ?>
+                                </span>
+                            </div>
+
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -156,9 +176,9 @@ require_once __DIR__ . '/../layouts/header.php';
             <!-- Footer Summary & Cetak Invoice -->
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="w-full sm:w-auto flex justify-between sm:block">
-                <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Tagihan Keseluruhan</p>
-                <h3 class="text-2xl md:text-3xl font-black text-slate-900">Rp <?= htmlspecialchars(number_format(($pesanan['total_bayar'] ?? 0), 0, ',', '.')) ?></h3>
-            </div>
+                    <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Tagihan Keseluruhan</p>
+                    <h3 class="text-2xl md:text-3xl font-black text-slate-900">Rp <?= htmlspecialchars(number_format(($pesanan['total_bayar'] ?? 0), 0, ',', '.')) ?></h3>
+                </div>
                 <div class="flex items-center gap-3 w-full sm:w-auto">
                     <a href="invoice.php" class="w-full sm:w-auto text-center px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition shadow-lg flex items-center justify-center gap-2">
                         <i class="fas fa-print"></i> Cetak Invoice
