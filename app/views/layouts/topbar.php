@@ -2,8 +2,16 @@
 /**
  * Topbar / Header Component - KickDropShoe MIS (Mobile Responsive with Hamburger)
  */
+$formatter = new IntlDateFormatter(
+    'id_ID',
+    IntlDateFormatter::NONE,
+    IntlDateFormatter::NONE,
+    'Asia/Jakarta',
+    IntlDateFormatter::GREGORIAN,
+    'dd MMM yyyy'
+);
 $header_title = $header_title ?? 'Dashboard';
-$header_date = $header_date ?? '17 Sep 2026';
+$header_date = $formatter->format(new DateTime());
 $header_extra = $header_extra ?? '';
 ?>
 <header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 md:py-5 flex justify-between items-center sticky top-0 z-10 shrink-0">

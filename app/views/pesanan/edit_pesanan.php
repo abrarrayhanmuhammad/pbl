@@ -1,6 +1,9 @@
 <?php
-$page_title = 'Edit Pesanan #0881 - KickDropShoe';
-$current_page = 'pesanan';
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$page_title = 'Edit Pesanan' .  $pesanan['kode_pesanan'] . '- KickDropShoe';
+$current_page = 'edit_pesanan';
 require_once __DIR__ . '/../layouts/header.php';
 ?>
 <div class="flex h-screen overflow-hidden bg-brand-slateBg">
@@ -30,9 +33,9 @@ require_once __DIR__ . '/../layouts/header.php';
                 </a>
             </div>
 
-            <form action="">
-
-            </form>
+            <form action="/pesanan/simpanEdit" method="POST" id="form-pesanan" enctype="multipart/form-data" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+            <input type="hidden" name="id_pesanan" value="<?= (int) $pesanan['id_pesanan'] ?>">
             <div class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-5">
                 <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                     <i class="fas fa-user-circle text-slate-400"></i> Informasi Pelanggan
@@ -58,11 +61,14 @@ require_once __DIR__ . '/../layouts/header.php';
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 pt-2">
                     <div>
                         <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">TANGGAL MASUK</label>
-                        <input name="tgl_masuk" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" value="<?= htmlspecialchars(date('d-m-Y', strtotime($pesanan['tanggal_masuk']))) ?>" readonly required>
+                        <input name="tgl_masuk" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" value="<?= htmlspecialchars(date('Y-m-d', strtotime($pesanan['tanggal_masuk']))) ?>" readonly required>
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">TANGGAL SELESAI</label>
-                        <input name="tgl_selesai" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="dd/mm/yyyy">
+                        <input name="tgl_selesai" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="dd/mm/yyyy" <?= ($pesanan['status'] ?? '') !== 'Selesai' ? 'disabled' : '' ?>>
+                        <p class="text-[10px] text-amber-600 font-semibold mt-1.5">
+                            Tanggal selesai hanya dapat diubah jika status pesanan sudah Selesai.
+                        </p>
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">KODE PESANAN</label>
@@ -70,7 +76,7 @@ require_once __DIR__ . '/../layouts/header.php';
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">STATUS PENGERJAAN</label>
-                        <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-semibold text-slate-800 outline-none" required>
+                        <select name="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-semibold text-slate-800 outline-none" required>
                             <option class="bg-slate-900 text-white" value="Menunggu" <?= $pesanan['status'] === 'Menunggu' ? 'selected' : '' ?>>Menunggu</option>
                             <option class="bg-slate-900 text-white" value="Diproses" <?= $pesanan['status'] === 'Diproses' ? 'selected' : '' ?>>Sedang Diproses</option>
                             <option class="bg-slate-900 text-white" value="Selesai" <?= $pesanan['status'] === 'Selesai' ? 'selected' : '' ?>>Selesai Diproses</option>
@@ -79,9 +85,9 @@ require_once __DIR__ . '/../layouts/header.php';
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">STATUS BAYAR</label>
-                        <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-semibold text-slate-800 outline-none" required>
-                            <option value="Belum Bayar" <?= $pesanan['metode_bayar'] === 'Belum Bayar' ? 'selected' : '' ?>>Belum Bayar – <?= htmlspecialchars($pesanan['metode_bayar']) ?></option>
-                            <option value="LUNAS" <?= $pesanan['metode_bayar'] === 'LUNAS' ? 'selected' : '' ?>>LUNAS – <?= htmlspecialchars($pesanan['metode_bayar']) ?></option>
+                        <select name="status_bayar" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-xs font-semibold text-slate-800 outline-none" required>
+                            <option value="Belum Bayar" <?= $pesanan['status_bayar'] === 'Belum Bayar' ? 'selected' : '' ?>>Belum Bayar – <?= htmlspecialchars($pesanan['metode_bayar']) ?></option>
+                            <option value="Lunas" <?= $pesanan['status_bayar'] === 'Lunas' ? 'selected' : '' ?>>LUNAS – <?= htmlspecialchars($pesanan['metode_bayar']) ?></option>
                         </select>
                     </div>
                 </div>
@@ -94,7 +100,7 @@ require_once __DIR__ . '/../layouts/header.php';
                         <h3 class="text-sm font-extrabold flex items-center gap-3">
                             <span class="bg-brand-yellow text-slate-900 w-6 h-6 rounded-md flex items-center justify-center text-xs font-black"><?= $index + 1 ?></span> Detail Barang
                         </h3>
-                        <button type="button" onclick="deleteItemCard(<?= $item['id_detail_pesanan'] ?>)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg text-xs font-semibold transition">
+                        <button type="button" onclick="deleteEditItemCard(<?= $item['id_detail_pesanan'] ?>)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg text-xs font-semibold transition">
                             <i class="fas fa-trash mr-1"></i> Hapus
                         </button>
                     </div>
@@ -104,11 +110,11 @@ require_once __DIR__ . '/../layouts/header.php';
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">NAMA BARANG</label>
-                                    <input type="text" class="w-full bg-brand-darkInput border border-slate-700 rounded-xl px-4 py-3 text-xs font-medium text-white outline-none" value="<?= htmlspecialchars($item['nama_barang']) ?>" required>
+                                    <input type="text" name="nama_barang[<?= $item['id_detail_pesanan'] ?>]" class="w-full bg-brand-darkInput border border-slate-700 rounded-xl px-4 py-3 text-xs font-medium text-white outline-none" value="<?= htmlspecialchars($item['nama_barang']) ?>" required>
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">WARNA</label>
-                                    <input type="text" class="w-full bg-brand-darkInput border border-slate-700 rounded-xl px-4 py-3 text-xs font-medium text-white outline-none" value="<?= htmlspecialchars($item['warna'] ?? '') ?>" required>
+                                    <input type="text" name="warna_barang[<?= $item['id_detail_pesanan'] ?>]" class="w-full bg-brand-darkInput border border-slate-700 rounded-xl px-4 py-3 text-xs font-medium text-white outline-none" value="<?= htmlspecialchars($item['warna'] ?? '') ?>" required>
                                 </div>
                             </div>
 
@@ -122,7 +128,7 @@ require_once __DIR__ . '/../layouts/header.php';
                                     <option value="">Pilih Layanan</option>
                                 </select>
                                 
-                                <input type="hidden" name="tipe_layanan" class="tipe-layanan" value="<?= !empty($item['id_layanan']) ? 'layanan' : 'package' ?>">
+                                <input type="hidden" name="tipe_layanan[<?= $item['id_detail_pesanan'] ?>]" class="tipe-layanan" value="<?= !empty($item['id_layanan']) ? 'layanan' : 'package' ?>">
                             </div>
                         </div>
 
@@ -159,13 +165,13 @@ require_once __DIR__ . '/../layouts/header.php';
                         </div>
                         <div class="flex flex-col">
                             <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-2 h-7 sm:h-auto flex items-end leading-tight">CATATAN TAMBAHAN</label>
-                            <textarea class="w-full bg-brand-darkInput border border-slate-700 rounded-2xl p-3 sm:p-4 text-xs font-medium text-white outline-none h-28 sm:h-32 resize-none" placeholder="–"><?= htmlspecialchars($item['catatan'] ?? '') ?></textarea>
+                            <textarea name="catatan[<?= $item['id_detail_pesanan'] ?>]" class="w-full bg-brand-darkInput border border-slate-700 rounded-2xl p-3 sm:p-4 text-xs font-medium text-white outline-none h-28 sm:h-32 resize-none" placeholder="–"><?= htmlspecialchars($item['catatan'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
             <?php endforeach; ?>
 
-            <button type="button" class="add-item-btn-trigger w-full py-4 border-2 border-dashed border-slate-300 rounded-3xl text-slate-500 font-extrabold text-xs hover:bg-white hover:border-slate-400 hover:text-slate-800 transition flex items-center justify-center gap-2">
+            <button type="button" class="add-edit-item-btn-trigger w-full py-4 border-2 border-dashed border-slate-300 rounded-3xl text-slate-500 font-extrabold text-xs hover:bg-white hover:border-slate-400 hover:text-slate-800 transition flex items-center justify-center gap-2">
                 <i class="fas fa-plus-circle"></i> Tambah Barang Cuci / Repair
             </button>
 
@@ -193,24 +199,58 @@ require_once __DIR__ . '/../layouts/header.php';
                 </div>
 
                 <p class="text-xs font-bold text-slate-700 mb-2">Foto After / Sesudah Dicuci</p>
+
                 <div class="grid <?= count($barang) === 1 ? 'grid-cols-1' : 'grid-cols-2' ?> gap-6 mt-6">
                     <?php foreach ($barang as $item): ?>
-                        <div>
+                        <div class="item-foto-after-container" data-item-id="<?= (int) $item['id_detail_pesanan'] ?>">
                             <p class="text-xs font-extrabold text-slate-800 mb-1">
                                 <?= htmlspecialchars($item['nama_barang']) ?>
                             </p>
 
-                            <div class="upload-box-trigger w-full h-44 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-center p-4 hover:bg-slate-50 cursor-pointer">
-                                <i class="fas fa-upload text-slate-400 text-xl mb-2"></i>
-                                <span class="text-xs font-extrabold text-slate-700">Pilih Foto After</span>
-                                <span class="text-[10px] text-slate-400 mt-0.5">JPG atau PNG • Maks. 5 MB</span>
+                            <div data-photo-type="after">
+                                <?php if (!empty($item['foto_sesudah'])): ?>
+                                    <div class="upload-box-trigger-after w-full h-44 bg-slate-200 rounded-2xl overflow-hidden border border-slate-200 cursor-pointer">
+                                        <img src="/<?= htmlspecialchars($item['foto_sesudah']) ?>" alt="Before" class="w-full h-full object-cover">
+                                    </div>
+                                <?php else: ?>
+                                    <div class="upload-box-trigger-after w-full h-44 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-center p-4 hover:bg-slate-50 cursor-pointer">
+                                        <i class="fas fa-upload text-slate-400 text-xl mb-2"></i>
+                                        <span class="text-xs font-extrabold text-slate-700">Upload Foto After</span>
+                                        <span class="text-[10px] text-slate-400 mt-0.5">JPG atau PNG • Maks. 5 MB</span>
+                                    </div>
+                                     <p class="text-[10px] text-slate-400 mt-1">
+                                        Belum diunggah • Unggah hasil pengerjaan sebelum mengirim dokumentasi.
+                                    </p>
+                                <?php endif; ?>
                             </div>
-
-                            <p class="text-[10px] text-slate-400 mt-1">
-                                Belum diunggah • Unggah hasil pengerjaan sebelum mengirim dokumentasi.
-                            </p>
                         </div>
                     <?php endforeach; ?>
+                </div>
+                
+                <div id="photo-source-sheet-edit" class="fixed inset-0 z-[9999] hidden">
+                    <div id="photo-source-backdrop-edit" class="absolute inset-0 bg-black/60"></div>
+                    <div id="photo-source-panel-edit" class="absolute bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 rounded-t-3xl p-5 pb-8 transition-transform duration-300 translate-y-full">
+                        <div class="w-12 h-1.5 rounded-full bg-slate-600 mx-auto mb-5"></div>
+                        <h3 class="text-white font-extrabold text-base">Upload Foto After</h3>
+                        <p class="text-slate-400 text-xs mt-1 mb-5">Pilih sumber foto</p>
+                        <button type="button" id="photo-source-camera-edit" class="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-700 bg-slate-800 text-left mb-3">
+                            <i class="fas fa-camera text-yellow-400 text-xl w-8 text-center"></i>
+                            <div>
+                                <p class="text-white text-sm font-bold">Buka Kamera</p>
+                                <p class="text-slate-400 text-xs mt-1">Ambil foto langsung</p>
+                            </div>
+                        </button>
+                        <button type="button" id="photo-source-gallery-edit" class="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-700 bg-slate-800 text-left">
+                            <i class="fas fa-images text-blue-400 text-xl w-8 text-center"></i>
+                            <div>
+                                <p class="text-white text-sm font-bold">Pilih dari Galeri</p>
+                                <p class="text-slate-400 text-xs mt-1">Pilih foto yang tersimpan</p>
+                            </div>
+                        </button>
+                        <button type="button" id="photo-source-cancel-edit" class="w-full mt-4 py-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-bold">
+                            Batal
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -223,16 +263,19 @@ require_once __DIR__ . '/../layouts/header.php';
             <div class="flex items-center gap-2 md:gap-4 w-full sm:w-auto justify-end">
                 <div class="flex items-center gap-1.5 md:gap-2">
                     <span class="text-xs font-bold text-slate-500 hidden sm:inline">Metode pembayaran</span>
-                    <select class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 md:px-3 py-2 text-xs font-extrabold text-slate-800 outline-none">
+                    <select name="metode_pembayaran" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 md:px-3 py-2 text-xs font-extrabold text-slate-800 outline-none">
                         <option value="QRIS" <?= $pesanan['metode_bayar'] === 'QRIS' ? 'selected' : '' ?>>QRIS</option>
                         <option value="Cash" <?= $pesanan['metode_bayar'] === 'Cash' ? 'selected' : '' ?>>Cash</option>
                         <option value="Kartu" <?= $pesanan['metode_bayar'] === 'Kartu' ? 'selected' : '' ?>>Kartu</option>
                     </select>
                 </div>
                 <a href="pesanan.php" class="px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs transition inline-flex items-center">Batal</a>
-                <button type="button" onclick="alert('Perubahan Berhasil Disimpan!')" class="flex-1 sm:flex-none justify-center px-4 md:px-6 py-2.5 md:py-3 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 font-extrabold rounded-xl text-xs transition shadow-lg shadow-brand-yellow/30">Simpan Perubahan</button>
+                <button type="submit" class="flex-1 sm:flex-none justify-center px-4 md:px-6 py-2.5 md:py-3 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 font-extrabold rounded-xl text-xs transition shadow-lg shadow-brand-yellow/30 flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i> <span class="whitespace-nowrap">Simpan Perubahan</span>
+                </button>
             </div>
         </div>
+        </form>
     </main>
 </div>
 <script>
@@ -277,52 +320,52 @@ window.PRICELIST_DATA = <?= json_encode(
     )
 ) ?>;
 
-    window.LAYANAN_DATA = <?= json_encode(
-                                array_values(array_unique(array_column($layanan, 'kategori')))
-                            ) ?>;
+window.LAYANAN_DATA = <?= json_encode(
+    array_values(array_unique(array_column($layanan, 'kategori')))
+) ?>;
 
-    window.TREATMENT_KECEPATAN = <?= json_encode(
-                                        $treatmentKecepatan
-                                    ) ?>;
+window.TREATMENT_KECEPATAN = <?= json_encode(
+     $treatmentKecepatan
+) ?>;
 
-    window.TREATMENT_TAMBAHAN = <?= json_encode(
-                                    $treatmentTambahan
-                                ) ?>;
+window.TREATMENT_TAMBAHAN = <?= json_encode(
+    $treatmentTambahan
+ ) ?>;
 
-    window.EDIT_BARANG_DATA = <?= json_encode(
-                                    array_map(function ($item) {
-                                        return [
-                                            'id_detail_pesanan' => (int) $item['id_detail_pesanan'],
-                                            'id_layanan' => (int) $item['id_layanan'],
-                                            'nama_barang' => $item['nama_barang'],
-                                            'warna' => $item['warna'] ?? '',
-                                            'merk' => $item['merk'] ?? '',
-                                            'subtotal' => (float) $item['subtotal'],
-                                            'harga_satuan' => (float) $item['harga_satuan'],
-                                            'treatments' => $item['treatments'] ?? []
-                                        ];
-                                    }, $barang)
-                                ) ?>;
+window.EDIT_BARANG_DATA = <?= json_encode(
+    array_map(function ($item) {
+        return [
+            'id_detail_pesanan' => (int) $item['id_detail_pesanan'],
+            'id_layanan' => (int) $item['id_layanan'],
+            'nama_barang' => $item['nama_barang'],
+            'warna' => $item['warna'] ?? '',
+            'merk' => $item['merk'] ?? '',
+            'subtotal' => (float) $item['subtotal'],
+            'harga_satuan' => (float) $item['harga_satuan'],
+            'treatments' => $item['treatments'] ?? []
+        ];
+    }, $barang)
+) ?>;
 
-    window.TREATMENT_SELECTED = <?= json_encode(array_reduce($barang, function ($result, $item) {
-                                    $idDetail = $item['id_detail_pesanan'];
-                                    $result[$idDetail] = [
-                                        'speed_id' => null,
-                                        'extra_ids' => []
-                                    ];
+window.TREATMENT_SELECTED = <?= json_encode(array_reduce($barang, function ($result, $item) {
+    $idDetail = $item['id_detail_pesanan'];
+    $result[$idDetail] = [
+        'speed_id' => null,
+        'extra_ids' => []
+    ];
 
-                                    foreach ($item['treatments'] ?? [] as $treatment) {
-                                        $idTreatment = (string) $treatment['id_treatment_tambahan'];
-                                        $nama = $treatment['nama_treatment'];
+    foreach ($item['treatments'] ?? [] as $treatment) {
+        $idTreatment = (string) $treatment['id_treatment_tambahan'];
+        $nama = $treatment['nama_treatment'];
 
-                                        if (in_array($nama, ['Express', 'Prioritas'], true)) {
-                                            $result[$idDetail]['speed_id'] = $idTreatment;
-                                        } else {
-                                            $result[$idDetail]['extra_ids'][] = $idTreatment;
-                                        }
-                                    }
+        if (in_array($nama, ['Express', 'Prioritas'], true)) {
+            $result[$idDetail]['speed_id'] = $idTreatment;
+        } else {
+            $result[$idDetail]['extra_ids'][] = $idTreatment;
+        }
+    }
 
-                                    return $result;
-                                }, [])) ?>;
+    return $result;
+}, [])) ?>;
 </script>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

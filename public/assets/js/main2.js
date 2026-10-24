@@ -374,6 +374,179 @@ function generateCategoryButtons(itemId) {
     });
 }
 
+
+function initEditAddItemButton() {
+    const addBtn = document.querySelector('.add-edit-item-btn-trigger');
+    if (!addBtn) return;
+
+    addBtn.addEventListener('click', () => {
+        const existingIds = Array.from(
+            document.querySelectorAll('.item-dark-container')
+        ).map(card => Number(card.dataset.itemId) || 0);
+
+        const newId = Math.max(itemCounter, ...existingIds) + 1;
+        itemCounter = newId;
+
+        const template = `
+        <div id="item-container-${newId}" data-item-id="${newId}" class="item-dark-container bg-brand-darkCard text-white rounded-3xl p-6 md:p-8 shadow-xl space-y-6 animate-fade-in">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-sm font-extrabold flex items-center gap-3">
+                    <span class="bg-brand-yellow text-slate-900 w-6 h-6 rounded-md flex items-center justify-center text-xs font-black">${newId}</span>
+                    Detail Barang
+                </h3>
+                <button type="button" onclick="deleteEditItemCard(${newId})" class="px-3 py-1 bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-400 rounded-lg text-xs font-semibold transition">
+                    <i class="fas fa-trash mr-1"></i> Hapus
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">NAMA BARANG</label>
+                            <input name="nama_barang[${newId}]" type="text" class="w-full bg-brand-darkInput border border-slate-700/80 rounded-xl px-4 py-3 text-xs font-medium text-white outline-none" placeholder="Misal: Tas / Helm / Sepatu" required>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">WARNA</label>
+                            <input name="warna_barang[${newId}]" type="text" class="w-full bg-brand-darkInput border border-slate-700/80 rounded-xl px-4 py-3 text-xs font-medium text-white outline-none" placeholder="Warna barang" required>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800/80 space-y-3">
+                        <label class="block text-[10px] font-extrabold text-brand-yellow uppercase tracking-wider">KATEGORI & LAYANAN UTAMA</label>
+                        
+                        <div class="category-buttons grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        </div>
+
+                        <p class="category-caption text-[9px] text-slate-500 font-semibold">Deep Clean Shoes Care</p>
+                        <div>
+                            <select name="layanan_id[${newId}]" id="service-select-${newId}" onchange="updateItemSubtotal(${newId})" class="service-select w-full bg-brand-darkInput border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white outline-none font-semibold" required>
+                                <option value="" selected>Pilih Layanan</option>
+                            </select>
+
+                            <input type="hidden" name="tipe_layanan[${newId}]" class="tipe-layanan">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 flex flex-col justify-between">
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <label class="block text-[10px] font-extrabold text-brand-yellow uppercase tracking-wider">EXTRA TREATMENT</label>
+                        
+                        <div class="grid grid-cols-3 gap-2">
+
+                            <label class="p-3 border-2 border-brand-yellow bg-brand-yellow/10 rounded-xl flex flex-col items-center justify-center cursor-pointer transition">
+                                <input type="radio" name="speed[${newId}]" value="reguler" data-price="0" checked onchange="updateItemSubtotal(${newId})" class="text-brand-yellow mb-1">
+                                <span class="speed-title text-[10px] font-bold text-brand-yellow">Reguler</span>
+                            </label>
+
+
+                            ${(window.TREATMENT_KECEPATAN || []).map(item => `
+                                <label class="treatment-speed p-3 border border-slate-700 rounded-xl flex flex-col items-center justify-center cursor-pointer transition">
+                                    <input type="radio"name="speed[${newId}]" value="${item.id_treatment_tambahan}" data-price="${item.harga_min}" data-harga-max="${item.harga_max}" onchange="updateItemSubtotal(${newId})" class="text-brand-yellow mb-1">
+                                    <span class="speed-title text-[10px] font-bold text-slate-400">${item.nama_treatment}</span>
+                                    <span class="text-[9px] text-slate-400">${item.keterangan || ''} • +Rp${Number(item.harga_min).toLocaleString('id-ID')}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+
+                        <div class="space-y-2 pt-1">
+                            ${(window.TREATMENT_TAMBAHAN || []).map(item => `
+                                <label class="flex justify-between items-center p-3.5 border border-slate-700/90 bg-slate-800/50 rounded-xl cursor-pointer hover:border-slate-500 transition">
+                                    <div class="flex items-center gap-3">
+                                        <input type="checkbox" name="treatment_tambahan[${newId}][]" value="${item.id_treatment_tambahan}" data-price="${Number(item.id_treatment_tambahan) === 4 ? Number(item.harga_max) : Number(item.harga_min)}" data-harga-max="${Number(item.harga_max)}" onchange="updateItemSubtotal(${newId})" class="extra-check-${newId} w-4 h-4 rounded text-brand-yellow bg-slate-900 border-slate-600 focus:ring-brand-yellow">
+                                        <span class="text-xs font-bold text-white">${item.nama_treatment} (${item.keterangan || ''})</span>
+                                    </div>
+                                    <span class="text-xs font-bold text-brand-yellow">
+                                        ${Number(item.harga_min) === Number(item.harga_max) ? '+Rp' + Number(item.harga_min).toLocaleString('id-ID') : '+Rp' + Number(item.harga_min).toLocaleString('id-ID') + ' – Rp' + Number(item.harga_max).toLocaleString('id-ID')}
+                                    </span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="bg-black/60 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400">Subtotal Barang Ini:</span>
+                        <span id="subtotal-val-${newId}" class="subtotal-val text-lg font-black text-brand-yellow">Rp 0</span>
+                        <input type="hidden" name="subtotal[${newId}]" id="subtotal-input-${newId}" value="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 sm:gap-6 pt-3 border-t border-slate-800 items-stretch">
+                <div class="flex flex-col">
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-2 h-7 sm:h-auto flex items-end leading-tight">
+                        FOTO BEFORE (SEBELUM)
+                    </label>
+
+                    <div id="upload-before-trigger" class="upload-box-trigger border-2 border-dashed border-slate-700 rounded-2xl p-3 sm:p-4 h-28 sm:h-32 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-800/40 transition">
+                        <i class="fas fa-camera text-slate-400 text-base sm:text-lg mb-1"></i>
+                        <span class="text-[11px] sm:text-xs font-bold text-white">Upload Foto</span>
+                        <span class="text-[9px] sm:text-[10px] text-slate-500 mt-0.5">Maks. 5 MB</span>
+                    </div>
+
+                    <p id="foto-before-name" class="text-xs text-slate-400 mt-2"></p>
+                    <img id="foto-before-preview" class="hidden mt-2 w-full max-h-48 object-contain rounded-xl" alt="Preview foto Before">
+                </div>
+                <div class="flex flex-col">
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-2 h-7 sm:h-auto flex items-end leading-tight">CATATAN TAMBAHAN</label>
+                    <textarea name="catatan[${newId}]" class="w-full bg-brand-darkInput border border-slate-700 rounded-2xl p-3 sm:p-4 text-xs font-medium text-white outline-none h-28 sm:h-32 resize-none placeholder:text-slate-500" placeholder="Ketik noda khusus, robek, atau keluhan di sini..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div id="photo-source-sheet" class="fixed inset-0 z-[9999] hidden">
+            <div id="photo-source-backdrop" class="absolute inset-0 bg-black/60"></div>
+            <div id="photo-source-panel" class="absolute bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 rounded-t-3xl p-5 pb-8 transition-transform duration-300 translate-y-full">
+                <div class="w-12 h-1.5 rounded-full bg-slate-600 mx-auto mb-5"></div>
+                <h3 class="text-white font-extrabold text-base">Upload Foto Before</h3>
+                <p class="text-slate-400 text-xs mt-1 mb-5">Pilih sumber foto</p>
+                <button type="button" id="photo-source-camera" class="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-700 bg-slate-800 text-left mb-3">
+                    <i class="fas fa-camera text-yellow-400 text-xl w-8 text-center"></i>
+                    <div>
+                        <p class="text-white text-sm font-bold">Buka Kamera</p>
+                        <p class="text-slate-400 text-xs mt-1">Ambil foto langsung</p>
+                    </div>
+                </button>
+                <button type="button" id="photo-source-gallery" class="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-700 bg-slate-800 text-left">
+                    <i class="fas fa-images text-blue-400 text-xl w-8 text-center"></i>
+                    <div>
+                        <p class="text-white text-sm font-bold">Pilih dari Galeri</p>
+                        <p class="text-slate-400 text-xs mt-1">Pilih foto yang tersimpan</p>
+                    </div>
+                </button>
+                <button type="button" id="photo-source-cancel" class="w-full mt-4 py-3 rounded-xl bg-slate-800 text-slate-300 text-sm font-bold">
+                    Batal
+                </button>
+            </div>
+        </div>
+        `;
+
+
+        addBtn.insertAdjacentHTML('beforebegin', template);
+
+        const card = document.querySelector(`#item-container-${newId}`);
+        if (!card) return;
+
+        const defaultCategory = window.LAYANAN_DATA?.[0] || 'Package';
+
+        card.dataset.selectedCategory = defaultCategory;
+        card.dataset.selectedService = '';
+        card.dataset.selectedType = '';
+        card.dataset.previousCategory = defaultCategory;
+
+        generateEditCategoryButtons(newId);
+        loadServicesForItem(newId, defaultCategory);
+
+        generateSpeedTreatments(newId, 'reguler');
+        generateExtraTreatments(newId, []);
+
+        initPhotoUploads();
+        recalculateGrandTotal();
+    });
+}
+
+
 function generateEditCategoryButtons(itemId) {
     const categories = window.LAYANAN_DATA || [];
     const container = document.querySelector(
@@ -501,6 +674,15 @@ function deleteItemCard(id) {
     if (card) {
         card.remove();
         renumberItems();
+        recalculateGrandTotal();
+    }
+}
+
+function deleteEditItemCard(id) {
+    const card = document.getElementById(`item-container-${id}`);
+
+    if (card) {
+        card.remove();
         recalculateGrandTotal();
     }
 }
@@ -718,6 +900,160 @@ function initPhotoUploads() {
     backdrop.addEventListener('click', tutupSheet);
 }
 
+function initPhotoAfterUploads() {
+    const sheet = document.getElementById('photo-source-sheet-edit');
+    const panel = document.getElementById('photo-source-panel-edit');
+    const cameraBtn = document.getElementById('photo-source-camera-edit');
+    const galleryBtn = document.getElementById('photo-source-gallery-edit');
+    const cancelBtn = document.getElementById('photo-source-cancel-edit');
+    const backdrop = document.getElementById('photo-source-backdrop-edit');
+
+    if (!sheet || !panel || !cameraBtn || !galleryBtn || !cancelBtn || !backdrop) {
+        console.error('HTML bottom sheet foto tidak ditemukan.');
+        return;
+    }
+
+    if (sheet.dataset.afterInitialized === 'true') return;
+    sheet.dataset.afterInitialized = 'true';
+
+    let activeBox = null;
+    let activeForm = null;
+    let activeItemId = null;
+
+    function bukaSheet() {
+        sheet.classList.remove('hidden');
+
+        requestAnimationFrame(() => {
+            panel.classList.remove('translate-y-full');
+        });
+    }
+
+    function tutupSheet() {
+        panel.classList.add('translate-y-full');
+
+        setTimeout(() => {
+            sheet.classList.add('hidden');
+        }, 300);
+    }
+
+    function buatInput(form, itemId, box, capture = false) {
+        if (!form || !itemId || !box) return;
+
+        const container = box.closest('.item-foto-after-container');
+
+        if (!container) {
+            console.error('Card barang tidak ditemukan.');
+            return;
+        }
+
+        const input = document.createElement('input');
+
+        input.type = 'file';
+        input.name = `foto_after[${itemId}]`;
+        input.accept = 'image/jpeg,image/png,image/webp';
+        input.hidden = true;
+        input.dataset.afterUpload = 'true';
+        input.dataset.itemId = String(itemId);
+
+        if (capture) {
+            input.setAttribute('capture', 'environment');
+        }
+
+        input.addEventListener('change', function () {
+            const file = input.files?.[0];
+
+            if (!file) {
+                input.remove();
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ukuran foto maksimal 5 MB.');
+                input.remove();
+                return;
+            }
+
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                alert('Foto harus berformat JPG, PNG, atau WEBP.');
+                input.remove();
+                return;
+            }
+
+            form.querySelectorAll('input[data-after-upload="true"]').forEach(oldInput => {
+                if (oldInput !== input && oldInput.dataset.itemId === String(itemId)) {
+                    oldInput.remove();
+                }
+            });
+
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                box.innerHTML = `
+                    <img src="${event.target.result}"
+                         class="w-full h-full object-cover rounded-2xl"
+                         alt="Foto sesudah dicuci">
+                `;
+
+                box.classList.remove('border-dashed');
+                box.dataset.afterPhotoSelected = 'true';
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        form.appendChild(input);
+        input.click();
+    }
+
+    document.addEventListener('click', function (event) {
+        const box = event.target.closest('.upload-box-trigger-after');
+
+        if (!box || !box.closest('[data-photo-type="after"]')) return;
+
+        const container = box.closest('.item-foto-after-container');
+        const form = box.closest('form');
+
+        if (!container || !form) {
+            console.error('Container barang atau form tidak ditemukan.');
+            return;
+        }
+
+        const itemId = container.dataset.itemId;
+
+        if (!itemId) {
+            console.error('data-item-id tidak ditemukan.');
+            return;
+        }
+
+        activeBox = box;
+        activeForm = form;
+        activeItemId = String(itemId);
+
+        bukaSheet();
+    });
+
+    cameraBtn.addEventListener('click', function () {
+        const box = activeBox;
+        const form = activeForm;
+        const itemId = activeItemId;
+
+        tutupSheet();
+        buatInput(form, itemId, box, true);
+    });
+
+    galleryBtn.addEventListener('click', function () {
+        const box = activeBox;
+        const form = activeForm;
+        const itemId = activeItemId;
+
+        tutupSheet();
+        buatInput(form, itemId, box, false);
+    });
+
+    cancelBtn.addEventListener('click', tutupSheet);
+    backdrop.addEventListener('click', tutupSheet);
+}
+
 // 6. Master-Detail Order Selection:
 // - On Desktop: Seamless in-place switch on right panel (Persis 100% Desain Asli)
 // - On Mobile: Navigate to detail_pesanan.php without scrolling
@@ -750,14 +1086,15 @@ function initMasterDetailOrders() {
     function tanggal(value) {
         if (!value) return 'Belum selesai';
 
-        const date = new Date(value + 'T00:00:00');
+        const date = new Date(value);
 
         return Number.isNaN(date.getTime())
             ? value
             : date.toLocaleDateString('id-ID', {
                 day: '2-digit',
-                month: 'short',
-                year: 'numeric'
+                month: 'long',
+                year: 'numeric',
+                timeZone: 'UTC'
             });
     }
 
@@ -994,12 +1331,7 @@ function initMasterDetailOrders() {
 
             if (el.dateEstimasi) {
                 el.dateEstimasi.textContent = p.estimasi_selesai
-                    ? new Date(p.estimasi_selesai).toLocaleDateString('id-ID', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric',
-                        timeZone: 'UTC'
-                    })
+                    ? tanggal(p.estimasi_selesai)
                     : '-';
             }
 
@@ -1353,8 +1685,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initCategoryButtons();
     initExtraTreatmentCalculations();
     initPhotoUploads();
+    initPhotoAfterUploads();
     initOrderFilter();
     initMasterDetailOrders();
     initAddItemButton();
+    initEditAddItemButton();
     recalculateGrandTotal();
 });

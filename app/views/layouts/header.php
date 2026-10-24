@@ -6,6 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 $user_role = $user_role ?? ($_SESSION['role'] ?? 'superadmin');
 $user_name = $user_name ?? ($_SESSION['nama'] ?? ($user_role === 'karyawan' ? 'Bagas (Karyawan)' : 'Super Admin'));
 $user_initials = $user_initials ?? ($_SESSION['user_initials'] ?? ($user_role === 'karyawan' ? 'BK' : 'SA'));

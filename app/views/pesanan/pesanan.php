@@ -45,7 +45,7 @@ require_once __DIR__ . '/../layouts/header.php';
                                 'Selesai'   => 'bg-emerald-100 text-emerald-700',
                                 'Diambil'   => 'bg-emerald-100 text-emerald-700'
                             };
-                        ?>
+                            ?>
                             <div class="order-card-item p-5 rounded-2xl border-2 border-slate-200 bg-white shadow-sm cursor-pointer relative transition-all" data-id="<?= (int) $pesanan['id_pesanan'] ?>">
                                 <div class="flex justify-between items-start mb-1">
                                     <h4 class="font-extrabold text-slate-900 text-sm">
@@ -94,9 +94,17 @@ require_once __DIR__ . '/../layouts/header.php';
                             <i class="fas fa-edit"></i> Edit Pesanan
                         </a>
                         <?php if ($user_role === 'superadmin'): ?>
-                            <button type="button" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
-                                <i class="fas fa-trash"></i> Hapus
-                            </button>
+                            <?php
+                                $pesananAda = !empty($pesanan) && !empty($pesanan['id_pesanan']);
+                            ?>
+                            <form action="/pesanan/hapus" method="POST" id="form-hapus-pesanan">
+                                <input type="hidden" name="id_pesanan" value="<?= $pesananAda ? (int) $pesanan['id_pesanan'] : '' ?>">
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+
+                                <button type="submit" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2" <?= !$pesananAda ? 'disabled' : '' ?>>
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </form>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -115,15 +123,12 @@ require_once __DIR__ . '/../layouts/header.php';
                             <div class="w-full">
                                 <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 text-left">STATUS SAAT INI</label>
                                 <div class="relative w-full">
-                                    <select id="detail-status-select" class="w-full appearance-none bg-slate-800/80 border border-slate-700/80 text-white font-bold text-xs sm:text-sm rounded-xl px-4 py-3 pr-10 outline-none focus:border-brand-yellow text-left transition cursor-pointer">
+                                    <select id="detail-status-select" class="w-full appearance-none bg-slate-800/80 border border-slate-700/80 text-white font-bold text-xs sm:text-sm rounded-xl px-4 py-3 pr-10 outline-none focus:border-brand-yellow text-left transition" disabled>
                                         <option class="bg-slate-900 text-white" value="Menunggu">Menunggu</option>
                                         <option class="bg-slate-900 text-white" value="Diproses">Sedang Diproses</option>
                                         <option class="bg-slate-900 text-white" value="Selesai">Selesai Diproses</option>
                                         <option class="bg-slate-900 text-white" value="Diambil">Diambil</option>
                                     </select>
-                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
-                                        <i class="fas fa-chevron-down text-xs"></i>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -143,14 +148,14 @@ require_once __DIR__ . '/../layouts/header.php';
                         <div class="mb-5">
                             <p class="text-xs font-bold text-slate-700 mb-3">Foto Before / Sebelum Dicuci</p>
 
-                            <div id="detail-photos-before"  class="grid gap-4">
+                            <div id="detail-photos-before" class="grid gap-4">
                             </div>
                         </div>
 
                         <div>
                             <p class="text-xs font-bold text-slate-700 mb-3">Foto After / Sesudah Dicuci</p>
 
-                            <div id="detail-photos-after"  class="grid gap-4">
+                            <div id="detail-photos-after" class="grid gap-4">
                             </div>
                         </div>
 
@@ -188,4 +193,27 @@ require_once __DIR__ . '/../layouts/header.php';
         </div>
     </main>
 </div>
+<script>
+    document.getElementById('form-hapus-pesanan').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const form = this;
+
+        Swal.fire({
+            title: 'Hapus Pesanan?',
+            text: 'Data pesanan yang dihapus tidak dapat dikembalikan!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+</script>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

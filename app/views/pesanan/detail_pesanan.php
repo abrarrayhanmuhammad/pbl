@@ -1,6 +1,6 @@
 <?php
 $page_title = 'Detail Pesanan ' . $pesanan['kode_pesanan'] . ' - KickDropShoe';
-$current_page = 'pesanan';
+$current_page = 'detail_pesanan';
 require_once __DIR__ . '/../layouts/header.php';
 ?>
 <div class="flex h-screen overflow-hidden bg-brand-slateBg">
@@ -41,12 +41,31 @@ require_once __DIR__ . '/../layouts/header.php';
                     <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">Nama Pelanggan:</span><span class="font-extrabold text-slate-900"><?= htmlspecialchars($pesanan['nama_customer']) ?></span></div>
                     <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">No WhatsApp:</span><span class="font-bold text-slate-800"><?= htmlspecialchars($pesanan['no_hp']) ?></span></div>
                     <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">Drop Point:</span><span class="font-bold text-slate-800"><?= htmlspecialchars($pesanan['alamat_lokasi']) ?></span></div>
-                    <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">Tanggal Masuk:</span><span class="font-bold text-slate-800"><?= htmlspecialchars($pesanan['tanggal_masuk']) ?></span></div>
-                    <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">Estimasi Selesai:</span><span class="font-bold text-slate-800"><?= htmlspecialchars($pesanan['estimasi_selesai']) ?></span></div>
-                    <div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">Tanggal Selesai:</span><span class="font-bold text-slate-500"><?= ($pesanan['tanggal_selesai'] != '' ? htmlspecialchars($pesanan['tanggal_selesai']) : 'Belum Selesai') ?></span></div>
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span class="text-slate-400">Tanggal Masuk:</span>
+                        <span class="font-bold text-slate-800">
+                            <?= htmlspecialchars((new IntlDateFormatter('id_ID', IntlDateFormatter::LONG, IntlDateFormatter::NONE, 'Asia/Jakarta', IntlDateFormatter::GREGORIAN, 'dd MMMM yyyy'))->format(strtotime($pesanan['tanggal_masuk']))) ?>
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span class="text-slate-400">Estimasi Selesai:</span>
+                        <span class="font-bold text-slate-800">
+                            <?= htmlspecialchars((new IntlDateFormatter('id_ID', IntlDateFormatter::LONG, IntlDateFormatter::NONE, 'Asia/Jakarta', IntlDateFormatter::GREGORIAN, 'dd MMMM yyyy'))->format(strtotime($pesanan['estimasi_selesai']))) ?>
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span class="text-slate-400">Tanggal Selesai:</span>
+                        <span class="font-bold text-slate-500">
+                            <?= !empty($pesanan['tanggal_selesai'])
+                                ? htmlspecialchars((new IntlDateFormatter('id_ID', IntlDateFormatter::LONG, IntlDateFormatter::NONE, 'Asia/Jakarta', IntlDateFormatter::GREGORIAN, 'dd MMMM yyyy'))->format(strtotime($pesanan['tanggal_selesai'])))
+                                : 'Belum Selesai' ?>
+                        </span>
+                    </div>
                     <div class="flex justify-between py-1 items-center">
                         <span class="text-slate-400">Status Bayar:</span>
-                        <?php if ($pesanan['status_bayar'] === 'LUNAS'): ?>
+                        <?php if ($pesanan['status_bayar'] === 'Lunas'): ?>
                             <span class="font-extrabold text-emerald-600 bg-emerald-100 px-2.5 py-1 rounded-md text-[10px]"><?= htmlspecialchars($pesanan['status_bayar']) ?> - <?= htmlspecialchars($pesanan['metode_bayar']) ?></span>
                         <?php else: ?>
                             <span class="font-extrabold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md text-[10px]"><?= htmlspecialchars($pesanan['status_bayar']) ?> - <?= htmlspecialchars($pesanan['metode_bayar']) ?></span>
@@ -60,15 +79,17 @@ require_once __DIR__ . '/../layouts/header.php';
                     <div class="w-full">
                         <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 text-left">STATUS SAAT INI</label>
                         <div class="relative w-full">
-                            <select id="detail-status-select" onchange="alert('Status berhasil diubah ke: ' + this.value)" class="w-full appearance-none bg-slate-800/80 border border-slate-700/80 text-white font-bold text-xs sm:text-sm rounded-xl px-4 py-3 pr-10 outline-none focus:border-brand-yellow text-left transition cursor-pointer">
+                            <select id="detail-status-select" data-order-id="<?= (int) $pesanan['id_pesanan'] ?>" class=" w-full appearance-none bg-slate-800/80 border border-slate-700/80 text-white font-bold text-xs sm:text-sm rounded-xl px-4 py-3 pr-10 outline-none focus:border-brand-yellow text-left transition cursor-pointer">
                                 <option class="bg-slate-900 text-white" value="Menunggu" <?= $pesanan['status'] === 'Menunggu' ? 'selected' : '' ?>>Menunggu</option>
-                                <option class="bg-slate-900 text-white" value="Sedang Diproses" <?= ($pesanan['status'] === 'Sedang Diproses' || $pesanan['status'] === 'Diproses') ? 'selected' : '' ?>>Sedang Diproses</option>
-                                <option class="bg-slate-900 text-white" value="Selesai Diproses" <?= $pesanan['status'] === 'Selesai Diproses' ? 'selected' : '' ?>>Selesai Diproses</option>
+                                <option class="bg-slate-900 text-white" value="Diproses" <?= $pesanan['status'] === 'Diproses' ? 'selected' : '' ?>>Sedang Diproses</option>
+                                <option class="bg-slate-900 text-white" value="Selesai" <?= $pesanan['status'] === 'Selesai' ? 'selected' : '' ?>>Selesai Diproses</option>
                                 <option class="bg-slate-900 text-white" value="Diambil" <?= $pesanan['status'] === 'Diambil' ? 'selected' : '' ?>>Diambil</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
                                 <i class="fas fa-chevron-down text-xs"></i>
                             </div>
+
+                            <p id="status-save-message" class="mt-2 text-xs"></p>
                         </div>
                     </div>
                 </div>
@@ -160,15 +181,18 @@ require_once __DIR__ . '/../layouts/header.php';
                                 <?= htmlspecialchars($item['nama_barang']) ?>
                             </p>
 
-                            <div class="upload-box-trigger w-full h-44 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-center p-4 hover:bg-slate-50 cursor-pointer">
-                                <i class="fas fa-upload text-slate-400 text-xl mb-2"></i>
-                                <span class="text-xs font-extrabold text-slate-700">Pilih Foto After</span>
-                                <span class="text-[10px] text-slate-400 mt-0.5">JPG atau PNG • Maks. 5 MB</span>
-                            </div>
+                            <div class="w-full h-44 bg-slate-200 rounded-2xl overflow-hidden border border-slate-200">
+                                <?php if (!empty($item['foto_sesudah'])): ?>
+                                    <img src="/<?= htmlspecialchars($item['foto_sesudah']) ?>" alt="After" class="w-full h-full object-cover">
+                                <?php else: ?>
+                                    <div class="upload-box-trigger w-full h-44 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-center p-4 hover:bg-slate-50 cursor-pointer">
+                                        <p class="text-[10px] text-slate-400 mt-1">
+                                            Belum diunggah
+                                        </p>
+                                    </div>
 
-                            <p class="text-[10px] text-slate-400 mt-1">
-                                Belum diunggah • Unggah hasil pengerjaan sebelum mengirim dokumentasi.
-                            </p>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -189,4 +213,52 @@ require_once __DIR__ . '/../layouts/header.php';
         </div>
     </main>
 </div>
+<div id="csrf-data" data-token="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>"></div>
+<script>
+    const statusSelect = document.getElementById('detail-status-select');
+    const statusMessage = document.getElementById('status-save-message');
+
+    if (statusSelect) {
+        let statusSebelumnya = statusSelect.value;
+
+        statusSelect.addEventListener('change', async function() {
+            const statusBaru = this.value;
+            const idPesanan = this.dataset.orderId;
+
+            statusSelect.disabled = true;
+            statusMessage.className = 'mt-2 text-xs text-yellow-400';
+
+            try {
+                const response = await fetch('/pesanan/updateStatus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        id_pesanan: idPesanan,
+                        status: statusBaru,
+                        csrf_token: document.getElementById('csrf-data')?.dataset.token
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Status gagal disimpan.');
+                }
+
+                statusSebelumnya = statusBaru;
+                statusMessage.textContent = 'Status berhasil diperbarui.';
+                statusMessage.className = 'mt-2 text-xs text-green-400';
+            } catch (error) {
+                statusSelect.value = statusSebelumnya;
+                statusMessage.textContent = error.message || 'Terjadi kesalahan.';
+                statusMessage.className = 'mt-2 text-xs text-red-400';
+            } finally {
+                statusSelect.disabled = false;
+            }
+        });
+    }
+</script>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

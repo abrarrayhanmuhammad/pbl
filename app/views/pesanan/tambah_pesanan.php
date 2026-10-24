@@ -136,11 +136,8 @@ require_once __DIR__ . '/../layouts/header.php';
                                     }, $getAllPaket)
                                 ])
                             ); ?>;
-</script>
-<script>
+
     window.LAYANAN_DATA = <?= json_encode(array_values(array_unique(array_column($layanan, 'kategori')))) ?>;
-</script>
-<script>
     window.TREATMENT_KECEPATAN = <?= json_encode($treatmentKecepatan) ?>;
     window.TREATMENT_TAMBAHAN = <?= json_encode($treatmentTambahan) ?>;
 </script>

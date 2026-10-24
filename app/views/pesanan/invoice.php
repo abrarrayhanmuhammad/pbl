@@ -1,6 +1,6 @@
 <?php
 $page_title = 'Pratinjau Invoice ' . $pesanan['kode_pesanan'] . '- KickDropShoe';
-$current_page = 'pesanan';
+$current_page = 'invoice';
 $is_invoice = true;
 $body_class = 'font-sans antialiased bg-brand-slateBg print:bg-white';
 require_once __DIR__ . '/../layouts/header.php';
@@ -101,8 +101,8 @@ require_once __DIR__ . '/../layouts/header.php';
                                         <p class="text-xs font-medium text-slate-500"><?= htmlspecialchars($item['nama_layanan']) ?>: Rp <?= htmlspecialchars(number_format(($item['harga_satuan'] ?? 0), 0, ',', '.')) ?><br>Unyellowing: Rp 30.000<br>Express (1-2 Hari): Rp 10.000</p>
                                     </div>
                                     <div class="w-20 text-center font-medium text-slate-700">1</div>
-                                    <div class="w-32 text-right font-medium text-slate-700">Rp 70.000</div>
-                                    <div class="w-32 text-right font-extrabold text-slate-900">Rp 70.000</div>
+                                    <div class="w-32 text-right font-medium text-slate-700">Rp <?= htmlspecialchars(number_format(($item['harga_satuan'] ?? 0), 0, ',', '.')) ?></div>
+                                    <div class="w-32 text-right font-extrabold text-slate-900">Rp <?= htmlspecialchars(number_format(($item['subtotal'] ?? 0), 0, ',', '.')) ?></div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -110,7 +110,7 @@ require_once __DIR__ . '/../layouts/header.php';
                         <!-- Total Akhir -->
                         <div class="bg-slate-50 p-5 rounded-xl flex justify-between items-center border border-slate-100">
                             <p class="text-base font-bold text-slate-700">Total Akhir</p>
-                            <p class="text-3xl font-black text-slate-900">Rp 105.000</p>
+                            <p class="text-3xl font-black text-slate-900">Rp <?= htmlspecialchars(number_format(($pesanan['total_bayar'] ?? 0), 0, ',', '.')) ?></p>
                         </div>
 
                         <!-- Ketentuan & Footer -->
@@ -125,7 +125,7 @@ require_once __DIR__ . '/../layouts/header.php';
                     </div>
                 </div>
 
-                <p class="text-xs font-medium text-slate-400 print:hidden mt-2">Tombol dan navigasi tidak termasuk dalam hasil cetak.</p>
+                <!-- <p class="text-xs font-medium text-slate-400 print:hidden mt-2">Tombol dan navigasi tidak termasuk dalam hasil cetak.</p> -->
             </div>
     </main>
 </div>
