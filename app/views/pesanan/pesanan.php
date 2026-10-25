@@ -19,7 +19,7 @@ require_once __DIR__ . '/../layouts/header.php';
                 <div class="space-y-3 shrink-0">
                     <div class="relative">
                         <i class="fas fa-search absolute left-4 top-3.5 text-slate-400 text-sm"></i>
-                        <input type="text" id="order-search-input" class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="Cari ID / Nama Customer...">
+                        <input type="text" id="order-search-input" class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="Cari Kode Pesanan / Nama Customer...">
                     </div>
                     <div class="flex gap-2">
                         <select id="order-status-select" class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 outline-none">

@@ -90,7 +90,7 @@ require_once __DIR__ . '/../layouts/header.php';
                             <option value="QRIS">QRIS</option>
                         </select>
                     </div>
-                    <button type="button" onclick="alert('Pesanan Dibatalkan')" class="px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs transition">Batal</button>
+                    <button type="button" id="btn-batal" class="px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs transition">Batal</button>
                     <button type="submit" class="flex-1 sm:flex-none justify-center px-4 md:px-6 py-2.5 md:py-3 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 font-extrabold rounded-xl text-xs transition shadow-lg shadow-brand-yellow/30 flex items-center gap-2">
                         <i class="fas fa-check-circle"></i> <span class="whitespace-nowrap">Simpan Pesanan</span>
                     </button>
@@ -140,5 +140,23 @@ require_once __DIR__ . '/../layouts/header.php';
     window.LAYANAN_DATA = <?= json_encode(array_values(array_unique(array_column($layanan, 'kategori')))) ?>;
     window.TREATMENT_KECEPATAN = <?= json_encode($treatmentKecepatan) ?>;
     window.TREATMENT_TAMBAHAN = <?= json_encode($treatmentTambahan) ?>;
+
+    document.getElementById('btn-batal').addEventListener('click', function () {
+        Swal.fire({
+            title: 'Batalkan Pesanan?',
+            text: 'Data yang sudah kamu isi akan hilang jika belum disimpan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Batalkan',
+            cancelButtonText: 'Lanjut Mengisi',
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/pesanan';
+            }
+        });
+    });
 </script>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
