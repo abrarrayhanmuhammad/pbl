@@ -268,7 +268,7 @@ CREATE TABLE detail_pesanan (
     subtotal INTEGER NOT NULL CHECK (subtotal >= 0),
     status_pengerjaan VARCHAR(30) NOT NULL DEFAULT 'Menunggu',
     foto_before VARCHAR(255),
-    foto_after VARCHAR(255),
+    foto_sesudah VARCHAR(255),
     catatan TEXT
 );
 

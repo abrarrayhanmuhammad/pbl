@@ -65,7 +65,7 @@ require_once __DIR__ . '/../layouts/header.php';
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-1.5">TANGGAL SELESAI</label>
-                        <input name="tgl_selesai" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="dd/mm/yyyy" <?= ($pesanan['status'] ?? '') !== 'Selesai' ? 'disabled' : '' ?>>
+                        <input name="tgl_selesai" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="dd/mm/yyyy" value="<?= htmlspecialchars(date('Y-m-d', strtotime($pesanan['tanggal_selesai']))) ?>" <?= ($pesanan['status'] ?? '') !== 'Selesai' ? 'readonly' : '' ?>>
                         <p class="text-[10px] text-amber-600 font-semibold mt-1.5">
                             Tanggal selesai hanya dapat diubah jika status pesanan sudah Selesai.
                         </p>

@@ -707,6 +707,11 @@ class PesananController
         $uploadedFiles = [];
         $fotoUntukDihapus = [];
 
+        if ($_POST['status'] !== 'Selesai' && $_POST['status'] !== 'Diambil') {
+             $tglSelesai = null;
+        }
+
+
         $validDate = static function ($date): bool {
             if (!is_string($date) || $date === '') {
                 return false;

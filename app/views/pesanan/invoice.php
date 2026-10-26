@@ -77,7 +77,11 @@ require_once __DIR__ . '/../layouts/header.php';
                             <p class="text-sm font-medium text-slate-500">Drop Point: <?= htmlspecialchars($pesanan['alamat_lokasi']) ?></p>
                         </div>
                         <div class="text-right space-y-2">
-                            <div class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold mb-1">LUNAS - QRIS</div>
+                            <?php if ($pesanan['status_bayar'] === 'Belum Bayar'): ?>
+                                <div class="inline-block px-3 py-1 rounded-md text-xs font-bold mb-1"><?= htmlspecialchars($pesanan['status_bayar']) ?> - <?= htmlspecialchars($pesanan['metode_bayar']) ?></div>
+                            <?php else: ?>
+                                <div class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold mb-1"><?= htmlspecialchars($pesanan['status_bayar']) ?> - <?= htmlspecialchars($pesanan['metode_bayar']) ?></div>
+                            <?php endif; ?>
                             <p class="text-sm font-medium text-slate-500">Status: <?= htmlspecialchars($pesanan['status']) ?></p>
                             <p class="text-sm font-medium text-slate-500">Tanggal Selesai: <?= ($pesanan['tanggal_selesai'] === '' ? htmlspecialchars($pesanan['tanggal_selesai']) : 'Belum Selesai') ?></p>
                         </div>
