@@ -689,7 +689,6 @@ class PesananController
         $noWa = trim($_POST['no_wa'] ?? '');
         $tglMasuk = $_POST['tgl_masuk'] ?? '';
         $tglSelesai = $_POST['tgl_selesai'] ?? null;
-        $metodeBayar = $_POST['metode_pembayaran'] ?? '';
         $dropPoint = $_POST['drop_point'] ?? '';
 
         $status = $_POST['status'] ?? null;
@@ -739,10 +738,6 @@ class PesananController
             }
         } else {
             $tglSelesai = null;
-        }
-
-        if (!in_array($metodeBayar, ['Cash', 'Transfer', 'QRIS'], true)) {
-            exit('Metode pembayaran tidak valid.');
         }
 
         if (
@@ -819,7 +814,7 @@ class PesananController
             $this->db->beginTransaction();
 
             $stmt = $this->db->prepare(
-                'SELECT id_pesanan, id_customer
+                'SELECT id_pesanan, id_customer, metode_bayar
              FROM pesanan
              WHERE id_pesanan = :id
              FOR UPDATE'
@@ -964,7 +959,6 @@ class PesananController
                  id_drop_point = :drop_point,
                  tanggal_masuk = :masuk,
                  tanggal_selesai = :selesai,
-                 metode_bayar = :metode,
                  status = COALESCE(:status, status),
                  status_bayar = COALESCE(:status_bayar, status_bayar)
              WHERE id_pesanan = :id'
@@ -975,7 +969,6 @@ class PesananController
                 'drop_point' => $dropPoint !== '' ? $dropPoint : null,
                 'masuk' => $tglMasuk,
                 'selesai' => $tglSelesai,
-                'metode' => $metodeBayar,
                 'status' => $status,
                 'status_bayar' => $statusBayar,
                 'id' => $idPesanan,
