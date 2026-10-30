@@ -65,6 +65,14 @@ require_once __DIR__ . '/../layouts/header.php';
                 <button type="button" id="togglePassword" class="absolute right-4 top-10 text-slate-400 hover:text-slate-600 focus:outline-none">
                     <i class="fas fa-eye"></i>
                 </button>
+
+            <!-- lupa password -zahra -->
+                <div class="flex justify-end mt-2">
+                    <a href="/forgot-password" class="text-xs" font bold text-slate-500 hover:text-slate-800 transition-colors">
+                Lupa Password?
+            </a>
+                </div>
+
             </div>
             <button type="submit" class="w-full py-4 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 font-extrabold text-sm rounded-xl transition-all shadow-lg shadow-brand-yellow/30 mt-4 tracking-wide border border-slate-900/10">
                 Login
