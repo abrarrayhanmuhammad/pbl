@@ -263,11 +263,9 @@ require_once __DIR__ . '/../layouts/header.php';
             <div class="flex items-center gap-2 md:gap-4 w-full sm:w-auto justify-end">
                 <div class="flex items-center gap-1.5 md:gap-2">
                     <span class="text-xs font-bold text-slate-500 hidden sm:inline">Metode pembayaran</span>
-                    <select name="metode_pembayaran" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 md:px-3 py-2 text-xs font-extrabold text-slate-800 outline-none">
-                        <option value="QRIS" <?= $pesanan['metode_bayar'] === 'QRIS' ? 'selected' : '' ?>>QRIS</option>
-                        <option value="Cash" <?= $pesanan['metode_bayar'] === 'Cash' ? 'selected' : '' ?>>Cash</option>
-                        <option value="Kartu" <?= $pesanan['metode_bayar'] === 'Kartu' ? 'selected' : '' ?>>Kartu</option>
-                    </select>
+                    <span class="bg-slate-100 border border-slate-200 rounded-xl px-2.5 md:px-3 py-2 text-xs font-extrabold text-slate-800">
+                        <?= htmlspecialchars($pesanan['metode_bayar'] ?? '-') ?>
+                    </span>
                 </div>
                 <a href="pesanan.php" class="px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs transition inline-flex items-center">Batal</a>
                 <button type="submit" class="flex-1 sm:flex-none justify-center px-4 md:px-6 py-2.5 md:py-3 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 font-extrabold rounded-xl text-xs transition shadow-lg shadow-brand-yellow/30 flex items-center gap-2">
