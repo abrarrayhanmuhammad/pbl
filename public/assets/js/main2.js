@@ -263,7 +263,7 @@ function initAddItemButton() {
 
                             ${(window.TREATMENT_KECEPATAN || []).map(item => `
                                 <label class="treatment-speed p-3 border border-slate-700 rounded-xl flex flex-col items-center justify-center cursor-pointer transition">
-                                    <input type="radio"name="speed[${newId}]" value="${item.id_treatment_tambahan}" data-price="${item.harga_min}" data-harga-max="${item.harga_max}" onchange="updateItemSubtotal(${newId})" class="text-brand-yellow mb-1">
+                                    <input type="radio" name="speed[${newId}]" value="${item.id_treatment_tambahan}" data-speed-name="${item.nama_treatment.toLowerCase()}" data-price="${item.harga_min}" data-harga-max="${item.harga_max}" onchange="updateItemSubtotal(${newId})" class="text-brand-yellow mb-1">
                                     <span class="speed-title text-[10px] font-bold text-slate-400">${item.nama_treatment}</span>
                                     <span class="text-[9px] text-slate-400">${item.keterangan || ''} • +Rp${Number(item.harga_min).toLocaleString('id-ID')}</span>
                                 </label>
@@ -374,7 +374,6 @@ function generateCategoryButtons(itemId) {
     });
 }
 
-
 function initEditAddItemButton() {
     const addBtn = document.querySelector('.add-edit-item-btn-trigger');
     if (!addBtn) return;
@@ -441,7 +440,7 @@ function initEditAddItemButton() {
 
                             ${(window.TREATMENT_KECEPATAN || []).map(item => `
                                 <label class="treatment-speed p-3 border border-slate-700 rounded-xl flex flex-col items-center justify-center cursor-pointer transition">
-                                    <input type="radio" name="speed[${newId}]" value="${item.id_treatment_tambahan}" data-price="${item.harga_min}" data-harga-max="${item.harga_max}" onchange="updateItemSubtotal(${newId})" class="text-brand-yellow mb-1">
+                                    <input type="radio" name="speed[${newId}]" value="${item.id_treatment_tambahan}" data-speed-name="${item.nama_treatment.toLowerCase()}" data-price="${item.harga_min}" data-harga-max="${item.harga_max}" onchange="updateItemSubtotal(${newId})" class="text-brand-yellow mb-1">
                                     <span class="speed-title text-[10px] font-bold text-slate-400">${item.nama_treatment}</span>
                                     <span class="text-[9px] text-slate-400">${item.keterangan || ''} • +Rp${Number(item.harga_min).toLocaleString('id-ID')}</span>
                                 </label>
@@ -527,7 +526,7 @@ function initEditAddItemButton() {
 
         renumberItems();
 
-        const finalId = Number(card.dataset.itemId);
+        const itemId = Number(card.dataset.itemId);
 
         const defaultCategory = window.LAYANAN_DATA?.[0] || 'Package';
 
@@ -536,16 +535,54 @@ function initEditAddItemButton() {
         card.dataset.selectedType = '';
         card.dataset.previousCategory = defaultCategory;
 
-        generateEditCategoryButtons(finalId);
-        loadServicesForItem(finalId, defaultCategory);
+        generateEditCategoryButtons(itemId);
+        loadServicesForItem(itemId, defaultCategory);
 
-        generateSpeedTreatments(finalId, 'reguler');
-        generateExtraTreatments(finalId, []);
+        generateSpeedTreatments(itemId, 'reguler');
+        generateExtraTreatments(itemId, []);
+
+        updateSpeedAvailability(itemId, defaultCategory);
 
         recalculateGrandTotal();
     });
 }
 
+function updateSpeedAvailability(itemId, category, recalculate = false) {
+    const container = document.querySelector(`#item-container-${itemId}`);
+    if (!container) return;
+
+    const normalizedCategory = String(category).trim().toLowerCase();
+    const isRestricted = ['repair', 'package'].includes(normalizedCategory);
+    const speedInputs = container.querySelectorAll(`input[name="speed[${itemId}]"]`);
+    let speedChanged = false;
+
+    speedInputs.forEach(input => {
+        const speedName = input.dataset.speedName || '';
+        const isRestrictedSpeed = speedName.includes('express') || speedName.includes('prioritas');
+
+        if (!isRestrictedSpeed) return;
+
+        input.disabled = isRestricted;
+
+        const label = input.closest('label');
+        if (label) {
+            label.classList.toggle('opacity-100', isRestricted);
+            label.classList.toggle('hover:border-slate-500', isRestricted);
+        }
+
+        if (isRestricted && input.checked) {
+            const reguler = container.querySelector(`input[name="speed[${itemId}]"][value="reguler"]`);
+            if (reguler) {
+                reguler.checked = true;
+                speedChanged = true;
+            }
+        }
+    });
+
+    if (recalculate && speedChanged) {
+        updateItemSubtotal(itemId);
+    }
+}
 
 function generateEditCategoryButtons(itemId) {
     const categories = window.LAYANAN_DATA || [];
@@ -1715,10 +1752,7 @@ function tampilkanDokumentasiFoto(barang) {
 }
 
 function generateSpeedTreatments(itemId, selectedTreatmentId = 'reguler') {
-    const container = document.querySelector(
-        `#item-container-${itemId} .speed-container`
-    );
-
+    const container = document.querySelector(`#item-container-${itemId} .speed-container`);
     if (!container) return;
 
     const treatments = window.TREATMENT_KECEPATAN || [];
@@ -1736,6 +1770,7 @@ function generateSpeedTreatments(itemId, selectedTreatmentId = 'reguler') {
 
     container.innerHTML = options.map(item => {
         const id = String(item.id_treatment_tambahan);
+        const name = String(item.nama_treatment).toLowerCase();
         const checked = id === String(selectedTreatmentId);
         const price = Number(item.harga_min || 0);
         const min = Number(item.estimasi_min_hari || 0);
@@ -1750,14 +1785,13 @@ function generateSpeedTreatments(itemId, selectedTreatmentId = 'reguler') {
                     type="radio"
                     name="speed[${itemId}]"
                     value="${id}"
+                    data-speed-name="${name}"
                     data-price="${price}"
                     ${checked ? 'checked' : ''}
                     onchange="updateItemSubtotal(${itemId})"
                     class="text-brand-yellow mb-1"
                 >
-                <span class="speed-title text-[10px] font-bold ${checked ? 'text-brand-yellow' : 'text-slate-400'
-            }">${item.nama_treatment}</span>
-
+                <span class="speed-title text-[10px] font-bold ${checked ? 'text-brand-yellow' : 'text-slate-400'}">${item.nama_treatment}</span>
                 ${id !== 'reguler' ? `
                     <span class="text-[9px] text-slate-400">
                         ${min}–${max} Hari • +${price.toLocaleString('id-ID')}
@@ -1766,6 +1800,11 @@ function generateSpeedTreatments(itemId, selectedTreatmentId = 'reguler') {
             </label>
         `;
     }).join('');
+
+    const card = document.querySelector(`#item-container-${itemId}`);
+    if (card) {
+        updateSpeedAvailability(itemId, card.dataset.selectedCategory || '');
+    }
 }
 
 function generateExtraTreatments(itemId, selectedTreatmentIds = []) {
@@ -1956,6 +1995,16 @@ function initCustomerEditDropdown() {
         if (!container.contains(event.target)) closeDropdown();
     });
 }
+
+document.addEventListener('click', function (event) {
+    const button = event.target.closest('.cat-btn');
+    if (!button) return;
+
+    const container = button.closest('.item-dark-container');
+    if (!container) return;
+
+    updateSpeedAvailability(container.dataset.itemId, button.dataset.category, true);
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('KickDropShoe Engine Loaded.');
