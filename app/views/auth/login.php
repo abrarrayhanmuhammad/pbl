@@ -56,12 +56,12 @@ require_once __DIR__ . '/../layouts/header.php';
                 <?php unset($_SESSION['error']); ?>
             <?php endif; ?>
             <div>
-                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">Username / Email</label>
-                <input type="text" name="username" id="username" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-yellow" value="admin@kickdrop.com" required>
+                <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">Username</label>
+                <input type="text" name="username" id="username" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="Masukan username..." required>
             </div>
             <div class="relative">
                 <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">Password</label>
-                <input type="password" name="password" id="password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-yellow" value="password123" required>
+                <input type="password" name="password" id="password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="Masukan password..."  required>
                 <button type="button" id="togglePassword" class="absolute right-4 top-10 text-slate-400 hover:text-slate-600 focus:outline-none">
                     <i class="fas fa-eye"></i>
                 </button>

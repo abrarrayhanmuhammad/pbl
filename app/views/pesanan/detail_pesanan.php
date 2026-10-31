@@ -24,9 +24,17 @@ require_once __DIR__ . '/../layouts/header.php';
                         <i class="fas fa-edit"></i> Edit Pesanan
                     </a>
                     <?php if ($user_role === 'superadmin'): ?>
-                        <button type="button" onclick="if(confirm('Yakin ingin menghapus pesanan ini?')) window.location.href='pesanan.php';" class="flex-1 sm:flex-none justify-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
-                            <i class="fas fa-trash"></i> Hapus
-                        </button>
+                         <?php
+                            $pesananAda = !empty($pesanan) && !empty($pesanan['id_pesanan']);
+                        ?>
+                        <form action="/pesanan/hapus" method="POST" id="form-hapus-pesanan">
+                            <input type="hidden" name="id_pesanan" value="<?= $pesananAda ? (int) $pesanan['id_pesanan'] : '' ?>">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+
+                            <button type="submit" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2" <?= !$pesananAda ? 'disabled' : '' ?>>
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </form>
                     <?php endif; ?>
                 </div>
             </div>
@@ -260,5 +268,27 @@ require_once __DIR__ . '/../layouts/header.php';
             }
         });
     }
+
+    document.getElementById('form-hapus-pesanan').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const form = this;
+
+        Swal.fire({
+            title: 'Hapus Pesanan?',
+            text: 'Data pesanan yang dihapus tidak dapat dikembalikan!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
 </script>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

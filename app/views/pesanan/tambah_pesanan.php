@@ -33,40 +33,80 @@ require_once __DIR__ . '/../layouts/header.php';
                     <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                         <i class="fas fa-user-circle text-slate-400"></i> Informasi Pelanggan
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">NAMA PELANGGAN</label>
-                            <input type="text" name="nama_pelanggan" id="nama_pelanggan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="Masukkan nama" required>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                        <div class="relative" id="customer-field">
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                                NAMA PELANGGAN
+                            </label>
+
+                            <div class="relative">
+                                <input type="text" name="nama_pelanggan" id="nama_pelanggan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-xs font-semibold text-slate-800 outline-none focus:border-yellow-400" placeholder="Pilih atau masukkan nama pelanggan" autocomplete="off" required>
+
+                                <button type="button"  id="toggle-customer-dropdown" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </button>
+                            </div>
+
+                            <div id="customer-dropdown" class="hidden absolute z-50 top-full left-0 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
+                                <div class="max-h-52 overflow-y-auto" id="customer-list">
+                                    <?php foreach ($customer as $pelanggan): ?>
+                                        <button type="button"  class="customer-option w-full text-left px-4 py-3 hover:bg-yellow-50 border-b border-slate-100 last:border-0 transition" data-nama="<?= htmlspecialchars($pelanggan['nama']) ?>" data-no-wa="<?= htmlspecialchars($pelanggan['no_hp']) ?>">
+                                            <p class="text-xs font-bold text-slate-800">
+                                                <?= htmlspecialchars($pelanggan['nama']) ?>
+                                            </p>
+                                            <p class="text-[10px] text-slate-400 mt-1">
+                                                <?= htmlspecialchars($pelanggan['no_hp']) ?>
+                                            </p>
+                                        </button>
+                                    <?php endforeach; ?>
+
+                                    <div id="customer-empty"  class="hidden px-4 py-4 text-center text-xs text-slate-400">
+                                        Pelanggan tidak ditemukan.
+                                        <br>
+                                        Silakan masukkan pelanggan baru.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
                         <div>
-                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">NO WHATSAPP</label>
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                                NO WHATSAPP
+                            </label>
                             <input type="text" name="no_wa" id="no_wa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="08..." required>
                         </div>
+
                         <div>
-                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">DROP POINT</label>
-                            <select name="drop_point" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none">
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                                DROP POINT
+                            </label>
+                            <select name="drop_point"  class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none">
                                 <?php foreach ($dropPoint as $item): ?>
-                                    <option value="<?= $item['id_drop_point'] ?>"><?= $item['alamat_lokasi'] ?></option>
+                                    <option value="<?= $item['id_drop_point'] ?>">
+                                        <?= htmlspecialchars($item['alamat_lokasi']) ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 pt-2">
+
                         <div>
-                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">TANGGAL MASUK</label>
+                            <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+                                TANGGAL MASUK
+                            </label>
                             <div class="relative">
-                                <input name="tgl_masuk" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="dd/mm/yyyy" required>
-                                <!-- <i class="far fa-calendar absolute right-3.5 top-3.5 text-slate-400 text-xs"></i> -->
+                                <input name="tgl_masuk"  type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="dd/mm/yyyy" required>
                             </div>
                         </div>
-                        <div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 pt-2">
+                        <!-- <div>
                             <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">TANGGAL SELESAI</label>
                             <div class="relative">
                                 <input name="tgl_selesai" type="date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none" placeholder="dd/mm/yyyy">
-                                <!-- <i class="far fa-calendar absolute right-3.5 top-3.5 text-slate-400 text-xs"></i> -->
+                                <i class="far fa-calendar absolute right-3.5 top-3.5 text-slate-400 text-xs"></i>
                             </div>
                             <p class="text-[9px] text-slate-400 font-medium mt-1">Diisi saat pengerjaan selesai</p>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 
@@ -141,7 +181,7 @@ require_once __DIR__ . '/../layouts/header.php';
     window.TREATMENT_KECEPATAN = <?= json_encode($treatmentKecepatan) ?>;
     window.TREATMENT_TAMBAHAN = <?= json_encode($treatmentTambahan) ?>;
 
-    document.getElementById('btn-batal').addEventListener('click', function () {
+    document.getElementById('btn-batal').addEventListener('click', function() {
         Swal.fire({
             title: 'Batalkan Pesanan?',
             text: 'Data yang sudah kamu isi akan hilang jika belum disimpan.',
@@ -155,6 +195,23 @@ require_once __DIR__ . '/../layouts/header.php';
         }).then((result) => {
             if (result.isConfirmed) {
                 window.location.href = '/pesanan';
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputNama = document.getElementById('nama_pelanggan');
+        const inputWa = document.getElementById('no_wa');
+        const daftarPelanggan = document.getElementById('daftar-pelanggan');
+
+        inputNama.addEventListener('change', function() {
+            const pilihan = Array.from(daftarPelanggan.options).find(option => {
+                return option.value === this.value.trim();
+            });
+
+            if (pilihan) {
+                this.value = pilihan.dataset.nama;
+                inputWa.value = pilihan.dataset.noWa;
             }
         });
     });

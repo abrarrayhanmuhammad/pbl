@@ -414,11 +414,11 @@ function initEditAddItemButton() {
 
                     <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800/80 space-y-3">
                         <label class="block text-[10px] font-extrabold text-brand-yellow uppercase tracking-wider">KATEGORI & LAYANAN UTAMA</label>
-                        
-                        <div class="category-buttons grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        </div>
+
+                        <div class="category-buttons grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
 
                         <p class="category-caption text-[9px] text-slate-500 font-semibold">Deep Clean Shoes Care</p>
+
                         <div>
                             <select name="layanan_id[${newId}]" id="service-select-${newId}" onchange="updateItemSubtotal(${newId})" class="service-select w-full bg-brand-darkInput border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white outline-none font-semibold" required>
                                 <option value="" selected>Pilih Layanan</option>
@@ -432,18 +432,16 @@ function initEditAddItemButton() {
                 <div class="space-y-4 flex flex-col justify-between">
                     <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
                         <label class="block text-[10px] font-extrabold text-brand-yellow uppercase tracking-wider">EXTRA TREATMENT</label>
-                        
-                        <div class="grid grid-cols-3 gap-2">
 
+                        <div class="grid grid-cols-3 gap-2">
                             <label class="p-3 border-2 border-brand-yellow bg-brand-yellow/10 rounded-xl flex flex-col items-center justify-center cursor-pointer transition">
                                 <input type="radio" name="speed[${newId}]" value="reguler" data-price="0" checked onchange="updateItemSubtotal(${newId})" class="text-brand-yellow mb-1">
                                 <span class="speed-title text-[10px] font-bold text-brand-yellow">Reguler</span>
                             </label>
 
-
                             ${(window.TREATMENT_KECEPATAN || []).map(item => `
                                 <label class="treatment-speed p-3 border border-slate-700 rounded-xl flex flex-col items-center justify-center cursor-pointer transition">
-                                    <input type="radio"name="speed[${newId}]" value="${item.id_treatment_tambahan}" data-price="${item.harga_min}" data-harga-max="${item.harga_max}" onchange="updateItemSubtotal(${newId})" class="text-brand-yellow mb-1">
+                                    <input type="radio" name="speed[${newId}]" value="${item.id_treatment_tambahan}" data-price="${item.harga_min}" data-harga-max="${item.harga_max}" onchange="updateItemSubtotal(${newId})" class="text-brand-yellow mb-1">
                                     <span class="speed-title text-[10px] font-bold text-slate-400">${item.nama_treatment}</span>
                                     <span class="text-[9px] text-slate-400">${item.keterangan || ''} • +Rp${Number(item.harga_min).toLocaleString('id-ID')}</span>
                                 </label>
@@ -522,11 +520,14 @@ function initEditAddItemButton() {
         </div>
         `;
 
-
         addBtn.insertAdjacentHTML('beforebegin', template);
 
         const card = document.querySelector(`#item-container-${newId}`);
         if (!card) return;
+
+        renumberItems();
+
+        const finalId = Number(card.dataset.itemId);
 
         const defaultCategory = window.LAYANAN_DATA?.[0] || 'Package';
 
@@ -535,13 +536,12 @@ function initEditAddItemButton() {
         card.dataset.selectedType = '';
         card.dataset.previousCategory = defaultCategory;
 
-        generateEditCategoryButtons(newId);
-        loadServicesForItem(newId, defaultCategory);
+        generateEditCategoryButtons(finalId);
+        loadServicesForItem(finalId, defaultCategory);
 
-        generateSpeedTreatments(newId, 'reguler');
-        generateExtraTreatments(newId, []);
+        generateSpeedTreatments(finalId, 'reguler');
+        generateExtraTreatments(finalId, []);
 
-        initPhotoUploads();
         recalculateGrandTotal();
     });
 }
@@ -576,7 +576,13 @@ function generateEditCategoryButtons(itemId) {
         button.textContent = category;
 
         button.addEventListener('click', () => {
-            selectEditCategory(itemId, category);
+            const currentCard = button.closest('.item-dark-container');
+
+            if (!currentCard) return;
+
+            const currentId = Number(currentCard.dataset.itemId);
+
+            selectEditCategory(currentId, category);
         });
 
         container.appendChild(button);
@@ -668,6 +674,28 @@ function selectEditCategory(itemId, category) {
     updateItemSubtotal(itemId);
 }
 
+function deleteEditItemCard(id) {
+    const card = document.getElementById(`item-container-${id}`);
+
+    if (!card) return;
+
+    const hiddenIdInput = card.previousElementSibling;
+
+    if (
+        hiddenIdInput &&
+        hiddenIdInput.matches('input[name^="id_detail_pesanan["]')
+    ) {
+        hiddenIdInput.remove();
+    }
+
+    card.remove();
+
+    requestAnimationFrame(() => {
+        renumberItems();
+        recalculateGrandTotal();
+    });
+}
+
 function deleteItemCard(id) {
     const card = document.getElementById(`item-container-${id}`);
 
@@ -678,37 +706,59 @@ function deleteItemCard(id) {
     }
 }
 
-function deleteEditItemCard(id) {
-    const card = document.getElementById(`item-container-${id}`);
-
-    if (card) {
-        card.remove();
-        recalculateGrandTotal();
-    }
-}
 
 function renumberItems() {
-    const itemCards = document.querySelectorAll('.item-dark-container');
+    const itemCards = Array.from(
+        document.querySelectorAll('.item-dark-container')
+    );
 
     itemCards.forEach((card, index) => {
-        const newId = index + 1;
+        const newId = String(index + 1);
+
+        const hiddenIdInput = card.previousElementSibling;
+
+        if (
+            hiddenIdInput &&
+            hiddenIdInput.matches('input[name^="id_detail_pesanan["]')
+        ) {
+            hiddenIdInput.name = `id_detail_pesanan[${newId}]`;
+        }
+
+        card.querySelectorAll('[name]').forEach(element => {
+            if (element.name) {
+                element.name = element.name.replace(
+                    /\[\d+\]/,
+                    `[${newId}]`
+                );
+            }
+        });
 
         card.id = `item-container-${newId}`;
         card.dataset.itemId = newId;
 
         const numberElement = card.querySelector('h3 span');
+
         if (numberElement) {
             numberElement.textContent = newId;
         }
 
-        const subtotal = card.querySelector('.subtotal-val');
-        if (subtotal) {
-            subtotal.id = `subtotal-val-${newId}`;
-        }
+        card.querySelectorAll('[id]').forEach(element => {
+            if (element.id) {
+                element.id = element.id.replace(
+                    /-\d+$/,
+                    `-${newId}`
+                );
+            }
+        });
 
-        const serviceSelect = card.querySelector('.service-select');
-        if (serviceSelect) {
-            serviceSelect.id = `service-select-${newId}`;
+        card.querySelectorAll('[data-item-id]').forEach(element => {
+            element.dataset.itemId = newId;
+        });
+
+        const tipeInput = card.querySelector('.tipe-layanan');
+
+        if (tipeInput) {
+            tipeInput.name = `tipe_layanan[${newId}]`;
         }
 
         card.querySelectorAll('input[type="radio"]').forEach(radio => {
@@ -716,36 +766,46 @@ function renumberItems() {
         });
 
         card.querySelectorAll('input[type="checkbox"][data-price]').forEach(input => {
-            input.classList.remove(...Array.from(input.classList).filter(c => c.startsWith('extra-check-')));
+            input.classList.remove(
+                ...Array.from(input.classList).filter(className =>
+                    className.startsWith('extra-check-')
+                )
+            );
+
             input.classList.add(`extra-check-${newId}`);
         });
 
-        const deleteButton = card.querySelector('button[onclick^="deleteItemCard"]');
+        const deleteButton = card.querySelector('button[onclick*="ItemCard"]');
+
         if (deleteButton) {
-            deleteButton.setAttribute('onclick', `deleteItemCard(${newId})`);
+            const isEdit = deleteButton.getAttribute('onclick')
+                .includes('deleteEditItemCard');
+
+            deleteButton.setAttribute(
+                'onclick',
+                `${isEdit ? 'deleteEditItemCard' : 'deleteItemCard'}(${newId})`
+            );
         }
 
-        card.querySelectorAll('[onchange*="updateItemSubtotal"]').forEach(element => {
-            element.setAttribute(
-                'onchange',
-                element.getAttribute('onchange').replace(
-                    /updateItemSubtotal\(\d+\)/g,
-                    `updateItemSubtotal(${newId})`
-                )
-            );
-        });
+        card.querySelectorAll('[onchange]').forEach(element => {
+            const onchange = element.getAttribute('onchange');
 
-        card.querySelectorAll('[id]').forEach(element => {
-            if (element.id.startsWith('subtotal-val-')) {
-                element.id = `subtotal-val-${newId}`;
+            if (onchange && onchange.includes('updateItemSubtotal')) {
+                element.setAttribute(
+                    'onchange',
+                    onchange.replace(
+                        /updateItemSubtotal\(\d+\)/g,
+                        `updateItemSubtotal(${newId})`
+                    )
+                );
             }
         });
     });
 
     itemCounter = itemCards.length;
 }
-
 // 5. Photo Upload Preview Simulation
+
 function initPhotoUploads() {
     const sheet = document.getElementById('photo-source-sheet');
     const panel = document.getElementById('photo-source-panel');
@@ -898,7 +958,55 @@ function initPhotoUploads() {
 
     cancelBtn.addEventListener('click', tutupSheet);
     backdrop.addEventListener('click', tutupSheet);
+
+    document.addEventListener('submit', function (event) {
+        const form = event.target;
+
+        if (!form.matches('form')) return;
+
+        const containers = form.querySelectorAll('.item-dark-container');
+
+        for (const container of containers) {
+            const itemId = String(container.dataset.itemId);
+
+            const existingPhoto = container.querySelector(
+                '.upload-box-trigger img'
+            );
+
+            if (existingPhoto) {
+                continue;
+            }
+
+            const input = form.querySelector(
+                `input[data-before-upload="true"][data-item-id="${itemId}"]`
+            );
+
+            if (!input || !input.files || input.files.length === 0) {
+                event.preventDefault();
+
+                Swal.fire({
+                    title: 'Foto Belum Diunggah!',
+                    text: 'Silakan unggah foto Before untuk setiap barang sebelum menyimpan pesanan.',
+                    icon: 'warning',
+                    confirmButtonColor: '#2563eb',
+                    confirmButtonText: 'Mengerti'
+                });
+
+                const box = container.querySelector('.upload-box-trigger');
+
+                if (box) {
+                    box.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+
+                return;
+            }
+        }
+    });
 }
+
 
 function initPhotoAfterUploads() {
     const sheet = document.getElementById('photo-source-sheet-edit');
@@ -1030,6 +1138,54 @@ function initPhotoAfterUploads() {
         activeItemId = String(itemId);
 
         bukaSheet();
+    });
+
+    document.addEventListener('submit', function (event) {
+        const form = event.target;
+
+        if (form.id !== 'form-pesanan') return;
+
+        const status = form.querySelector('[name="status"]')?.value;
+
+        if (!['Selesai', 'Diambil'].includes(status)) return;
+
+        const itemCards = form.querySelectorAll('.item-dark-container');
+        const afterContainers = Array.from(
+            form.querySelectorAll('.item-foto-after-container')
+        );
+
+        for (const itemCard of itemCards) {
+            const itemId = itemCard.dataset.itemId;
+
+            const afterContainer = afterContainers.find(
+                container => container.dataset.itemId === itemId
+            );
+
+            const afterBox = afterContainer?.querySelector(
+                '.upload-box-trigger-after'
+            );
+
+            const fotoAfter = afterBox?.querySelector('img');
+
+            if (!fotoAfter) {
+                event.preventDefault();
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Foto After Belum Lengkap',
+                    text: `Upload semua foto After sebelum status menjadi ${status}.`,
+                    confirmButtonText: 'Mengerti',
+                    confirmButtonColor: '#2563eb'
+                }).then(() => {
+                    afterBox?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                });
+
+                return;
+            }
+        }
     });
 
     cameraBtn.addEventListener('click', function () {
@@ -1656,6 +1812,151 @@ function generateExtraTreatments(itemId, selectedTreatmentIds = []) {
     }).join('');
 }
 
+function initCustomerDropdown() {
+    const container = document.getElementById('customer-field');
+    const inputNama = document.getElementById('nama_pelanggan');
+    const inputWa = document.getElementById('no_wa');
+    const dropdown = document.getElementById('customer-dropdown');
+    const toggleButton = document.getElementById('toggle-customer-dropdown');
+    const options = document.querySelectorAll('.customer-option');
+    const emptyMessage = document.getElementById('customer-empty');
+
+    if (!container || !inputNama || !inputWa || !dropdown || !toggleButton) return;
+
+    function filterCustomers() {
+        const keyword = inputNama.value.toLowerCase().trim();
+        let found = 0;
+
+        options.forEach(option => {
+            const nama = option.dataset.nama.toLowerCase();
+            const noWa = option.dataset.noWa.toLowerCase();
+
+            const cocok = nama.includes(keyword) || noWa.includes(keyword);
+
+            option.classList.toggle('hidden', !cocok);
+
+            if (cocok) found++;
+        });
+
+        emptyMessage.classList.toggle('hidden', found > 0);
+    }
+
+    function openDropdown() {
+        dropdown.classList.remove('hidden');
+        filterCustomers();
+    }
+
+    function closeDropdown() {
+        dropdown.classList.add('hidden');
+    }
+
+    inputNama.addEventListener('focus', openDropdown);
+
+    inputNama.addEventListener('input', function () {
+        openDropdown();
+
+        const namaSaatIni = this.value.trim();
+
+        const pelanggan = Array.from(options).find(option => {
+            return option.dataset.nama === namaSaatIni;
+        });
+
+        if (!pelanggan) {
+            inputWa.value = '';
+        }
+    });
+
+    toggleButton.addEventListener('click', function () {
+        if (dropdown.classList.contains('hidden')) {
+            openDropdown();
+            inputNama.focus();
+        } else {
+            closeDropdown();
+        }
+    });
+
+    options.forEach(option => {
+        option.addEventListener('click', function () {
+            inputNama.value = this.dataset.nama;
+            inputWa.value = this.dataset.noWa;
+
+            closeDropdown();
+        });
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!container.contains(event.target)) {
+            closeDropdown();
+        }
+    });
+}
+
+function initCustomerEditDropdown() {
+    const container = document.getElementById('customer-edit-field');
+    const inputNama = document.getElementById('nama_customer');
+    const inputWa = document.getElementById('no_wa');
+    const dropdown = document.getElementById('customer-edit-dropdown');
+    const toggleButton = document.getElementById('toggle-customer-edit-dropdown');
+    const options = document.querySelectorAll('.customer-edit-option');
+    const emptyMessage = document.getElementById('customer-edit-empty');
+
+    if (!container || !inputNama || !inputWa || !dropdown || !toggleButton) return;
+
+    function filterCustomers() {
+        const keyword = inputNama.value.toLowerCase().trim();
+        let found = 0;
+
+        options.forEach(option => {
+            const nama = option.dataset.nama.toLowerCase();
+            const noWa = option.dataset.noWa.toLowerCase();
+            const cocok = nama.includes(keyword) || noWa.includes(keyword);
+            option.classList.toggle('hidden', !cocok);
+            if (cocok) found++;
+        });
+
+        emptyMessage.classList.toggle('hidden', found > 0);
+    }
+
+    function openDropdown() {
+        dropdown.classList.remove('hidden');
+        filterCustomers();
+    }
+
+    function closeDropdown() {
+        dropdown.classList.add('hidden');
+    }
+
+    inputNama.addEventListener('focus', openDropdown);
+
+    inputNama.addEventListener('input', function () {
+        openDropdown();
+        const namaSaatIni = this.value.trim();
+        const pelanggan = Array.from(options).find(option => option.dataset.nama === namaSaatIni);
+        if (!pelanggan) inputWa.value = '';
+    });
+
+    toggleButton.addEventListener('click', function () {
+        if (dropdown.classList.contains('hidden')) {
+            openDropdown();
+            inputNama.focus();
+        } else {
+            closeDropdown();
+        }
+    });
+
+    options.forEach(option => {
+        option.addEventListener('click', function () {
+            inputNama.value = this.dataset.nama;
+            inputWa.value = this.dataset.noWa;
+            closeDropdown();
+        });
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!container.contains(event.target)) closeDropdown();
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('KickDropShoe Engine Loaded.');
 
@@ -1691,4 +1992,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initAddItemButton();
     initEditAddItemButton();
     recalculateGrandTotal();
+    initCustomerDropdown();
+    initCustomerEditDropdown();
 });

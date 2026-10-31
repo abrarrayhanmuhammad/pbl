@@ -4,6 +4,7 @@ require_once __DIR__ . '/../models/Pesanan.php';
 require_once __DIR__ . '/../models/DropPoint.php';
 require_once __DIR__ . '/../models/Layanan.php';
 require_once __DIR__ . '/../models/TreatmentTambahan.php';
+require_once __DIR__ . '/../models/Customer.php';
 
 class PesananController
 {
@@ -12,6 +13,7 @@ class PesananController
     private DropPoint $dropPointModel;
     private Layanan $layananModel;
     private TreatmentTambahan $treatmentTambahanModel;
+    private Customer $customerModel;
 
     public function __construct(PDO $db)
     {
@@ -20,6 +22,7 @@ class PesananController
         $this->dropPointModel = new DropPoint($db);
         $this->layananModel = new Layanan($db);
         $this->treatmentTambahanModel = new TreatmentTambahan($db);
+        $this->customerModel = new Customer($db);
     }
 
     public function index(): void
@@ -46,6 +49,7 @@ class PesananController
         $getAllLayanan = $this->layananModel->getAllLayanan();
         $getAllPaket = $this->layananModel->getAllPaket();
         $treatment = $this->treatmentTambahanModel->getTreatmentTambahan();
+        $customer = $this->customerModel->getAllCustomer();
 
         $treatmentKecepatan = $treatment['kecepatan'];
         $treatmentTambahan = $treatment['tambahan'];
@@ -360,64 +364,66 @@ class PesananController
                 $files = $_FILES['foto_before'] ?? null;
 
                 if (
-                    is_array($files) &&
-                    isset($files['error'][$id]) &&
-                    $files['error'][$id] !== UPLOAD_ERR_NO_FILE
+                    !is_array($files) ||
+                    !isset($files['error'][$id]) ||
+                    $files['error'][$id] === UPLOAD_ERR_NO_FILE
                 ) {
-                    $error = $files['error'][$id];
-
-                    if ($error !== UPLOAD_ERR_OK) {
-                        throw new RuntimeException('Upload foto gagal.');
-                    }
-
-                    $tmpName = $files['tmp_name'][$id];
-                    $size = (int) $files['size'][$id];
-
-                    if (
-                        !is_uploaded_file($tmpName) ||
-                        $size < 1 ||
-                        $size > 5 * 1024 * 1024
-                    ) {
-                        throw new RuntimeException(
-                            'Foto tidak valid atau melebihi 5 MB.'
-                        );
-                    }
-
-                    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmpName);
-
-                    $extensions = [
-                        'image/jpeg' => 'jpg',
-                        'image/png' => 'png',
-                        'image/webp' => 'webp'
-                    ];
-
-                    if (!isset($extensions[$mime])) {
-                        throw new RuntimeException(
-                            'Foto harus JPG, PNG, atau WEBP.'
-                        );
-                    }
-
-                    $folder = dirname(__DIR__, 2) . '/public/uploads/pesanan/before';
-
-                    if (!is_dir($folder) && !mkdir($folder, 0755, true)) {
-                        throw new RuntimeException(
-                            'Folder upload gagal dibuat.'
-                        );
-                    }
-
-                    $filename = bin2hex(random_bytes(16))
-                        . '.'
-                        . $extensions[$mime];
-
-                    $destination = $folder . '/' . $filename;
-
-                    if (!move_uploaded_file($tmpName, $destination)) {
-                        throw new RuntimeException('Foto gagal disimpan.');
-                    }
-
-                    $fotoPath = 'uploads/pesanan/before/' . $filename;
-                    $uploadedFiles[] = $destination;
+                    throw new RuntimeException(
+                        'Foto Before wajib diunggah untuk setiap barang.'
+                    );
                 }
+
+                $error = $files['error'][$id];
+
+                if ($error !== UPLOAD_ERR_OK) {
+                    throw new RuntimeException('Upload foto gagal.');
+                }
+
+                $tmpName = $files['tmp_name'][$id];
+                $size = (int) $files['size'][$id];
+
+                if (
+                    !is_uploaded_file($tmpName) ||
+                    $size < 1 ||
+                    $size > 5 * 1024 * 1024
+                ) {
+                    throw new RuntimeException(
+                        'Foto tidak valid atau melebihi 5 MB.'
+                    );
+                }
+
+                $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmpName);
+
+                $extensions = [
+                    'image/jpeg' => 'jpg',
+                    'image/png' => 'png',
+                    'image/webp' => 'webp'
+                ];
+
+                if (!isset($extensions[$mime])) {
+                    throw new RuntimeException(
+                        'Foto harus JPG, PNG, atau WEBP.'
+                    );
+                }
+
+                $folder = dirname(__DIR__, 2) . '/public/uploads/pesanan/before';
+
+                if (!is_dir($folder) && !mkdir($folder, 0755, true)) {
+                    throw new RuntimeException(
+                        'Folder upload gagal dibuat.'
+                    );
+                }
+
+                $filename = bin2hex(random_bytes(16)) . '.' . $extensions[$mime];
+
+                $destination = $folder . '/' . $filename;
+
+                if (!move_uploaded_file($tmpName, $destination)) {
+                    throw new RuntimeException('Foto gagal disimpan.');
+                }
+
+                $fotoPath = 'uploads/pesanan/before/' . $filename;
+                $uploadedFiles[] = $destination;
 
 
                 $stmtDetail->execute([
@@ -642,6 +648,7 @@ class PesananController
 
             $treatmentKecepatan = $treatment['kecepatan'];
             $treatmentTambahan = $treatment['tambahan'];
+            $customer = $this->customerModel->getAllCustomer();
 
             require_once __DIR__ . '/../views/pesanan/edit_pesanan.php';
         } catch (\Throwable $e) {
@@ -685,6 +692,11 @@ class PesananController
             exit('ID pesanan tidak valid.');
         }
 
+        // echo '<pre>';
+        // print_r($_POST);
+        // echo '</pre>';
+        // exit;
+
         $nama = trim($_POST['nama_customer'] ?? '');
         $noWa = trim($_POST['no_wa'] ?? '');
         $tglMasuk = $_POST['tgl_masuk'] ?? '';
@@ -707,7 +719,7 @@ class PesananController
         $fotoUntukDihapus = [];
 
         if ($_POST['status'] !== 'Selesai' && $_POST['status'] !== 'Diambil') {
-             $tglSelesai = null;
+            $tglSelesai = null;
         }
 
 
@@ -884,6 +896,31 @@ class PesananController
             }
 
             $detailDihapus = array_diff($detailLama, $detailAktif);
+
+            if (in_array($status, ['Selesai', 'Diambil'], true)) {
+                $filesAfter = $_FILES['foto_after'] ?? [];
+
+                foreach ($itemIds as $formId) {
+                    $idDetail = $formDetailMap[(string) $formId] ?? null;
+
+                    $fotoAfterSudahAda = $idDetail !== null
+                        && !empty($fotoAfterLama[$idDetail]);
+
+                    $errorUpload = $filesAfter['error'][$formId] ?? UPLOAD_ERR_NO_FILE;
+
+                    $fotoAfterDiunggah = $errorUpload !== UPLOAD_ERR_NO_FILE;
+
+                    if (!$fotoAfterSudahAda && !$fotoAfterDiunggah) {
+                        throw new RuntimeException(
+                            'Foto After wajib diunggah untuk barang: '
+                                . trim($namaBarang[$formId])
+                                . ' sebelum status diubah menjadi '
+                                . $status
+                                . '.'
+                        );
+                    }
+                }
+            }
 
             foreach ($detailDihapus as $idDetail) {
                 if (!empty($fotoLama[$idDetail])) {

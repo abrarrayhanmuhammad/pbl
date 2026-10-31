@@ -50,6 +50,8 @@ if ($uri === '/' && $method === 'GET') {
     $laporanController->index();
 } elseif ($uri === '/akun' && $method === 'GET') {
     $pegawaiController->index();
+} elseif ($uri === '/akun/updatePassword' && $method === 'POST') {
+    $pegawaiController->updatePassword();
 } else {
     http_response_code(404);
     require_once __DIR__ . '/../app/views/errors/404.php';

@@ -30,7 +30,7 @@ $header_extra = $header_extra ?? '';
     <div class="flex items-center gap-2 md:gap-3">
         <?= $header_extra ?>
         <div class="bg-slate-100 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-slate-200 text-[11px] md:text-xs font-bold text-slate-600 flex items-center gap-1.5 md:gap-2">
-            <i class="far fa-calendar"></i> <span class="hidden sm:inline"><?= htmlspecialchars($header_date) ?></span><span class="sm:hidden">17 Sep</span>
+            <i class="far fa-calendar"></i> <span class="hidden sm:inline"><?= htmlspecialchars($header_date) ?></span><span class="sm:hidden"><?= htmlspecialchars($header_date) ?></span>
         </div>
     </div>
 </header>

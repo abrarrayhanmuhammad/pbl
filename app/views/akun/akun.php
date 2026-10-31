@@ -5,11 +5,11 @@ require_once __DIR__ . '/../layouts/header.php';
 ?>
 <div class="flex h-screen overflow-hidden bg-brand-slateBg">
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
-    
+
     <main class="flex-1 flex flex-col h-full overflow-y-auto">
-        <?php 
+        <?php
         $header_title = 'Pengaturan Akun';
-        require_once __DIR__ . '/../layouts/topbar.php'; 
+        require_once __DIR__ . '/../layouts/topbar.php';
         ?>
 
         <div class="p-4 md:p-8 max-w-4xl mx-auto w-full">
@@ -26,15 +26,40 @@ require_once __DIR__ . '/../layouts/header.php';
                         </span>
                     </div>
                 </div>
-                <div class="space-y-4 max-w-lg">
-                    <div>
-                        <label class="block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Ganti Password</label>
-                        <input type="password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="Masukkan password baru...">
+                <h1 class="block font-extrabold text-slate-400 uppercase tracking-wider mb-2">Ganti Password</h1>
+                <form action="/akun/updatePassword" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+
+                    <div class="space-y-4 max-w-lg">
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Password Lama</label>
+                            <input type="password" name="password_lama" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="Masukkan password lama..." required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Password Baru</label>
+                            <input type="password" name="password_baru" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="Masukkan password baru..." minlength="8" required>
+                            <p class="text-[10px] text-slate-400 mt-2">Password baru minimal 8 karakter.</p>
+                        </div>
+                        <button type="submit" class="px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition shadow-md">Simpan Perubahan</button>
                     </div>
-                    <button type="button" onclick="alert('Password berhasil diperbarui!')" class="px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition shadow-md">Simpan Perubahan</button>
-                </div>
+                </form>
+                <?php if (isset($_GET['status'])): ?>
+                    <?php
+                    $pesan = [
+                        'kosong' => 'Password lama dan password baru wajib diisi.',
+                        'password_pendek' => 'Password baru minimal 8 karakter.',
+                        'password_salah' => 'Password lama yang kamu masukkan salah.',
+                        'password_berhasil' => 'Password berhasil diperbarui.'
+                    ];
+                    ?>
+                    <?php if (isset($pesan[$_GET['status']])): ?>
+                        <div class="mb-4 p-3 rounded-xl bg-slate-100 text-xs font-semibold text-slate-700">
+                            <?= htmlspecialchars($pesan[$_GET['status']]) ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
             </div>
-        </div> 
+        </div>
     </main>
 </div>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
