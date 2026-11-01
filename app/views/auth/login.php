@@ -66,12 +66,12 @@ require_once __DIR__ . '/../layouts/header.php';
                     <i class="fas fa-eye"></i>
                 </button>
 
-            <!-- lupa password -zahra -->
+            <!-- forgot password -zahra -->
                 <div class="flex justify-end mt-2">
-                    <a href="/forgot-password" class="text-xs" font bold text-slate-500 hover:text-slate-800 transition-colors">
-                Lupa Password?
-            </a>
-                </div>
+                    <button type="button" onclick="document.getElementById('modal-forgot').classList.remove('hidden')" class="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                    Forgot Password?
+                </button>
+            </div>
 
             </div>
             <button type="submit" class="w-full py-4 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 font-extrabold text-sm rounded-xl transition-all shadow-lg shadow-brand-yellow/30 mt-4 tracking-wide border border-slate-900/10">
@@ -79,6 +79,35 @@ require_once __DIR__ . '/../layouts/header.php';
             </button>
         </form>
     </div>
+
+        <!-- Modal Forgot Password (Email Only) -->
+    <div id="modal-forgot" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl relative space-y-4">
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-yellow-100 text-yellow-800 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-sm border border-yellow-200">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-900">Forgot Password</h3>
+                <p class="text-xs text-slate-500">Masukkan email Anda untuk menerima tautan reset kata sandi.</p>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Reset link has been sent to your email.'); document.getElementById('modal-forgot').classList.add('hidden');" class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Email Address</label>
+                    <input type="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="nama@email.com" required>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="document.getElementById('modal-forgot').classList.add('hidden')" class="w-1/2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="w-1/2 py-3 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 font-extrabold text-xs rounded-xl transition shadow-md">
+                        Send Link
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
 
     <script src="/assets/js/main.js"></script>
     <script>
