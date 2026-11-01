@@ -108,16 +108,32 @@ require_once __DIR__ . '/../layouts/header.php';
                         <?php endif; ?>
                     </div>
                 </div>
-
+           <!-- Merapihkan -->   
                 <div class="flex-1 overflow-y-auto p-6 space-y-6">
                     <div class="grid grid-cols-2 gap-6">
-                        <div class="bg-slate-50/80 p-5 rounded-2xl border border-slate-100 space-y-2.5 text-xs font-medium">
-                            <div class="flex justify-between"><span class="text-slate-400">Tanggal Masuk:</span><span id="detail-date-in" class="font-bold text-slate-800 detail-date-in">-</span></div>
-                            <div class="flex justify-between"><span class="text-slate-400">Status Bayar:</span><span class="detail-status-pay"><span id="detail-status-pay" class="detail-status-pay">-</span></span></div>
-                            <div class="flex justify-between"><span class="text-slate-400">Drop Point:</span><span id="detail-drop-point" class="font-bold text-slate-800 detail-drop-point">-</span></div>
-                            <div class="flex justify-between"><span class="text-slate-400">Estimasi Selesai:</span><span id="detail-estimasi" class="font-bold text-slate-500 detail-date-out">-</span></div>
-                            <div class="flex justify-between"><span class="text-slate-400">Tanggal Selesai:</span><span id="detail-date-out" class="font-bold text-slate-500 detail-date-out">-</span></div>
+                        <div class="bg-slate-50/80 p-5 rounded-2xl border border-slate-100 space-y-3 text-xs font-medium">
+                            <div class="flex justify-between items-center gap-2">
+                                <span class="text-slate-400 shrink-0 whitespace-nowrap">Tanggal Masuk:</span>
+                                <span id="detail-date-in" class="font-bold text-slate-800 text-right detail-date-in">-</span>
+                            </div>
+                            <div class="flex justify-between items-center gap-2">
+                                <span class="text-slate-400 shrink-0 whitespace-nowrap">Status Bayar:</span>
+                                <span class="detail-status-pay text-right"><span id="detail-status-pay" class="detail-status-pay font-bold">-</span></span>
+                            </div>
+                            <div class="flex justify-between items-start gap-2">
+                                <span class="text-slate-400 shrink-0 whitespace-nowrap">Drop Point:</span>
+                                <span id="detail-drop-point" class="font-bold text-slate-800 detail-drop-point text-[11px] text-right leading-tight">-</span>
+                            </div>
+                            <div class="flex justify-between items-center gap-2">
+                                <span class="text-slate-400 shrink-0 whitespace-nowrap">Estimasi Selesai:</span>
+                                <span id="detail-estimasi" class="font-bold text-slate-500 text-right detail-date-out">-</span>
+                            </div>
+                            <div class="flex justify-between items-center gap-2">
+                                <span class="text-slate-400 shrink-0 whitespace-nowrap">Tanggal Selesai:</span>
+                                <span id="detail-date-out" class="font-bold text-slate-500 text-right detail-date-out">-</span>
+                            </div>
                         </div>
+
                         <div class="bg-brand-darkCard text-white p-5 rounded-2xl flex flex-col justify-center">
                             <h3 class="text-xs sm:text-sm font-bold text-slate-300 text-center mb-4">Status Pengerjaan</h3>
                             <div class="w-full">

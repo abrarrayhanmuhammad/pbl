@@ -56,6 +56,19 @@ $is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
                 <?php endif; ?>
             <?php endif; ?>
 
+             <!-- Log Aktivitas (Khusus Superadmin / Owner) -->
+            <?php if ($user_role === 'superadmin'): ?>
+                <?php if ($current_page === 'log'): ?>
+                    <a href="/log" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
+                        <i class="fas fa-history w-5"></i> Log Aktivitas
+                    </a>
+                <?php else: ?>
+                    <a href="/log" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                        <i class="fas fa-history w-5"></i> Log Aktivitas
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
+
             <!-- Daftar Pesanan -->
             <?php if ($current_page === 'pesanan'): ?>
                 <a href="/pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
@@ -67,9 +80,9 @@ $is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
                 </a>
             <?php endif; ?>
 
-            <!-- Tambah Pesanan (Selalu Kuning Mencolok) -->
+            <!-- Tambah Pesanan  -->
              <?php if ($current_page === 'tambah_pesanan'): ?>
-                <a href="/pesanan/tambah" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-yellow text-slate-900 font-extrabold shadow-lg shadow-brand-yellow/20 transition-all">
+                <a href="/pesanan/tambah" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
                 <i class="fas fa-plus w-5"></i> Tambah Pesanan
             </a>
             <?php else: ?>

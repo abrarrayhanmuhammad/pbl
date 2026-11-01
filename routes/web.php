@@ -52,6 +52,8 @@ if ($uri === '/' && $method === 'GET') {
     $pegawaiController->index();
 } elseif ($uri === '/akun/updatePassword' && $method === 'POST') {
     $pegawaiController->updatePassword();
+} elseif ($uri === '/log' && $method === 'GET') {
+    require_once __DIR__ . '/../app/views/dashboard/log_aktivitas.php';
 } else {
     http_response_code(404);
     require_once __DIR__ . '/../app/views/errors/404.php';
