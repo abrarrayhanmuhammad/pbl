@@ -92,17 +92,19 @@ $is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
     </div>
 
     <!-- User Profile Pill at Bottom -->
-    <div class="p-4 border-t border-slate-800/60 m-4 bg-slate-800/40 rounded-2xl shrink-0">
+    <div class="p-4 border-t border-slate-800/60 m-4 mb-28 lg:mb-4 bg-slate-800/60 rounded-2xl shrink-0 shadow-lg">
         <div class="flex items-center gap-3 mb-3">
             <div class="w-9 h-9 bg-brand-yellow text-slate-900 font-extrabold rounded-full flex items-center justify-center text-xs shadow-sm">
                 <?= htmlspecialchars($user_initials) ?>
             </div>
-            <div>
+           <div>
                 <p class="text-xs font-extrabold text-white leading-tight"><?= htmlspecialchars($user_name) ?></p>
-                <p class="text-[10px] text-emerald-400 font-semibold">Online</p>
+                <p class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1.5 mt-0.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Online
+                </p>
             </div>
         </div>
-        <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all border border-slate-700/50">
+        <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-xl text-xs font-extrabold transition-all border border-red-500/30">
             <i class="fas fa-sign-out-alt"></i> Keluar
         </a>
     </div>
