@@ -1,7 +1,4 @@
 Jalankan jika belom ada vendor dan jika baru pull
-VENDOR PHPMAILER = composer require phpmailer/phpmailer
-
-Jalankan jika belom ada vendor dan jika baru pull
-INSTALL DOTENV = composer require vlucas/phpdotenv
+INSTALL COMPESER = composer install
 
 Copy .env.example, ubah namanya menjadi .env
