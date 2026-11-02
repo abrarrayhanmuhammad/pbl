@@ -47,13 +47,13 @@ require_once __DIR__ . '/../layouts/header.php';
                 <!-- Garis Kuning Atas -->
                 <div class="h-2 w-full bg-brand-yellow"></div>
 
-                <div class="p-10 space-y-8">
-                    <!-- Header Invoice -->
-                    <div class="flex justify-between items-start">
+                               <div class="p-6 sm:p-10 space-y-6 sm:space-y-8">
+                    <!-- Header Invoice: Di HP bertumpuk rapi, di Desktop tetap berdampingan persis aslinya -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <!-- Bagian Kiri (Logo & Alamat) -->
                         <div class="space-y-2">
-                            <div class="flex items-center gap-3 mb-4">
-                                <img src="assets/logo.png" alt="Logo" class="w-10 h-10 rounded-full shadow-md border-1.5 border-slate-900 object-cover bg-white">
+                            <div class="flex items-center gap-3 mb-2 sm:mb-4">
+                                <img src="/assets/logo.png" alt="Logo" class="w-10 h-10 rounded-full shadow-md border-1.5 border-slate-900 object-cover bg-white">
                                 <h2 class="text-2xl font-black text-slate-900">KickDropShoe</h2>
                             </div>
                             <p class="text-sm font-medium text-slate-500">Jl. Klayatan GG II NO 19, Malang</p>
@@ -61,24 +61,24 @@ require_once __DIR__ . '/../layouts/header.php';
                         </div>
 
                         <!-- Bagian Kanan (Nomor Invoice) -->
-                        <div class="text-right space-y-1">
+                        <div class="text-left sm:text-right space-y-1 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-0 border-slate-100">
                             <p class="text-lg font-black text-slate-900">NOTA TRANSAKSI</p>
                             <h1 class="text-3xl font-black text-slate-900"><?= htmlspecialchars($pesanan['kode_pesanan']) ?></h1>
-                            <p class="text-sm font-medium text-slate-500 mt-2">Tanggal: <?= date('d-m-Y', strtotime($pesanan['tanggal_masuk'])) ?></p>
+                            <p class="text-sm font-medium text-slate-500 mt-1 sm:mt-2">Tanggal: <?= date('d-m-Y', strtotime($pesanan['tanggal_masuk'])) ?></p>
                         </div>
                     </div>
 
-                    <!-- Info Pelanggan -->
-                    <div class="flex justify-between items-start">
+                    <!-- Info Pelanggan: Di HP bertumpuk rapi, di Desktop berdampingan persis aslinya -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div class="space-y-1">
                             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">PELANGGAN</p>
                             <p class="text-lg font-black text-slate-900"><?= htmlspecialchars($pesanan['nama_customer']) ?></p>
                             <p class="text-sm font-medium text-slate-500">No WhatsApp: <?= htmlspecialchars($pesanan['no_hp']) ?></p>
                             <p class="text-sm font-medium text-slate-500">Drop Point: <?= htmlspecialchars($pesanan['alamat_lokasi']) ?></p>
                         </div>
-                        <div class="text-right space-y-2">
+                        <div class="text-left sm:text-right space-y-2 w-full sm:w-auto">
                             <?php if ($pesanan['status_bayar'] === 'Belum Bayar'): ?>
-                                <div class="inline-block px-3 py-1 rounded-md text-xs font-bold mb-1"><?= htmlspecialchars($pesanan['status_bayar']) ?> - <?= htmlspecialchars($pesanan['metode_bayar']) ?></div>
+                                <div class="inline-block px-3 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-bold mb-1"><?= htmlspecialchars($pesanan['status_bayar']) ?> - <?= htmlspecialchars($pesanan['metode_bayar']) ?></div>
                             <?php else: ?>
                                 <div class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold mb-1"><?= htmlspecialchars($pesanan['status_bayar']) ?> - <?= htmlspecialchars($pesanan['metode_bayar']) ?></div>
                             <?php endif; ?>
@@ -86,7 +86,6 @@ require_once __DIR__ . '/../layouts/header.php';
                             <p class="text-sm font-medium text-slate-500">Tanggal Selesai: <?= ($pesanan['tanggal_selesai'] === '' ? htmlspecialchars($pesanan['tanggal_selesai']) : 'Belum Selesai') ?></p>
                         </div>
                     </div>
-
                     <!-- Tabel Pesanan -->
                     <div class="w-full overflow-x-auto">
                         <div class="min-w-[500px]">
