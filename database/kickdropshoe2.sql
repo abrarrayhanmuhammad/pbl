@@ -28,14 +28,14 @@ CREATE TABLE pegawai (
     nama VARCHAR(50) NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('karyawan', 'superadmin')),
     uname VARCHAR(30) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL
 );
 
--- Akun contoh. Ganti password_hash_bcrypt dengan hash bcrypt hasil
--- password_hash('passwordanda', PASSWORD_BCRYPT) dari PHP sebelum dipakai.
-INSERT INTO pegawai (nama, role, uname, password) VALUES
-('Super Admin', 'superadmin', 'admin', '$2y$12$4r7yJPa3qU0vs8Oa9bzjWuuAAhoTq350RCwclJeNweW6FSVYCHYYy'),
-('Karyawan Demo', 'karyawan', 'karyawan', '$2y$12$E8VHd/KTb.k3fTFHt1j9lOAIenqQEJ8v6X5nh9ja1bmJH4fqbzbTa');
+-- Akun contoh
+INSERT INTO pegawai (nama, role, uname, email, password) VALUES
+('Super Admin', 'superadmin', 'admin', 'r4ayhanm@gmail.com', '$2y$12$4r7yJPa3qU0vs8Oa9bzjWuuAAhoTq350RCwclJeNweW6FSVYCHYYy'),
+('Karyawan Demo', 'karyawan', 'karyawan', 'tot658259@gmail.com', '$2y$12$E8VHd/KTb.k3fTFHt1j9lOAIenqQEJ8v6X5nh9ja1bmJH4fqbzbTa');
 
 
 -- =========================================================
@@ -280,6 +280,17 @@ CREATE TABLE detail_treatment_tambahan (
     id_detail_pesanan INTEGER NOT NULL REFERENCES detail_pesanan(id_detail_pesanan) ON DELETE CASCADE,
     id_treatment_tambahan INTEGER NOT NULL REFERENCES treatment_tambahan(id_treatment_tambahan),
     harga INTEGER NOT NULL CHECK (harga >= 0)
+);
+
+-- =========================================================
+-- 11. PASSWORD RESET
+-- =========================================================
+CREATE TABLE password_resets (
+    id_reset SERIAL PRIMARY KEY,
+    id_pegawai INTEGER NOT NULL REFERENCES pegawai(id_pegawai) ON DELETE CASCADE,
+    token VARCHAR(255) NOT NULL,
+    expired_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indeks untuk pencarian pesanan dan relasi yang sering digunakan

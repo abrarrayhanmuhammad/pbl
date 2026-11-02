@@ -178,21 +178,19 @@ class PesananController
             $this->db->beginTransaction();
 
             $stmt = $this->db->prepare(
-                'SELECT id_customer FROM customer WHERE no_hp = :no_hp LIMIT 1'
+                'SELECT id_customer, nama FROM customer WHERE no_hp = :no_hp LIMIT 1'
             );
             $stmt->execute(['no_hp' => $noWa]);
-            $idCustomer = $stmt->fetchColumn();
+            $idCustomer = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($idCustomer) {
-                $idCustomer = (int) $idCustomer;
+                if (strcasecmp(trim($idCustomer['nama']), trim($nama)) !== 0) {
+                    $_SESSION['error'] = 'Nomor HP sudah terdaftar atas nama pelanggan lain.';
+                    header('Location: /pesanan/tambah');
+                    exit;
+                }
 
-                $stmt = $this->db->prepare(
-                    'UPDATE customer SET nama = :nama WHERE id_customer = :id'
-                );
-                $stmt->execute([
-                    'nama' => $nama,
-                    'id' => $idCustomer
-                ]);
+                $idCustomer = (int) $idCustomer;
             } else {
                 $stmt = $this->db->prepare(
                     'INSERT INTO customer (nama, no_hp)
@@ -466,6 +464,7 @@ class PesananController
 
             unset($_SESSION['csrf_token']);
 
+            $_SESSION['success'] = 'Pesanan berhasil ditambahkan.';
             header('Location: /pesanan');
             exit;
         } catch (Throwable $e) {
@@ -1396,6 +1395,7 @@ class PesananController
 
             unset($_SESSION['csrf_token']);
 
+            $_SESSION['success'] = 'Pesanan berhasil diperbarui.';
             header('Location: /pesanan');
             exit;
         } catch (Throwable $e) {
@@ -1804,6 +1804,34 @@ class PesananController
         }
 
         try {
+            if (in_array($status, ['Selesai', 'Diambil'], true)) {
+                $stmt = $this->db->prepare(
+                    'SELECT
+                    COUNT(*) AS total_barang,
+                    COUNT(*) FILTER (
+                        WHERE foto_sesudah IS NOT NULL
+                        AND BTRIM(foto_sesudah) <> \'\'
+                    ) AS total_foto_sesudah
+                 FROM detail_pesanan
+                 WHERE id_pesanan = :id'
+                );
+
+                $stmt->execute(['id' => $idPesanan]);
+                $foto = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (
+                    (int) $foto['total_barang'] === 0 ||
+                    (int) $foto['total_barang'] !== (int) $foto['total_foto_sesudah']
+                ) {
+                    http_response_code(422);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Status tidak dapat diubah menjadi ' . $status . '. Pastikan foto after semua barang sudah diunggah.'
+                    ]);
+                    return;
+                }
+            }
+
             $stmt = $this->db->prepare(
                 'UPDATE pesanan
              SET status = :status
@@ -1960,6 +1988,7 @@ class PesananController
                 }
             }
 
+            $_SESSION['success'] = 'Pesanan berhasil dihapus';
             header('Location: /pesanan');
             exit;
         } catch (PDOException $e) {

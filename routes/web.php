@@ -20,6 +20,12 @@ if ($uri === '/' && $method === 'GET') {
     exit;
 } elseif ($uri === '/login' && $method === 'GET') {
     $authController->showLogin();
+} elseif ($uri === '/forgot-password' && $method === 'POST') {
+    $authController->forgotPassword();
+} elseif ($uri === '/reset-password' && $method === 'GET') {
+    $authController->showResetPassword();
+} elseif ($uri === '/reset-password/process' && $method === 'POST') {
+    $authController->resetPassword();
 } elseif ($uri === '/login/process' && $method === 'POST') {
     $authController->login();
 } elseif ($uri === '/logout' && $method === 'GET') {

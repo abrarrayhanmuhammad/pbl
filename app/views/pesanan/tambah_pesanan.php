@@ -1,7 +1,4 @@
 <?php
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
 $page_title = 'Tambah Pesanan Baru - KickDropShoe';
 $current_page = 'tambah_pesanan';
 require_once __DIR__ . '/../layouts/header.php';
@@ -139,6 +136,18 @@ require_once __DIR__ . '/../layouts/header.php';
         </form>
     </main>
 </div>
+
+<?php if (isset($_SESSION['error'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: <?= json_encode($_SESSION['error']) ?>,
+            confirmButtonColor: '#dc2626'
+        });
+    </script>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
 <script>
     window.PRICELIST_DATA = <?= json_encode(
                                 array_reduce($getAllLayanan, function ($result, $item) {

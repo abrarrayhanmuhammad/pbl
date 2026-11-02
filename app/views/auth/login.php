@@ -73,6 +73,13 @@ require_once __DIR__ . '/../layouts/header.php';
                 </button>
             </div>
 
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="success-message">
+                    <?= htmlspecialchars($_SESSION['success']) ?>
+                </div>
+                <?php unset($_SESSION['success']); ?>
+            <?php endif; ?>
+
             </div>
             <button type="submit" class="w-full py-4 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 font-extrabold text-sm rounded-xl transition-all shadow-lg shadow-brand-yellow/30 mt-4 tracking-wide border border-slate-900/10">
                 Login
@@ -90,10 +97,11 @@ require_once __DIR__ . '/../layouts/header.php';
                 <h3 class="text-lg font-black text-slate-900">Forgot Password</h3>
                 <p class="text-xs text-slate-500">Masukkan email Anda untuk menerima tautan reset kata sandi.</p>
             </div>
-            <form onsubmit="event.preventDefault(); alert('Reset link has been sent to your email.'); document.getElementById('modal-forgot').classList.add('hidden');" class="space-y-3">
+            <form method="POST" action="/forgot-password" class="space-y-3">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                 <div>
                     <label class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Email Address</label>
-                    <input type="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="nama@email.com" required>
+                    <input type="email" name="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow" placeholder="nama@email.com" required>
                 </div>
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="document.getElementById('modal-forgot').classList.add('hidden')" class="w-1/2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl transition">

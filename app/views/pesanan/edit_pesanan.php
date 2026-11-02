@@ -1,7 +1,4 @@
 <?php
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
 $page_title = 'Edit Pesanan' .  $pesanan['kode_pesanan'] . '- KickDropShoe';
 $current_page = 'edit_pesanan';
 require_once __DIR__ . '/../layouts/header.php';

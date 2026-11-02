@@ -209,6 +209,39 @@ require_once __DIR__ . '/../layouts/header.php';
         </div>
     </main>
 </div>
+<?php if (isset($_SESSION['success'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: <?= json_encode($_SESSION['success']) ?>,
+            confirmButtonColor: '#16a34a'
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+<?php if (isset($_SESSION['error'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: <?= json_encode($_SESSION['error']) ?>,
+            confirmButtonColor: '#dc2626'
+        });
+    </script>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+<?php if (isset($_SESSION['warning'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Peringatan',
+            text: <?= json_encode($_SESSION['warning']) ?>,
+            confirmButtonColor: '#d97706'
+        });
+    </script>
+    <?php unset($_SESSION['warning']); ?>
+<?php endif; ?>
 <script>
     document.getElementById('form-hapus-pesanan').addEventListener('submit', function(e) {
         e.preventDefault();
