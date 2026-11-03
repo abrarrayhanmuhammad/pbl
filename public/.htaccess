@@ -1,8 +1,11 @@
+
 RewriteEngine On
 
 # Maintenance Mode
 RewriteCond %{DOCUMENT_ROOT}/maintenance.flag -f
 RewriteCond %{REQUEST_URI} !^/maintenance\.html$
+RewriteCond %{REQUEST_URI} !^/assets/
+RewriteCond %{REQUEST_URI} !^/favicon\.ico$
 RewriteRule ^.*$ /maintenance.html [R=503,L]
 
 ErrorDocument 503 /maintenance.html
