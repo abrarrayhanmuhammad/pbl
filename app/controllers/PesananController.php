@@ -190,7 +190,7 @@ class PesananController
                     exit;
                 }
 
-                $idCustomer = (int) $idCustomer;
+                $idCustomer = (int) $idCustomer['id_customer'];
             } else {
                 $stmt = $this->db->prepare(
                     'INSERT INTO customer (nama, no_hp)

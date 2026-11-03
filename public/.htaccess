@@ -1,5 +1,13 @@
 RewriteEngine On
 
+# Maintenance Mode
+RewriteCond %{DOCUMENT_ROOT}/maintenance.flag -f
+RewriteCond %{REQUEST_URI} !^/maintenance\.html$
+RewriteRule ^.*$ /maintenance.html [R=503,L]
+
+ErrorDocument 503 /maintenance.html
+
+# Routing aplikasi
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]

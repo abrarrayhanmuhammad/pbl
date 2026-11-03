@@ -2,6 +2,7 @@
 $page_title = 'Pratinjau Invoice ' . $pesanan['kode_pesanan'] . '- KickDropShoe';
 $current_page = 'invoice';
 $is_invoice = true;
+$header_title = 'Invoice '. $pesanan['kode_pesanan'];
 $body_class = 'font-sans antialiased bg-brand-slateBg print:bg-white';
 require_once __DIR__ . '/../layouts/header.php';
 ?>
@@ -11,20 +12,7 @@ require_once __DIR__ . '/../layouts/header.php';
 
     <main class="flex-1 flex flex-col h-full overflow-y-auto print:overflow-visible">
         <!-- Header (Hilang hanya saat dicetak) -->
-        <header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 md:py-5 flex justify-between items-center sticky top-0 z-10 shrink-0 print:hidden">
-            <div class="flex items-center gap-3">
-                <button type="button" onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition focus:outline-none" aria-label="Menu">
-                    <i class="fas fa-bars text-base"></i>
-                </button>
-                <div>
-                    <h2 class="text-lg md:text-xl font-extrabold text-slate-900 tracking-tight">Pratinjau Invoice</h2>
-                    <p class="text-xs md:text-sm font-medium text-slate-500 mt-0.5">Periksa rincian pesanan <?= htmlspecialchars($pesanan['kode_pesanan']) ?> sebelum mencetak.</p>
-                </div>
-            </div>
-            <div class="bg-slate-100 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-slate-200 text-[11px] md:text-xs font-bold text-slate-600 flex items-center gap-2">
-                <i class="far fa-calendar"></i> <span class="hidden sm:inline">17 Sep 2026</span><span class="sm:hidden">17 Sep</span>
-            </div>
-        </header>
+         <?php require_once __DIR__ . '/../layouts/topbar.php';?>
 
         <div class="p-4 md:p-8 flex flex-col items-center gap-6 print:p-0">
             <!-- Tombol Aksi (Hilang hanya saat dicetak) -->
