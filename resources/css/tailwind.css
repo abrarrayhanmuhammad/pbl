@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@source "../../public/maintenance.html";
+
+@theme {
+    --font-sans: "Inter", Arial, sans-serif;
+}
