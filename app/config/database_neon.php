@@ -1,4 +1,3 @@
-
 <?php
 
 require_once __DIR__ . '/../../vendor/autoload.php';
@@ -13,8 +12,10 @@ $username = $_ENV['DB_USER'] ?? '';
 $password = $_ENV['DB_PASSWORD'] ?? '';
 
 try {
+    $endpoint = explode('.', $host)[0];
+
     $pdo = new PDO(
-        "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require",
+        "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require;options='endpoint=$endpoint'",
         $username,
         $password
     );
@@ -23,5 +24,5 @@ try {
 
 } catch (PDOException $e) {
     error_log($e->getMessage());
-    die("Koneksi database gagal.");
+    die("Koneksi database gagal: " . $e->getMessage());
 }
