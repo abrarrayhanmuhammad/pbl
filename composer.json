@@ -1,6 +1,7 @@
 {
     "require": {
         "phpmailer/phpmailer": "^7.1",
-        "vlucas/phpdotenv": "^5.8"
+        "vlucas/phpdotenv": "^5.8",
+        "cloudinary/cloudinary_php": "^3.3"
     }
 }
