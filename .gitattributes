@@ -1,0 +1,5 @@
+# Mengabaikan folder vendor agar tidak mengacaukan statistik
+vendor/**/* linguist-vendored
+
+# Memaksa semua file .php dibaca sebagai bahasa PHP
+*.php linguist-language=PHP
