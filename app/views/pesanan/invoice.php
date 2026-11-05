@@ -83,6 +83,7 @@ require_once __DIR__ . '/../layouts/header.php';
                                 <div class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold mb-1"><?= htmlspecialchars($pesanan['status_bayar']) ?> - <?= htmlspecialchars($pesanan['metode_bayar']) ?></div>
                             <?php endif; ?>
                             <p class="text-sm font-medium text-slate-500">Status: <?= htmlspecialchars($pesanan['status']) ?></p>
+                            <p class="text-sm font-medium text-slate-500">Penanggung Jawab: <?= htmlspecialchars($pesanan['nama_pegawai'] ?? '-') ?></p>
                             <p class="text-sm font-medium text-slate-500">Tanggal Selesai: <?= ($pesanan['tanggal_selesai'] === '' ? htmlspecialchars($pesanan['tanggal_selesai']) : 'Belum Selesai') ?></p>
                         </div>
                     </div>

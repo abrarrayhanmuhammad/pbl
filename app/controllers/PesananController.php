@@ -2091,6 +2091,7 @@ class PesananController
                     c.nama AS nama_customer,
                     c.no_hp,
                     d.alamat_lokasi,
+                    pegawai.nama AS nama_pegawai,
                     (
                         SELECT MAX(
                             p.tanggal_masuk
@@ -2111,6 +2112,8 @@ class PesananController
                 FROM pesanan p
                 JOIN customer c
                     ON c.id_customer = p.id_customer
+                LEFT JOIN pegawai
+                    ON pegawai.id_pegawai = p.id_pegawai
                 LEFT JOIN drop_point d
                     ON d.id_drop_point = p.id_drop_point
                 WHERE p.id_pesanan = :id
