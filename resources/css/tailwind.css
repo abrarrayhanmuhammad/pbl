@@ -1,7 +1,15 @@
 @import "tailwindcss";
 
-@source "../../public/maintenance.html";
+@source "../../app";
+@source "../../public";
 
 @theme {
-    --font-sans: "Inter", Arial, sans-serif;
+    --font-sans: "Plus Jakarta Sans", Arial, sans-serif;
+
+    --color-brand-navy: #0B1325;
+    --color-brand-darkCard: #0F172A;
+    --color-brand-darkInput: #1E293B;
+    --color-brand-yellow: #FFFF00;
+    --color-brand-yellowHover: #CCCC00;
+    --color-brand-slateBg: #F8FAFC;
 }
