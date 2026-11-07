@@ -7,9 +7,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 class AuthController
 {
     private Pegawai $pegawaiModel;
+    private PDO $db;
 
     public function __construct(PDO $db)
     {
+        $this->db = $db;
         $this->pegawaiModel = new Pegawai($db);
     }
 
@@ -46,6 +48,16 @@ class AuthController
 
         if (!$pegawai || !password_verify($password, $pegawai['password'])) {
             $_SESSION['error'] = 'Username atau password salah.';
+
+            catatLog(
+                $this->db,
+                'Autentikasi',
+                'Login Gagal',
+                'AUTH-LOGIN-GAGAL',
+                'Percobaan login gagal untuk username "' . mb_substr($username, 0, 30) . '".',
+                $pegawai ? (int) $pegawai['id_pegawai'] : null
+            );
+            
             header('Location: /login');
             exit;
         }
@@ -56,11 +68,15 @@ class AuthController
         $_SESSION['nama'] = $pegawai['nama'];
         $_SESSION['role'] = $pegawai['role'];
 
-        if ($pegawai['role'] === 'superadmin') {
-            header('Location: /dashboard');
-        } else {
-            header('Location: /dashboard');
-        }
+        catatLog(
+            $this->db,
+            'Autentikasi',
+            'Login Berhasil',
+            'AUTH-LOGIN',
+            $pegawai['nama'] . ' berhasil login ke sistem.'
+        );
+
+        header('Location: /dashboard');
 
         exit;
     }
@@ -224,6 +240,15 @@ class AuthController
                 $passwordHash
             );
 
+            catatLog(
+                $this->db,
+                'Autentikasi',
+                'Reset Password',
+                'AUTH-RESET',
+                'Password akun berhasil diatur ulang lewat tautan email.',
+                (int) $reset['id_pegawai']
+            );
+
             $_SESSION['success'] = 'Password berhasil diubah. Silakan login menggunakan password baru.';
             header('Location: /login');
             exit;
@@ -237,6 +262,16 @@ class AuthController
 
     public function logout(): void
     {
+        if (isset($_SESSION['id_pegawai'])) {
+                catatLog(
+                    $this->db,
+                    'Autentikasi',
+                    'Logout',
+                    'AUTH-LOGOUT',
+                    ($_SESSION['nama'] ?? 'Pengguna') . ' keluar dari sistem.'
+                );
+            }
+            
         session_unset();
         session_destroy();
 

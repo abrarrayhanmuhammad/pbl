@@ -67,6 +67,14 @@ class PegawaiController
         $pegawai = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$pegawai || !password_verify($passwordLama, $pegawai['password'])) {
+            catatLog(
+                $this->db,
+                'Pegawai',
+                'Ganti Password Gagal',
+                'USER-PASSWORD-GAGAL',
+                ($_SESSION['nama'] ?? 'Pegawai') . ' salah memasukkan password lama saat mengganti password.'
+            );
+                        
             header('Location: /akun?status=password_salah');
             exit;
         }
@@ -83,6 +91,15 @@ class PegawaiController
             'password' => $passwordHash,
             'id' => $idPegawai
         ]);
+
+        catatLog(
+            $this->db,
+            'Pegawai',
+            'Ganti Password',
+            'USER-PASSWORD',
+            ($_SESSION['nama'] ?? 'Pegawai') . ' mengganti password akunnya.'
+        );
+
 
         header('Location: /akun?status=password_berhasil');
         exit;

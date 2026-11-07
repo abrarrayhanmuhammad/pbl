@@ -4,63 +4,52 @@ $current_page = 'log';
 require_once __DIR__ . '/../layouts/header.php';
 
 // Data Mockup Riwayat Log Aktivitas Sistem
-$system_logs = [
-    [
-        'time' => '01 Nov 2026, 09:15 WIB',
-        'user' => 'Karyawan Demo',
-        'role' => 'Karyawan',
-        'category' => 'Pesanan',
-        'badge' => 'bg-blue-50 text-blue-700 border-blue-200',
-        'ref' => '#0881',
-        'action' => 'Update Status Pengerjaan',
-        'desc' => 'Mengubah status pesanan #0881 menjadi "Diproses".',
-        'ip' => '192.168.1.14'
-    ],
-    [
-        'time' => '01 Nov 2026, 08:30 WIB',
-        'user' => 'Super Admin',
-        'role' => 'Owner',
-        'category' => 'Autentikasi',
-        'badge' => 'bg-slate-100 text-slate-700 border-slate-200',
-        'ref' => 'AUTH-LOGIN',
-        'action' => 'Login Berhasil',
-        'desc' => 'Super Admin berhasil login ke sistem.',
-        'ip' => '192.168.1.10'
-    ],
-    [
-        'time' => '31 Okt 2026, 17:45 WIB',
-        'user' => 'Super Admin',
-        'role' => 'Owner',
-        'category' => 'Laporan',
-        'badge' => 'bg-purple-50 text-purple-700 border-purple-200',
-        'ref' => 'LAP-OKT26',
-        'action' => 'Unduh Laporan Keuangan',
-        'desc' => 'Mengunduh rekapitulasi laporan pendapatan periode Oktober 2026.',
-        'ip' => '192.168.1.10'
-    ],
-    [
-        'time' => '31 Okt 2026, 14:10 WIB',
-        'user' => 'Karyawan Demo',
-        'role' => 'Karyawan',
-        'category' => 'Pembayaran',
-        'badge' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        'ref' => '#0881',
-        'action' => 'Penerimaan Pembayaran',
-        'desc' => 'Menerima pembayaran tunai sebesar Rp 25.000 untuk pesanan #0881.',
-        'ip' => '192.168.1.14'
-    ],
-    [
-        'time' => '30 Okt 2026, 11:20 WIB',
-        'user' => 'Super Admin',
-        'role' => 'Owner',
-        'category' => 'Pegawai',
-        'badge' => 'bg-amber-50 text-amber-800 border-amber-200',
-        'ref' => 'USER-KARYAWAN',
-        'action' => 'Pembaruan Akun Staf',
-        'desc' => 'Memperbarui data akun staf operasional.',
-        'ip' => '192.168.1.10'
-    ]
-];
+    $badgeMap = [
+        'Pesanan'     => 'bg-blue-50 text-blue-700 border-blue-200',
+        'Autentikasi' => 'bg-slate-100 text-slate-700 border-slate-200',
+        'Laporan'     => 'bg-purple-50 text-purple-700 border-purple-200',
+        'Pembayaran'  => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'Pegawai'     => 'bg-amber-50 text-amber-800 border-amber-200',
+    ];
+    $namaBulan = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    $roleMap = [
+        'superadmin' => 'Owner',
+        'karyawan'   => 'Karyawan',
+    ];
+    $zonaJakarta = new DateTimeZone('Asia/Jakarta');
+    
+    $stmt = $pdo->query(
+        'SELECT
+            log_aktivitas.created_at AS "createdAt",
+            pegawai.nama AS "namaPegawai",
+            pegawai.role AS "rolePegawai",
+            log_aktivitas.kategori AS "kategori",
+            log_aktivitas.referensi AS "referensi",
+            log_aktivitas.aksi AS "aksi",
+            log_aktivitas.keterangan AS "keterangan",
+            log_aktivitas.ip_address AS "ipAddress"
+        FROM log_aktivitas
+        LEFT JOIN pegawai
+            ON log_aktivitas.id_pegawai = pegawai.id_pegawai
+        ORDER BY log_aktivitas.created_at DESC
+        LIMIT 200'
+    );
+    
+    $system_logs = array_map(function ($row) use ($badgeMap, $namaBulan, $roleMap, $zonaJakarta) {
+        $dt = new DateTime($row['createdAt']);
+        $dt->setTimezone($zonaJakarta);
+        return [
+            'time'     => $dt->format('d') . ' ' . $namaBulan[(int) $dt->format('n')] . ' ' . $dt->format('Y, H:i') . ' WIB',
+            'user'     => $row['namaPegawai'] ?? 'Sistem',
+            'role'     => $roleMap[$row['rolePegawai']] ?? '-',
+            'category' => $row['kategori'],
+            'badge'    => $badgeMap[$row['kategori']] ?? 'bg-slate-100 text-slate-700 border-slate-200',
+            'ref'      => $row['referensi'] ?? '-',
+            'action'   => $row['aksi'],
+            'desc'     => $row['keterangan'] ?? '',
+            'ip'       => $row['ipAddress'] ?? '-',
+        ];
+    }, $stmt->fetchAll(PDO::FETCH_ASSOC));
 ?>
 <div class="flex h-screen overflow-hidden bg-brand-slateBg">
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
@@ -114,6 +103,11 @@ $system_logs = [
                             </tr>
                         </thead>
                         <tbody id="log-tbody" class="divide-y divide-slate-100 font-medium">
+                            <?php if (empty($system_logs)): ?>
+                                <tr>
+                                    <td colspan="6" class="p-8 text-center text-slate-400 font-bold">Belum ada aktivitas tercatat.</td>
+                                </tr>
+                            <?php endif; ?>
                             <?php foreach ($system_logs as $log): ?>
                                 <tr class="log-row hover:bg-slate-50/70 transition" data-category="<?= htmlspecialchars($log['category']) ?>">
                                     <td class="p-4 pl-6 font-bold text-slate-800 whitespace-nowrap"><?= htmlspecialchars($log['time']) ?></td>

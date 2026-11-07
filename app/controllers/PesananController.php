@@ -190,7 +190,7 @@ class PesananController
                     exit;
                 }
 
-                $idCustomer = (int) $idCustomer;
+                $idCustomer = (int) $idCustomer['id_customer'];
             } else {
                 $stmt = $this->db->prepare(
                     'INSERT INTO customer (nama, no_hp)
@@ -461,6 +461,14 @@ class PesananController
             ]);
 
             $this->db->commit();
+
+            catatLog(
+                $this->db,
+                'Pesanan',
+                'Pesanan Baru',
+                $kodePesanan,
+                'Membuat pesanan baru ' . $kodePesanan . ' dengan total Rp ' . number_format((int) $totalBayar, 0, ',', '.') . '.'
+            );
 
             unset($_SESSION['csrf_token']);
 
@@ -1304,7 +1312,7 @@ class PesananController
             $this->db->beginTransaction();
 
             $stmt = $this->db->prepare(
-                'SELECT id_pesanan, id_customer, metode_bayar
+                'SELECT id_pesanan, id_customer, metode_bayar, metode_bayar, status, status_bayar, total_bayar 
              FROM pesanan
              WHERE id_pesanan = :id
              FOR UPDATE'
@@ -1839,6 +1847,35 @@ class PesananController
 
             $this->db->commit();
 
+            $kode = ambilKodePesanan($this->db, (int) $idPesanan);
+            
+            $perubahan = [];
+            
+            if ($status !== null && $status !== $pesananLama['status']) {
+                $perubahan[] = 'status ' . $pesananLama['status'] . ' menjadi ' . $status;
+            }
+            
+            if ($statusBayar !== null && $statusBayar !== $pesananLama['status_bayar']) {
+                $perubahan[] = 'status bayar ' . $pesananLama['status_bayar'] . ' menjadi ' . $statusBayar;
+            }
+            
+            if ((int) $pesananLama['total_bayar'] !== (int) $totalBayar) {
+                $perubahan[] = 'total Rp ' . number_format((int) $pesananLama['total_bayar'], 0, ',', '.')
+                . ' menjadi Rp ' . number_format((int) $totalBayar, 0, ',', '.');
+            }
+            
+            $keterangan = $perubahan
+                ? 'Memperbarui pesanan ' . $kode . ': ' . implode('; ', $perubahan) . '.'
+                : 'Memperbarui data pesanan ' . $kode . ' (status, status bayar, dan total tidak berubah).';
+            
+            catatLog(
+                $this->db,
+                'Pesanan',
+                'Edit Pesanan',
+                $kode,
+                $keterangan
+            );
+            
             $folderBefore = realpath(
                 dirname(__DIR__, 2) . '/public/uploads/pesanan/before'
             );
@@ -2342,6 +2379,16 @@ class PesananController
                 }
             }
 
+            $kode = ambilKodePesanan($this->db, (int) $idPesanan);
+
+            catatLog(
+                $this->db,
+                'Pesanan',
+                'Update Status Pengerjaan',
+                $kode,
+                'Mengubah status pesanan ' . $kode . ' menjadi "' . $status . '".'
+            );
+
             echo json_encode([
                 'success' => true,
                 'message' => 'Status berhasil diperbarui.',
@@ -2423,6 +2470,8 @@ class PesananController
                 }
             }
 
+            $kode = ambilKodePesanan($this->db, (int) $idPesanan);
+
             $stmt = $this->db->prepare(
                 'DELETE FROM pesanan
                 WHERE id_pesanan = :id_pesanan'
@@ -2436,6 +2485,14 @@ class PesananController
                 http_response_code(404);
                 exit('Pesanan tidak ditemukan.');
             }
+
+            catatLog(
+                $this->db,
+                'Pesanan',
+                'Hapus Pesanan',
+                $kode,
+                'Menghapus pesanan ' . $kode . ' beserta seluruh detail dan fotonya.'
+            );
 
             $folderBefore = realpath(
                 dirname(__DIR__, 2) . '/public/uploads/pesanan/before'

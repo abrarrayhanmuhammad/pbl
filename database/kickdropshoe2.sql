@@ -19,6 +19,8 @@ DROP TABLE IF EXISTS jenis_barang CASCADE;
 DROP TABLE IF EXISTS drop_point CASCADE;
 DROP TABLE IF EXISTS customer CASCADE;
 DROP TABLE IF EXISTS pegawai CASCADE;
+DROP TABLE IF EXISTS log_aktivitas CASCADE;
+DROP TABLE IF EXISTS password_resets CASCADE;
 
 -- =========================================================
 -- 1. PEGAWAI / LOGIN
