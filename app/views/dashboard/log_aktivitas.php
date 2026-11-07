@@ -71,7 +71,7 @@ $system_logs = [
         require_once __DIR__ . '/../layouts/topbar.php';
         ?>
 
-        <div class="p-4 sm:p-8 max-w-7xl mx-auto w-full space-y-6">
+        <div class="p-4 sm:p-8 max-w-7xl mx-auto w-full space-y-6 pb-36 lg:pb-8">
             <!-- Header Ringkasan & Filter -->
             <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

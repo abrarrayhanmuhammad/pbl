@@ -13,7 +13,7 @@ require_once __DIR__ . '/../layouts/header.php';
         ?>
 
         <!-- Desktop: Split Master-Detail layout (100% Persis Desktop Asli) | Mobile: List View -->
-        <div class="p-4 lg:p-8 flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-81px)] lg:overflow-hidden">
+        <div class="p-4 lg:p-8 flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-81px)] lg:overflow-hidden pb-36 lg:pb-8">
             <!-- Left Panel: Daftar Pesanan -->
             <div class="w-full lg:w-[380px] flex flex-col gap-4 shrink-0 lg:h-full lg:overflow-hidden">
                 <div class="space-y-3 shrink-0">

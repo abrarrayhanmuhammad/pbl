@@ -23,7 +23,7 @@ require_once __DIR__ . '/../layouts/header.php';
         require_once __DIR__ . '/../layouts/topbar.php'; 
         ?>
 
-        <div class="p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+        <div class="p-4 md:p-8 max-w-7xl mx-auto w-full space-y-6 pb-36 lg:pb-8">
             <div class="bg-white rounded-3xl border border-slate-200 p-4 md:p-6 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
                     <div class="relative">

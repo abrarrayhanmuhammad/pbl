@@ -69,6 +69,19 @@ $is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
                 <?php endif; ?>
             <?php endif; ?>
 
+            <!-- Tambah / Kelola Karyawan (Khusus Superadmin / Owner) -->
+            <?php if ($user_role === 'superadmin'): ?>
+                <?php if ($current_page === 'karyawan'): ?>
+                    <a href="/karyawan" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
+                        <i class="fas fa-user-plus w-5"></i> Tambah Karyawan
+                    </a>
+                <?php else: ?>
+                    <a href="/karyawan" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                        <i class="fas fa-user-plus w-5"></i> Tambah Karyawan
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
+
             <!-- Daftar Pesanan -->
             <?php if ($current_page === 'pesanan'): ?>
                 <a href="/pesanan" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-extrabold transition-all">
@@ -122,3 +135,54 @@ $is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
         </a>
     </div>
 </aside>
+
+<?php if ($current_page !== 'tambah_pesanan' && $current_page !== 'edit_pesanan'): ?>
+<!-- Mobile Bottom Navigation Bar (Tokopedia / Shopee / Duolingo Style) -->
+<nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-30 px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.05)] <?= $is_print_hidden ?>">
+    <!-- 1. Beranda -->
+    <a href="/dashboard" class="flex flex-col items-center justify-center flex-1 py-1 relative active:scale-90 transition-transform <?= $current_page === 'dashboard' ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600 font-semibold' ?>">
+        <i class="fas fa-house text-base mb-0.5"></i>
+        <span class="text-[10px] tracking-tight">Beranda</span>
+        <?php if ($current_page === 'dashboard'): ?>
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-yellow mt-0.5"></span>
+        <?php endif; ?>
+    </a>
+
+    <!-- 2. Pesanan -->
+    <a href="/pesanan" class="flex flex-col items-center justify-center flex-1 py-1 relative active:scale-90 transition-transform <?= ($current_page === 'pesanan') ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600 font-semibold' ?>">
+        <i class="fas fa-receipt text-base mb-0.5"></i>
+        <span class="text-[10px] tracking-tight">Pesanan</span>
+        <?php if ($current_page === 'pesanan'): ?>
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-yellow mt-0.5"></span>
+        <?php endif; ?>
+    </a>
+
+    <!-- 3. TAMBAH PESANAN (TEPAT DI TENGAH - Action Button Ala Tokopedia/Shopee) -->
+    <a href="/pesanan/tambah" class="flex flex-col items-center justify-center flex-1 relative group active:scale-90 transition-transform <?= $current_page === 'tambah_pesanan' ? 'text-slate-900 font-black' : '' ?>">
+        <div class="w-10 h-10 -mt-3 rounded-full bg-brand-yellow text-slate-900 flex items-center justify-center shadow-md border-2 border-white group-hover:bg-yellow-300">
+            <i class="fas fa-plus text-sm font-black"></i>
+        </div>
+        <span class="text-[10px] tracking-tight font-black text-slate-800 mt-0.5">Tambah</span>
+    </a>
+
+    <?php if ($user_role === 'superadmin'): ?>
+        <!-- 4. Laporan (Super Admin) -->
+        <a href="/laporan" class="flex flex-col items-center justify-center flex-1 py-1 relative active:scale-90 transition-transform <?= $current_page === 'laporan' ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600 font-semibold' ?>">
+            <i class="fas fa-chart-line text-base mb-0.5"></i>
+            <span class="text-[10px] tracking-tight">Laporan</span>
+            <?php if ($current_page === 'laporan'): ?>
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-yellow mt-0.5"></span>
+            <?php endif; ?>
+        </a>
+    <?php endif; ?>
+
+    <!-- 5. Akun -->
+    <a href="/akun" class="flex flex-col items-center justify-center flex-1 py-1 relative active:scale-90 transition-transform <?= $current_page === 'akun' ? 'text-slate-900 font-black' : 'text-slate-400 hover:text-slate-600 font-semibold' ?>">
+        <i class="fas fa-user text-base mb-0.5"></i>
+        <span class="text-[10px] tracking-tight">Akun</span>
+        <?php if ($current_page === 'akun'): ?>
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-yellow mt-0.5"></span>
+        <?php endif; ?>
+    </a>
+</nav>
+<?php endif; ?>

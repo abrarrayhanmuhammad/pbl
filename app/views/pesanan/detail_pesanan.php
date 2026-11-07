@@ -13,7 +13,7 @@ require_once __DIR__ . '/../layouts/header.php';
         require_once __DIR__ . '/../layouts/topbar.php';
         ?>
 
-        <div class="p-4 md:p-8 max-w-5xl mx-auto w-full space-y-6">
+        <div class="p-4 md:p-8 max-w-5xl mx-auto w-full space-y-6 pb-36 lg:pb-8">
             <!-- Navigation Back & Quick Action Buttons -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <a href="/pesanan" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition shadow-sm">
