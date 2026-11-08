@@ -395,7 +395,8 @@ require_once __DIR__ . '/../layouts/header.php';
                                     $idDetail = $item['id_detail_pesanan'];
                                     $result[$idDetail] = [
                                         'speed_id' => null,
-                                        'extra_ids' => []
+                                        'extra_ids' => [],
+                                        'extra_prices' => []
                                     ];
 
                                     foreach ($item['treatments'] ?? [] as $treatment) {
@@ -406,6 +407,7 @@ require_once __DIR__ . '/../layouts/header.php';
                                             $result[$idDetail]['speed_id'] = $idTreatment;
                                         } else {
                                             $result[$idDetail]['extra_ids'][] = $idTreatment;
+                                            $result[$idDetail]['extra_prices'][$idTreatment] = (int) $treatment['harga'];
                                         }
                                     }
 

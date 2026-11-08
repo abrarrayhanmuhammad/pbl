@@ -92,6 +92,7 @@ class PesananController
         $speed = $_POST['speed'] ?? [];
         $treatments = $_POST['treatment_tambahan'] ?? [];
         $catatan = $_POST['catatan'] ?? [];
+        $hargaManual = is_array($_POST['harga_manual'] ?? null) ? $_POST['harga_manual'] : [];
 
         $uploadedFiles = [];
 
@@ -245,7 +246,7 @@ class PesananController
             );
 
             $stmtTreatment = $this->db->prepare(
-                'SELECT id_treatment_tambahan, nama_treatment, harga_min
+                'SELECT id_treatment_tambahan, nama_treatment, harga_min, harga_max, harga_manual
                 FROM treatment_tambahan
                 WHERE id_treatment_tambahan = :id'
             );
@@ -352,7 +353,7 @@ class PesananController
                         throw new RuntimeException('Treatment tidak ditemukan.');
                     }
 
-                    $hargaTambahan[$treatmentId] = (int) $row['harga_min'];
+                    $hargaTambahan[$treatmentId] = $this->resolveHargaTreatment($row, $hargaManual[$id][$treatmentId] ?? null);
                 }
 
                 $subtotal = $hargaLayanan + array_sum($hargaTambahan);
@@ -1200,6 +1201,7 @@ class PesananController
         $treatments = $_POST['treatment_tambahan'] ?? [];
         $catatan = $_POST['catatan'] ?? [];
         $detailPost = $_POST['id_detail_pesanan'] ?? [];
+        $hargaManual = is_array($_POST['harga_manual'] ?? null) ? $_POST['harga_manual'] : [];
 
         $uploadedFiles = [];
         $fotoUntukDihapus = [];
@@ -1510,7 +1512,7 @@ class PesananController
             );
 
             $stmtTreatment = $this->db->prepare(
-                'SELECT id_treatment_tambahan, nama_treatment, harga_min
+                'SELECT id_treatment_tambahan, nama_treatment, harga_min, harga_max, harga_manual
              FROM treatment_tambahan
              WHERE id_treatment_tambahan = :id'
             );
@@ -1622,7 +1624,7 @@ class PesananController
                         throw new RuntimeException('Treatment tidak ditemukan.');
                     }
 
-                    $hargaTambahan[$treatmentId] = (int) $row['harga_min'];
+                    $hargaTambahan[$treatmentId] = $this->resolveHargaTreatment($row, $hargaManual[$formId][$treatmentId] ?? null);
                 }
 
                 $subtotal = $hargaLayanan + array_sum($hargaTambahan);
@@ -2685,5 +2687,32 @@ class PesananController
 
             exit;
         }
+    }
+
+    private function resolveHargaTreatment(array $row, $hargaInput): int
+    {
+        $hargaMin = (int) $row['harga_min'];
+        $isManual = in_array($row['harga_manual'] ?? false, [true, 't', '1', 1], true);
+    
+        if (!$isManual) {
+            return $hargaMin;
+        }
+    
+        $angka = is_scalar($hargaInput)
+            ? preg_replace('/[^0-9]/', '', (string) $hargaInput)
+            : '';
+    
+        if ($angka === '') {
+            throw new RuntimeException('Harga ' . $row['nama_treatment'] . ' wajib diisi.');
+        }
+    
+        $harga = (int) $angka;
+        $hargaMax = $row['harga_max'] !== null ? (int) $row['harga_max'] : null;
+    
+        if ($harga < $hargaMin || ($hargaMax !== null && $harga > $hargaMax)) {
+            throw new RuntimeException('Harga ' . $row['nama_treatment'] . ' di luar rentang yang diizinkan.');
+        }
+    
+        return $harga;
     }
 }

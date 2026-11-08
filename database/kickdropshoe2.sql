@@ -126,9 +126,7 @@ CREATE TABLE layanan (
 INSERT INTO layanan
 (nama_layanan, kategori, id_jenis, variasi, harga_min, harga_max, estimasi_min_hari, estimasi_max_hari, keterangan)
 VALUES
-('Dark Shoes', 'Deep Clean Shoes Care', 1, NULL, 25000, 25000, 4, 5, 'Mencuci seluruh bagian sepatu'),
-('Basic & White Shoes', 'Deep Clean Shoes Care', 1, NULL, 30000, 30000, 4, 5, 'Mencuci seluruh bagian sepatu'),
-('Leather/Suede/Bludru', 'Deep Clean Shoes Care', 1, NULL, 30000, 30000, 4, 5, 'Mencuci seluruh bagian sepatu'),
+('Deep Clean Shoes', 'Deep Clean Shoes Care', 1, NULL, 30000, 30000, 4, 5, 'Mencuci seluruh bagian sepatu (Dark, Basic, White, Leather/Suede/Bludru)'),
 ('Premium Deep Clean', 'Deep Clean Shoes Care', 1, NULL, 50000, 50000, 4, 5, 'Mencuci seluruh bagian sepatu'),
 ('Caterpillar/Boots', 'Deep Clean Shoes Care', 1, NULL, 35000, 35000, 4, 5, 'Mencuci seluruh bagian sepatu'),
 ('Flatshoes', 'Deep Clean Shoes Care', 1, NULL, 20000, 20000, 4, 5, 'Mencuci seluruh bagian sepatu'),
@@ -183,6 +181,7 @@ CREATE TABLE treatment_tambahan (
     estimasi_min_hari INTEGER,
     estimasi_max_hari INTEGER,
     keterangan TEXT,
+    harga_manual BOOLEAN NOT NULL DEFAULT FALSE,
     CHECK (harga_max IS NULL OR harga_max >= harga_min)
 );
 
@@ -193,6 +192,11 @@ VALUES
 ('Prioritas', 5000, 5000, 3, 3, '3 hari'),
 ('Pipis Hewan', 15000, 15000, 8, 8, '8 hari'),
 ('Noda Berat', 5000, 10000, 5, 8, '5-8 hari');
+
+-- Harga Noda Berat diisi kasir (rentang harga_min - harga_max)
+UPDATE treatment_tambahan
+SET harga_manual = TRUE
+WHERE treatment_tambahan.nama_treatment = 'Noda Berat';
 
 -- =========================================================
 -- 7. PAKET
@@ -225,9 +229,9 @@ INSERT INTO paket_layanan (id_paket, id_layanan)
 SELECT p.id_paket, l.id_layanan
 FROM paket p
 JOIN layanan l ON
-    (p.nama_paket = 'Dark Shoes + Unyellowing' AND l.nama_layanan IN ('Dark Shoes', 'Unyellowing'))
- OR (p.nama_paket = 'Basic Shoes + Unyellowing' AND l.nama_layanan IN ('Basic & White Shoes', 'Unyellowing'))
- OR (p.nama_paket = 'White Shoes + Whitening' AND l.nama_layanan IN ('Basic & White Shoes', 'Whitening'));
+    (p.nama_paket = 'Dark Shoes + Unyellowing' AND l.nama_layanan IN ('Deep Clean Shoes', 'Unyellowing'))
+ OR (p.nama_paket = 'Basic Shoes + Unyellowing' AND l.nama_layanan IN ('Deep Clean Shoes', 'Unyellowing'))
+ OR (p.nama_paket = 'White Shoes + Whitening' AND l.nama_layanan IN ('Deep Clean Shoes', 'Whitening'));
 
 -- =========================================================
 -- 8. PESANAN

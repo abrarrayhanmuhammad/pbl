@@ -124,6 +124,11 @@ function initCategoryButtons() {
 
 // 3. Extra Treatment Calculations
 function initExtraTreatmentCalculations() {
+  document.addEventListener('input', (e) => {
+      if (!e.target.matches('.harga-manual-input')) return;
+      const container = e.target.closest('.item-dark-container');
+      if (container) updateItemSubtotal(container.dataset.itemId || 1);
+  });
     document.addEventListener('change', (e) => {
         if (e.target.matches('input[type="radio"]') || e.target.matches('input[type="checkbox"]') || e.target.matches('.service-select')) {
             const container = e.target.closest('.item-dark-container');
@@ -132,6 +137,39 @@ function initExtraTreatmentCalculations() {
                 updateItemSubtotal(itemId);
             }
         }
+    });
+}
+
+function manualPriceHtml(itemId, item, checked, value) {
+    if (!item.harga_manual) return '';
+    const min = Number(item.harga_min);
+    const hasMax = item.harga_max !== null && item.harga_max !== undefined;
+    const max = Number(item.harga_max);
+    return `
+        <div class="harga-manual-wrap ${checked ? '' : 'hidden'}">
+            <input type="number" inputmode="numeric"
+                name="harga_manual[${itemId}][${item.id_treatment_tambahan}]"
+                min="${min}" ${hasMax ? `max="${max}"` : ''}
+                value="${value ?? ''}"
+                placeholder="Harga ${item.nama_treatment} (Rp${min.toLocaleString('id-ID')}${hasMax ? '–' + max.toLocaleString('id-ID') : '+'})"
+                ${checked ? 'required' : 'disabled'}
+                class="harga-manual-input w-full bg-brand-darkInput border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white outline-none font-semibold">
+        </div>`;
+}
+
+function getManualInput(checkbox) {
+    const wrap = checkbox.closest('label')?.nextElementSibling;
+    return wrap && wrap.classList.contains('harga-manual-wrap')
+        ? wrap.querySelector('.harga-manual-input') : null;
+}
+
+function syncManualPriceInputs(container, itemId) {
+    container.querySelectorAll(`.extra-check-${itemId}[data-manual="1"]`).forEach(cb => {
+        const input = getManualInput(cb);
+        if (!input) return;
+        input.closest('.harga-manual-wrap').classList.toggle('hidden', !cb.checked);
+        input.disabled = !cb.checked;
+        input.required = cb.checked;
     });
 }
 
@@ -155,8 +193,14 @@ function updateItemSubtotal(itemId) {
         total += Number(speedRadio.dataset.price) || 0;
     }
 
+    syncManualPriceInputs(container, itemId);
+    
     extraCheckboxes.forEach(cb => {
-        total += Number(cb.dataset.price) || 0;
+        if (cb.dataset.manual === '1') {
+            total += Number(getManualInput(cb)?.value) || 0;
+        } else {
+            total += Number(cb.dataset.price) || 0;
+        }
     });
 
     container.querySelectorAll(`input[name="speed[${itemId}]"]`).forEach(radio => {
@@ -274,13 +318,14 @@ function initAddItemButton() {
                             ${(window.TREATMENT_TAMBAHAN || []).map(item => `
                                 <label class="flex justify-between items-center p-3.5 border border-slate-700/90 bg-slate-800/50 rounded-xl cursor-pointer hover:border-slate-500 transition">
                                     <div class="flex items-center gap-3">
-                                        <input type="checkbox" name="treatment_tambahan[${newId}][]" value="${item.id_treatment_tambahan}" data-price="${Number(item.id_treatment_tambahan) === 4 ? Number(item.harga_max) : Number(item.harga_min)}" data-harga-max="${Number(item.harga_max)}" onchange="updateItemSubtotal(${newId})" class="extra-check-${newId} w-4 h-4 rounded text-brand-yellow bg-slate-900 border-slate-600 focus:ring-brand-yellow">
+                                        <input type="checkbox" name="treatment_tambahan[${newId}][]" value="${item.id_treatment_tambahan}" data-price="${Number(item.harga_min)}" data-manual="${item.harga_manual ? 1 : 0}" data-harga-max="${Number(item.harga_max)}" onchange="updateItemSubtotal(${newId})" class="extra-check-${newId} w-4 h-4 rounded text-brand-yellow bg-slate-900 border-slate-600 focus:ring-brand-yellow">
                                         <span class="text-xs font-bold text-white">${item.nama_treatment} (${item.keterangan || ''})</span>
                                     </div>
                                     <span class="text-xs font-bold text-brand-yellow">
                                         ${Number(item.harga_min) === Number(item.harga_max) ? '+Rp' + Number(item.harga_min).toLocaleString('id-ID') : '+Rp' + Number(item.harga_min).toLocaleString('id-ID') + ' – Rp' + Number(item.harga_max).toLocaleString('id-ID')}
                                     </span>
                                 </label>
+                                ${manualPriceHtml(newId, item, false, '')}
                             `).join('')}
                         </div>
                     </div>
@@ -451,13 +496,14 @@ function initEditAddItemButton() {
                             ${(window.TREATMENT_TAMBAHAN || []).map(item => `
                                 <label class="flex justify-between items-center p-3.5 border border-slate-700/90 bg-slate-800/50 rounded-xl cursor-pointer hover:border-slate-500 transition">
                                     <div class="flex items-center gap-3">
-                                        <input type="checkbox" name="treatment_tambahan[${newId}][]" value="${item.id_treatment_tambahan}" data-price="${Number(item.id_treatment_tambahan) === 4 ? Number(item.harga_max) : Number(item.harga_min)}" data-harga-max="${Number(item.harga_max)}" onchange="updateItemSubtotal(${newId})" class="extra-check-${newId} w-4 h-4 rounded text-brand-yellow bg-slate-900 border-slate-600 focus:ring-brand-yellow">
+                                        <input type="checkbox" name="treatment_tambahan[${newId}][]" value="${item.id_treatment_tambahan}" data-price="${Number(item.harga_min)}" data-manual="${item.harga_manual ? 1 : 0}" data-harga-max="${Number(item.harga_max)}" onchange="updateItemSubtotal(${newId})" class="extra-check-${newId} w-4 h-4 rounded text-brand-yellow bg-slate-900 border-slate-600 focus:ring-brand-yellow">
                                         <span class="text-xs font-bold text-white">${item.nama_treatment} (${item.keterangan || ''})</span>
                                     </div>
                                     <span class="text-xs font-bold text-brand-yellow">
                                         ${Number(item.harga_min) === Number(item.harga_max) ? '+Rp' + Number(item.harga_min).toLocaleString('id-ID') : '+Rp' + Number(item.harga_min).toLocaleString('id-ID') + ' – Rp' + Number(item.harga_max).toLocaleString('id-ID')}
                                     </span>
                                 </label>
+                                ${manualPriceHtml(newId, item, false, '')}
                             `).join('')}
                         </div>
                     </div>
@@ -1832,6 +1878,7 @@ function generateExtraTreatments(itemId, selectedTreatmentIds = []) {
                         name="treatment_tambahan[${itemId}][]"
                         value="${id}"
                         data-price="${price}"
+                        data-manual="${item.harga_manual ? 1 : 0}"
                         ${checked ? 'checked' : ''}
                         onchange="updateItemSubtotal(${itemId})"
                         class="extra-check-${itemId} w-4 h-4 rounded text-brand-yellow bg-slate-900 border-slate-600 focus:ring-brand-yellow"
@@ -1841,12 +1888,13 @@ function generateExtraTreatments(itemId, selectedTreatmentIds = []) {
                     </span>
                 </div>
                 <span class="text-xs font-bold text-brand-yellow">
-                    ${price > 0
-                ? '+' + price.toLocaleString('id-ID')
-                : 'Free'
+                ${item.harga_manual
+                    ? '+' + price.toLocaleString('id-ID') + ' – ' + Number(item.harga_max).toLocaleString('id-ID')
+                    : (price > 0 ? '+' + price.toLocaleString('id-ID') : 'Free')}
             }
                 </span>
             </label>
+             ${manualPriceHtml(itemId, item, checked, savedPrices?.[id])}
         `;
     }).join('');
 }
@@ -2025,7 +2073,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         generateExtraTreatments(
             itemId,
-            saved.extra_ids
+            saved.extra_ids,
+            saved.extra_prices
         );
 
         generateEditCategoryButtons(itemId);

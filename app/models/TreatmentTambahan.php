@@ -11,10 +11,14 @@ class TreatmentTambahan
 
     public function getTreatmentTambahan(): array
     {
-        $stmt = $this->db->prepare("SELECT id_treatment_tambahan, nama_treatment, harga_min, harga_max, estimasi_min_hari, estimasi_max_hari, keterangan FROM treatment_tambahan ORDER BY id_treatment_tambahan ASC");
+        $stmt = $this->db->prepare("SELECT id_treatment_tambahan, nama_treatment, harga_min, harga_max, estimasi_min_hari, estimasi_max_hari, keterangan, harga_manual FROM treatment_tambahan ORDER BY id_treatment_tambahan ASC");
         $stmt->execute();
 
         $treatmentAll = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($treatmentAll as &$item) {
+            $item['harga_manual'] = in_array($item['harga_manual'], [true, 't', '1', 1], true);
+        }
+        unset($item);
 
         $treatmentKecepatan = array_filter($treatmentAll, function ($item) {
             return in_array($item['nama_treatment'], ['Express', 'Prioritas'], true);
