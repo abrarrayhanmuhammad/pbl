@@ -5,49 +5,56 @@ $is_invoice = true;
 $body_class = 'font-sans antialiased bg-brand-slateBg print:bg-white';
 require_once __DIR__ . '/../layouts/header.php';
 ?>
+
 <div class="flex h-screen overflow-hidden">
     <!-- Sidebar (Hilang hanya saat dicetak) -->
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
 
     <main class="flex-1 flex flex-col h-full overflow-y-auto print:overflow-visible">
         <!-- Header (Hilang hanya saat dicetak) -->
-        <header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 md:py-5 flex justify-between items-center sticky top-0 z-10 shrink-0 print:hidden">
-            <div class="flex items-center gap-3">
-                <button type="button" onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition focus:outline-none" aria-label="Menu">
-                    <i class="fas fa-bars text-base"></i>
-                </button>
-                <div>
-                    <h2 class="text-lg md:text-xl font-extrabold text-slate-900 tracking-tight">Pratinjau Invoice</h2>
-                    <p class="text-xs md:text-sm font-medium text-slate-500 mt-0.5">Periksa rincian pesanan <?= htmlspecialchars($pesanan['kode_pesanan']) ?> sebelum mencetak.</p>
-                </div>
-            </div>
-            <div class="bg-slate-100 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-slate-200 text-[11px] md:text-xs font-bold text-slate-600 flex items-center gap-2">
-                <i class="far fa-calendar"></i> <span class="hidden sm:inline">17 Sep 2026</span><span class="sm:hidden">17 Sep</span>
-            </div>
-        </header>
+        <?php
+            $header_title = 'Invoice';
+            $header_subtitle = $pesanan['kode_pesanan'];
+            require_once __DIR__ . '/../layouts/topbar.php';
+        ?>
 
         <div class="p-4 md:p-8 flex flex-col items-center gap-6 print:p-0">
             <!-- Tombol Aksi (Hilang hanya saat dicetak) -->
-            <div class="w-full max-w-4xl flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 print:hidden">
-                <a href="/pesanan" class="justify-center px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-900 rounded-xl text-sm font-extrabold transition flex items-center gap-2 shadow-sm">
-                    <i class="fas fa-arrow-left"></i> Kembali ke Daftar Pesanan
+            <div class="w-full max-w-4xl flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 print:hidden">
+                <a href="/pesanan" class="w-full sm:w-auto justify-center px-5 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-900 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali ke Daftar Pesanan
                 </a>
-                <div class="flex items-center gap-2.5 sm:gap-3">
-                    <button type="button" onclick="window.print()" class="flex-1 sm:flex-none justify-center px-4 md:px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-900 rounded-xl text-xs md:text-sm font-extrabold transition flex items-center gap-2 shadow-sm">
-                        <i class="fas fa-file-pdf"></i> Unduh PDF
+
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                    <button type="button" onclick="window.print()" class="justify-center px-3 md:px-4 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-900 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                        <i class="fas fa-file-pdf"></i>
+                        Unduh PDF
                     </button>
-                    <button type="button" onclick="window.print()" class="flex-1 sm:flex-none justify-center px-4 md:px-5 py-2.5 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 rounded-xl text-xs md:text-sm font-extrabold transition flex items-center gap-2 shadow-sm">
-                        <i class="fas fa-print"></i> Cetak Sekarang
+
+                    <button type="button" onclick="window.print()" class="justify-center px-3 md:px-4 py-3 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                        <i class="fas fa-print"></i>
+                        Cetak Sekarang
+                    </button>
+
+                    <button type="button" onclick="unduhInvoiceGambar()" class="justify-center px-3 md:px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                        <i class="fas fa-image"></i>
+                        Unduh PNG
+                    </button>
+
+                    <button type="button" onclick="kirimInvoiceWhatsApp()" class="justify-center px-3 md:px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                        <i class="fab fa-whatsapp"></i>
+                        Kirim Invoice
                     </button>
                 </div>
             </div>
 
             <!-- KERTAS INVOICE (Yang akan tercetak) -->
-            <div class="w-full max-w-4xl bg-white shadow-xl border border-slate-200 print:shadow-none print:border-none print:max-w-full rounded-2xl md:rounded-3xl overflow-hidden">
+            <div id="invoice-capture" class="w-full max-w-4xl bg-white shadow-xl border border-slate-200 print:shadow-none print:border-none print:max-w-full rounded-2xl md:rounded-3xl overflow-hidden">
                 <!-- Garis Kuning Atas -->
                 <div class="h-2 w-full bg-brand-yellow"></div>
 
-                               <div class="p-6 sm:p-10 space-y-6 sm:space-y-8">
+                <div class="p-6 sm:p-10 space-y-6 sm:space-y-8">
                     <!-- Header Invoice: Di HP bertumpuk rapi, di Desktop tetap berdampingan persis aslinya -->
                     <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <!-- Bagian Kiri (Logo & Alamat) -->
@@ -133,4 +140,131 @@ require_once __DIR__ . '/../layouts/header.php';
             </div>
     </main>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+<script>
+    const dataInvoice = {
+        kodePesanan: <?= json_encode($pesanan['kode_pesanan']) ?>,
+        namaCustomer: <?= json_encode($pesanan['nama_customer']) ?>,
+        noHp: <?= json_encode($pesanan['no_hp']) ?>
+    };
+    async function unduhInvoiceGambar() {
+        const tombol = document.querySelector('[onclick="unduhInvoiceGambar()"]');
+        const invoice = document.getElementById('invoice-capture');
+
+        try {
+            tombol.disabled = true;
+            tombol.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuat Gambar...';
+
+            await document.fonts.ready;
+
+            const gambar = invoice.querySelectorAll('img');
+
+            await Promise.all(
+                Array.from(gambar).map(img => {
+                    if (img.complete) return Promise.resolve();
+
+                    return new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                })
+            );
+
+            const lebar = Math.max(invoice.scrollWidth, 800);
+
+            const canvas = await html2canvas(invoice, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                logging: false,
+                width: lebar,
+                height: invoice.scrollHeight,
+                windowWidth: lebar,
+                windowHeight: invoice.scrollHeight,
+                onclone: clonedDocument => {
+                    const clonedInvoice = clonedDocument.getElementById('invoice-capture');
+
+                    clonedInvoice.style.width = lebar + 'px';
+                    clonedInvoice.style.maxWidth = 'none';
+                    clonedInvoice.style.height = 'auto';
+                    clonedInvoice.style.overflow = 'visible';
+
+                    clonedInvoice.querySelectorAll('.overflow-x-auto').forEach(element => {
+                        element.style.overflow = 'visible';
+                    });
+                }
+            });
+
+            const link = document.createElement('a');
+            link.download = 'Invoice-<?= htmlspecialchars($pesanan['kode_pesanan'], ENT_QUOTES, 'UTF-8') ?>-' + Date.now() + '-KickDropShoe.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            return true;
+        } catch (error) {
+            console.error('Gagal membuat invoice:', error);
+            alert('Gagal membuat gambar invoice. Silakan coba kembali.');
+            return false;
+        } finally {
+            tombol.disabled = false;
+            tombol.innerHTML = '<i class="fas fa-image"></i> Unduh PNG';
+        }
+
+    }
+
+    async function kirimInvoiceWhatsApp() {
+        let nomor = String(dataInvoice.noHp || '').replace(/\D/g, '');
+
+        if (nomor.startsWith('0')) {
+            nomor = '62' + nomor.substring(1);
+        } else if (nomor.startsWith('8')) {
+            nomor = '62' + nomor;
+        }
+
+        if (nomor.length < 10) {
+            alert('Nomor WhatsApp pelanggan tidak valid.');
+            return;
+        }
+
+        const whatsapp = window.open('about:blank', '_blank');
+
+        if (!whatsapp) {
+            alert('Izinkan pop-up pada browser untuk membuka WhatsApp.');
+            return;
+        }
+
+        const berhasil = await unduhInvoiceGambar();
+
+        if (!berhasil) {
+            whatsapp.close();
+            return;
+        }
+
+        const pesan = [
+            `Halo Kak ${dataInvoice.namaCustomer || 'Customer'}!`,
+            '',
+            'Berikut kami lampirkan invoice pesanan Anda dari *KickDropShoe*.',
+            '',
+            `Kode Pesanan: ${dataInvoice.kodePesanan}`,
+            '',
+            'Silakan periksa rincian transaksi pada invoice terlampir.',
+            '',
+            'Terima kasih telah mempercayakan perawatan barang Anda kepada *KickDropShoe*!',
+            '',
+            'Salam bersih,',
+            '*Tim KickDropShoe*'
+        ].join('\n');
+
+        whatsapp.location.href = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Invoice Berhasil Dibuat',
+            text: 'Invoice sudah diunduh. Silakan lampirkan file PNG tersebut pada chat WhatsApp sebelum mengirim pesan.',
+            confirmButtonColor: '#16a34a'
+        });
+    }
+</script>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

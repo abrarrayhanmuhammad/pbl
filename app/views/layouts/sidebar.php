@@ -76,7 +76,7 @@ $is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
                         <i class="fas fa-user-plus w-5"></i> Tambah Karyawan
                     </a>
                 <?php else: ?>
-                    <a href="/karyawan" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
+                    <a href="/tambah/karyawan" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white font-bold transition-all">
                         <i class="fas fa-user-plus w-5"></i> Tambah Karyawan
                     </a>
                 <?php endif; ?>

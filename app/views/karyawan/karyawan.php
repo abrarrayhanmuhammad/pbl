@@ -3,31 +3,6 @@ $page_title = 'Kelola Karyawan - KickDropShoe';
 $current_page = 'karyawan';
 require_once __DIR__ . '/../layouts/header.php';
 
-if (empty($dataPegawai)) {
-    $dataPegawai = [
-        [
-            'id_pegawai' => 1,
-            'nama' => 'Super Admin',
-            'uname' => 'admin',
-            'email' => 'admin@kickdropshoe.com',
-            'role' => 'superadmin'
-        ],
-        [
-            'id_pegawai' => 2,
-            'nama' => 'Bagas (Karyawan)',
-            'uname' => 'bagas',
-            'email' => 'bagas@kickdropshoe.com',
-            'role' => 'karyawan'
-        ],
-        [
-            'id_pegawai' => 3,
-            'nama' => 'Karyawan Demo',
-            'uname' => 'demo',
-            'email' => 'demo@kickdropshoe.com',
-            'role' => 'karyawan'
-        ]
-    ];
-}
 $totalPegawai = $totalPegawai ?? count($dataPegawai);
 $totalSuperadmin = $totalSuperadmin ?? count(array_filter($dataPegawai, fn($p) => ($p['role'] ?? '') === 'superadmin'));
 $currentUserId = (int) ($_SESSION['id_pegawai'] ?? 1);
@@ -42,34 +17,6 @@ $currentUserId = (int) ($_SESSION['id_pegawai'] ?? 1);
         ?>
 
         <div class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6 pb-36 lg:pb-8">
-
-            <!-- Alert Notifikasi Status -->
-            <?php if (isset($_GET['status'])): ?>
-                <?php
-                $statusList = [
-                    'tambah_berhasil'     => ['type' => 'success', 'msg' => 'Karyawan baru berhasil ditambahkan.'],
-                    'update_berhasil'     => ['type' => 'success', 'msg' => 'Data karyawan berhasil diperbarui.'],
-                    'hapus_berhasil'      => ['type' => 'success', 'msg' => 'Karyawan berhasil dihapus.'],
-                    'hapus_diri_sendiri'  => ['type' => 'error',   'msg' => 'Tidak dapat menghapus akun Anda sendiri.'],
-                    'kosong'              => ['type' => 'error',   'msg' => 'Nama lengkap, username, dan password wajib diisi.'],
-                    'password_pendek'     => ['type' => 'error',   'msg' => 'Password minimal 8 karakter.'],
-                    'password_beda'       => ['type' => 'error',   'msg' => 'Konfirmasi password tidak cocok.'],
-                    'username_terpakai'   => ['type' => 'error',   'msg' => 'Username sudah digunakan, silakan pilih yang lain.'],
-                    'email_invalid'       => ['type' => 'error',   'msg' => 'Format email tidak valid.'],
-                    'email_terpakai'      => ['type' => 'error',   'msg' => 'Email sudah terdaftar.'],
-                    'gagal'               => ['type' => 'error',   'msg' => 'Terjadi kesalahan, silakan coba lagi.']
-                ];
-                $alert = $statusList[$_GET['status']] ?? null;
-                ?>
-                <?php if ($alert): ?>
-                    <div id="alert-box" class="p-4 rounded-xl flex items-center justify-between transition-all <?= $alert['type'] === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-red-50 border border-red-200 text-red-800' ?>">
-                        <p class="text-xs sm:text-sm font-semibold"><?= htmlspecialchars($alert['msg']) ?></p>
-                        <button type="button" onclick="document.getElementById('alert-box').remove()" class="text-slate-400 hover:text-slate-600 p-1">
-                            <i class="fas fa-times text-xs"></i>
-                        </button>
-                    </div>
-                <?php endif; ?>
-            <?php endif; ?>
 
             <!-- Ringkasan Metrik (Minimalis, Tanpa Simbol/Ikon, Tanpa Tulisan di Bawah Angka) -->
             <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
@@ -294,7 +241,7 @@ $currentUserId = (int) ($_SESSION['id_pegawai'] ?? 1);
             </div>
 
             <div>
-                <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Email (Opsional)</label>
+                <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Email</label>
                 <input type="email" name="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400" placeholder="nama@email.com">
             </div>
 
@@ -368,6 +315,13 @@ $currentUserId = (int) ($_SESSION['id_pegawai'] ?? 1);
                 <input type="password" name="password" id="edit-password" minlength="8" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400" placeholder="Masukkan password baru jika ingin diganti">
             </div>
 
+             <div>
+                <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Konfirmasi Password Baru <span class="text-slate-400 font-normal lowercase">(kosongkan jika tidak diubah)</span>
+                </label>
+                    <input type="password" name="password_konfirmasi" id="edit-password-konfirmasi" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400" placeholder="Masukkan password baru jika ingin diganti">
+            </div>
+
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                 <button type="button" onclick="tutupModalEdit()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 transition">
                     Batal
@@ -403,6 +357,36 @@ $currentUserId = (int) ($_SESSION['id_pegawai'] ?? 1);
         </form>
     </div>
 </div>
+
+<?php if (isset($_SESSION['success'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: <?= json_encode($_SESSION['success']) ?>,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#0B1325',
+            timer: 3000,
+            timerProgressBar: true
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: <?= json_encode($_SESSION['error']) ?>,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#0B1325',
+            timer: 3000,
+            timerProgressBar: true
+        });
+    </script>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
 
 <script>
 // Filter Pencarian & Role Real-Time

@@ -124,11 +124,11 @@ function initCategoryButtons() {
 
 // 3. Extra Treatment Calculations
 function initExtraTreatmentCalculations() {
-  document.addEventListener('input', (e) => {
-      if (!e.target.matches('.harga-manual-input')) return;
-      const container = e.target.closest('.item-dark-container');
-      if (container) updateItemSubtotal(container.dataset.itemId || 1);
-  });
+    document.addEventListener('input', (e) => {
+        if (!e.target.matches('.harga-manual-input')) return;
+        const container = e.target.closest('.item-dark-container');
+        if (container) updateItemSubtotal(container.dataset.itemId || 1);
+    });
     document.addEventListener('change', (e) => {
         if (e.target.matches('input[type="radio"]') || e.target.matches('input[type="checkbox"]') || e.target.matches('.service-select')) {
             const container = e.target.closest('.item-dark-container');
@@ -194,7 +194,7 @@ function updateItemSubtotal(itemId) {
     }
 
     syncManualPriceInputs(container, itemId);
-    
+
     extraCheckboxes.forEach(cb => {
         if (cb.dataset.manual === '1') {
             total += Number(getManualInput(cb)?.value) || 0;
@@ -1315,7 +1315,8 @@ function initMasterDetailOrders() {
         total: document.getElementById('detail-total'),
         whatsappCustomer: document.getElementById('detail-whatsapp-customer'),
         edit: document.getElementById('detail-edit-link'),
-        invoice: document.getElementById('detail-invoice-link')
+        invoice: document.getElementById('detail-invoice-link'),
+        sendDocumentation: document.getElementById('btn-kirim-dokumentasi')
     };
 
     function rupiah(value) {
@@ -1335,6 +1336,106 @@ function initMasterDetailOrders() {
                 year: 'numeric',
                 timeZone: 'UTC'
             });
+    }
+
+    function formatNomorWhatsApp(nomor) {
+        let hasil = String(nomor || '').replace(/\D/g, '');
+
+        if (hasil.startsWith('0')) {
+            hasil = '62' + hasil.substring(1);
+        } else if (hasil.startsWith('8')) {
+            hasil = '62' + hasil;
+        }
+
+        return hasil;
+    }
+
+    // function buatUrlFoto(foto) {
+    //     if (!foto) return '';
+
+    //     const path = String(foto);
+
+    //     if (/^https?:\/\//i.test(path)) {
+    //         return path;
+    //     }
+
+    //     return new URL('/' + path.replace(/^\/+/, ''), window.location.origin).href;
+    // }
+
+    function buatUrlFoto(foto) {
+        if (!foto) return '';
+
+        const path = String(foto);
+
+        if (/^https?:\/\//i.test(path)) {
+            return path;
+        }
+
+        return new URL(
+            '/' + path.replace(/^\/+/, ''),
+            'https://newer-enable-wheels-marc.trycloudflare.com'
+        ).href;
+    }
+
+    function aturTombolDokumentasi(pesanan, barang) {
+        if (!el.sendDocumentation) return;
+
+        const nomor = formatNomorWhatsApp(pesanan.no_hp);
+
+        const semuaFotoTersedia = barang.length > 0 &&
+            barang.every(item => item.foto_sesudah);
+
+        const bisaKirim = nomor.length >= 10 && semuaFotoTersedia;
+
+        el.sendDocumentation.disabled = !bisaKirim;
+
+        el.sendDocumentation.classList.toggle('bg-slate-200', !bisaKirim);
+        el.sendDocumentation.classList.toggle('text-slate-400', !bisaKirim);
+        el.sendDocumentation.classList.toggle('cursor-not-allowed', !bisaKirim);
+
+        el.sendDocumentation.classList.toggle('bg-brand-yellow', bisaKirim);
+        el.sendDocumentation.classList.toggle('text-slate-900', bisaKirim);
+        el.sendDocumentation.classList.toggle('cursor-pointer', bisaKirim);
+
+        el.sendDocumentation.onclick = null;
+
+        if (!bisaKirim) return;
+
+
+        el.sendDocumentation.onclick = function () {
+            const daftarFoto = barang.map((item, index) => {
+                return `${index + 1}. ${item.nama_barang || 'Barang'}\n${buatUrlFoto(item.foto_sesudah)}`;
+            }).join('\n\n');
+
+            const kodePesanan = String(pesanan.kode_pesanan || '-').replace(/^#+/, '');
+
+            const pesan = [
+                `Halo Kak ${pesanan.nama_customer || 'Customer'},`,
+                '',
+                'Terima kasih telah mempercayakan perawatan barang Anda kepada *KickDropShoe*.',
+                '',
+                'Kami informasikan bahwa pesanan Anda telah selesai dikerjakan.',
+                '',
+                '*DETAIL PESANAN*',
+                `Kode Pesanan: #${kodePesanan}`,
+                `Jumlah Barang: ${barang.length} item`,
+                '',
+                '*DOKUMENTASI FOTO AFTER*',
+                '',
+                daftarFoto,
+                '',
+                'Semoga hasil pengerjaan kami memuaskan dan membuat barang Anda kembali bersih serta nyaman digunakan.',
+                '',
+                'Terima kasih telah menggunakan layanan *KickDropShoe*!',
+                '',
+                'Salam bersih,',
+                '*Tim KickDropShoe*'
+            ].join('\n');
+
+            const url = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
+
+            window.open(url, '_blank', 'noopener,noreferrer');
+        };
     }
 
     function buatElemen(tag, className, text) {
@@ -1476,6 +1577,11 @@ function initMasterDetailOrders() {
 
     async function pilihPesanan(card) {
         const id = card.dataset.id;
+
+        if (el.sendDocumentation) {
+            el.sendDocumentation.disabled = true;
+            el.sendDocumentation.onclick = null;
+        }
 
         if (!id) {
             console.error('ID pesanan tidak ditemukan pada kartu.');
@@ -1630,6 +1736,8 @@ function initMasterDetailOrders() {
                 el.edit.href =
                     '/pesanan/edit?id=' + encodeURIComponent(p.id_pesanan);
             }
+
+            aturTombolDokumentasi(p, barang);
 
             if (el.invoice) {
                 el.invoice.href =
@@ -1853,7 +1961,7 @@ function generateSpeedTreatments(itemId, selectedTreatmentId = 'reguler') {
     }
 }
 
-function generateExtraTreatments(itemId, selectedTreatmentIds = []) {
+function generateExtraTreatments(itemId, selectedTreatmentIds = [], savedPrices = {}) {
     const container = document.querySelector(
         `#item-container-${itemId} .extra-treatment-container`
     );
@@ -1888,13 +1996,12 @@ function generateExtraTreatments(itemId, selectedTreatmentIds = []) {
                     </span>
                 </div>
                 <span class="text-xs font-bold text-brand-yellow">
-                ${item.harga_manual
-                    ? '+' + price.toLocaleString('id-ID') + ' – ' + Number(item.harga_max).toLocaleString('id-ID')
-                    : (price > 0 ? '+' + price.toLocaleString('id-ID') : 'Free')}
-            }
+                    ${item.harga_manual
+                ? '+' + price.toLocaleString('id-ID') + ' – ' + Number(item.harga_max).toLocaleString('id-ID')
+                : (price > 0 ? '+' + price.toLocaleString('id-ID') : 'Free')}
                 </span>
             </label>
-             ${manualPriceHtml(itemId, item, checked, savedPrices?.[id])}
+            ${manualPriceHtml(itemId, item, checked, savedPrices[id])}
         `;
     }).join('');
 }

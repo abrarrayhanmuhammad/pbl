@@ -188,7 +188,7 @@ require_once __DIR__ . '/../layouts/header.php';
                                 </div>
                             </div>
 
-                            <button id="btn-kirim-dokumentasi" type="button" disabled class="px-4 py-2 bg-slate-200 text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed flex items-center gap-2">
+                            <button id="btn-kirim-dokumentasi" type="button" class="px-4 py-2 bg-slate-200 text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed flex items-center gap-2">
                                 <i class="fas fa-paper-plane"></i> Kirim Foto After
                             </button>
                         </div>

@@ -24,8 +24,8 @@ require_once __DIR__ . '/../layouts/header.php';
                         <i class="fas fa-edit"></i> Edit Pesanan
                     </a>
                     <?php if ($user_role === 'superadmin'): ?>
-                         <?php
-                            $pesananAda = !empty($pesanan) && !empty($pesanan['id_pesanan']);
+                        <?php
+                        $pesananAda = !empty($pesanan) && !empty($pesanan['id_pesanan']);
                         ?>
                         <form action="/pesanan/hapus" method="POST" id="form-hapus-pesanan">
                             <input type="hidden" name="id_pesanan" value="<?= $pesananAda ? (int) $pesanan['id_pesanan'] : '' ?>">
@@ -206,6 +206,25 @@ require_once __DIR__ . '/../layouts/header.php';
                 </div>
             </div>
 
+            <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-2xl flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-brand-yellow/20 text-yellow-800 flex items-center justify-center text-sm font-bold">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="text-xs font-extrabold text-slate-900">Kirim Dokumentasi via WhatsApp</h5>
+                        <p id="detail-whatsapp-customer" class="text-[10px] text-slate-500 font-medium"><?= htmlspecialchars($pesanan['nama_customer']) . ' • ' . htmlspecialchars($pesanan['no_hp']) ?></p>
+                        <p class="text-[10px] text-yellow-800 font-medium mt-0.5">Foto After wajib tersedia sebelum dokumentasi penyelesaian dikirim.</p>
+                    </div>
+                </div>
+
+                <button id="btn-kirim-dokumentasi" type="button" class="px-4 py-2 bg-brand-yellow text-slate-900 rounded-xl text-xs font-bold flex items-center gap-2" onclick="kirimDokumentasi()">
+                    <i class="fas fa-paper-plane"></i> Kirim Foto After
+                </button>
+            </div>
+
+
             <!-- Footer Summary & Cetak Invoice -->
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="w-full sm:w-auto flex justify-between sm:block">
@@ -290,5 +309,89 @@ require_once __DIR__ . '/../layouts/header.php';
             }
         });
     });
+</script>
+
+<script>
+    const BASE_URL = 'https://newer-enable-wheels-marc.trycloudflare.com';
+    
+    const dataDokumentasi = {
+        kodePesanan: <?= json_encode($pesanan['kode_pesanan']) ?>,
+        namaCustomer: <?= json_encode($pesanan['nama_customer']) ?>,
+        noHp: <?= json_encode($pesanan['no_hp']) ?>,
+        barang: <?= json_encode(array_map(function ($item) {
+                    return ['nama_barang' => $item['nama_barang'], 'foto_sesudah' => $item['foto_sesudah'] ?? ''];
+                }, $detailBarang), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>
+    };
+
+    function kirimDokumentasi() {
+        let nomor = String(dataDokumentasi.noHp || '').replace(/\D/g, '');
+
+        if (nomor.startsWith('0')) {
+            nomor = '62' + nomor.substring(1);
+        } else if (nomor.startsWith('8')) {
+            nomor = '62' + nomor;
+        }
+
+        if (nomor.length < 10) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Nomor Tidak Valid',
+                text: 'Nomor WhatsApp pelanggan tidak valid.'
+            });
+            return;
+        }
+
+        const barang = dataDokumentasi.barang;
+
+        if (!barang.length || barang.some(item => !item.foto_sesudah)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Foto Belum Lengkap',
+                text: 'Pastikan semua foto after sudah diunggah sebelum mengirim dokumentasi.'
+            });
+            return;
+        }
+
+        // const daftarFoto = barang.map((item, index) => {
+        //     const pathFoto = String(item.foto_sesudah).replace(/^\/+/, '');
+        //     const urlFoto = `${window.location.origin}/${pathFoto}`;
+
+        //     return `${index + 1}. ${item.nama_barang}\n${urlFoto}`;
+        // }).join('\n\n');
+
+        const daftarFoto = barang.map((item, index) => {
+            const pathFoto = String(item.foto_sesudah).replace(/^\/+/, '');
+            const urlFoto = new URL('/' + pathFoto, BASE_URL).href;
+
+            return `${index + 1}. ${item.nama_barang}\n${urlFoto}`;
+        }).join('\n\n');
+
+        const pesan = [
+            `Halo Kak ${dataDokumentasi.namaCustomer || 'Customer'},`,
+            '',
+            'Terima kasih telah mempercayakan perawatan barang Anda kepada *KickDropShoe*.',
+            '',
+            'Kami informasikan bahwa pesanan Anda telah selesai dikerjakan.',
+            '',
+            '*DETAIL PESANAN*',
+            `Kode Pesanan: #${dataDokumentasi.kodePesanan}`,
+            `Jumlah Barang: ${barang.length} item`,
+            '',
+            '*DOKUMENTASI FOTO AFTER*',
+            '',
+            daftarFoto,
+            '',
+            'Silakan tekan tautan di atas untuk melihat foto hasil pengerjaan.',
+            '',
+            'Terima kasih telah menggunakan layanan *KickDropShoe*!',
+            '',
+            'Salam bersih,',
+            '*Tim KickDropShoe*'
+        ].join('\n');
+
+        const urlWhatsApp = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
+
+        window.open(urlWhatsApp, '_blank');
+    }
 </script>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

@@ -9,6 +9,13 @@ class Pegawai
         $this->db = $db;
     }
 
+    public function getAllPegawai(): array
+    {
+        $sql = "SELECT * FROM pegawai";
+
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function findByUsername(string $username): ?array
     {
         $sql = "SELECT * FROM pegawai WHERE uname = :username LIMIT 1";

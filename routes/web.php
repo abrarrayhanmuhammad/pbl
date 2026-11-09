@@ -58,6 +58,12 @@ if ($uri === '/' && $method === 'GET') {
     $pegawaiController->index();
 } elseif ($uri === '/akun/updatePassword' && $method === 'POST') {
     $pegawaiController->updatePassword();
+} elseif ($uri === '/tambah/karyawan' && $method === 'GET') {
+    $pegawaiController->tambahKaryawan();
+} elseif ($uri === '/karyawan/simpan' && $method === 'POST') {
+    $pegawaiController->simpanKaryawan();
+} elseif ($uri === '/karyawan/update' && $method === 'POST') {
+    $pegawaiController->updateKaryawan();
 } elseif ($uri === '/log' && $method === 'GET') {
     require_once __DIR__ . '/../app/views/dashboard/log_aktivitas.php';
 } else {

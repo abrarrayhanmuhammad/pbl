@@ -36,7 +36,7 @@ require_once __DIR__ . '/../layouts/header.php';
                     <div class="space-y-3 pb-6 border-b border-slate-100">
                         <p class="text-xs font-black text-slate-400 uppercase tracking-wider">Akses Manajemen</p>
                         <div class="border-2 border-slate-100 rounded-2xl divide-y divide-slate-100 bg-white overflow-hidden shadow-sm">
-                            <a href="/karyawan" class="flex items-center justify-between p-4 hover:bg-slate-50/80 active:bg-slate-100 transition-all group">
+                            <a href="/tambah/karyawan" class="flex items-center justify-between p-4 hover:bg-slate-50/80 active:bg-slate-100 transition-all group">
                                 <div class="flex items-center gap-3">
                                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
                                     <div>
