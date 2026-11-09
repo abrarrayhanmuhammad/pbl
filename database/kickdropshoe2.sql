@@ -299,11 +299,26 @@ CREATE TABLE password_resets (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- =========================================================
+-- 12. LOG AKTIVITAS
+-- =========================================================
+CREATE TABLE log_aktivitas (
+    id_log SERIAL PRIMARY KEY,
+    id_pegawai INTEGER REFERENCES pegawai(id_pegawai) ON DELETE SET NULL,
+    kategori VARCHAR(30) NOT NULL,
+    aksi VARCHAR(100) NOT NULL,
+    referensi VARCHAR(50),
+    keterangan TEXT,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Indeks untuk pencarian pesanan dan relasi yang sering digunakan
 CREATE INDEX idx_pesanan_customer ON pesanan(id_customer);
 CREATE INDEX idx_pesanan_status ON pesanan(status);
 CREATE INDEX idx_pesanan_tanggal_masuk ON pesanan(tanggal_masuk);
 CREATE INDEX idx_detail_pesanan_pesanan ON detail_pesanan(id_pesanan);
 CREATE INDEX idx_layanan_kategori ON layanan(kategori);
+CREATE INDEX idx_log_created_at ON log_aktivitas(created_at DESC);
 
 COMMIT;
