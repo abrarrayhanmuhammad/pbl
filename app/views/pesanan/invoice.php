@@ -146,17 +146,80 @@ require_once __DIR__ . '/../layouts/header.php';
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 
+
 <script>
     const dataInvoice = {
         kodePesanan: <?= json_encode($pesanan['kode_pesanan']) ?>,
         namaCustomer: <?= json_encode($pesanan['nama_customer']) ?>,
         noHp: <?= json_encode($pesanan['no_hp']) ?>
     };
+
+    function oklchKeRgb(value) {
+        const match = value.match(
+            /oklch\(\s*([+-]?[\d.]+%?)\s+([+-]?[\d.]+%?)\s+([+-]?[\d.]+)(?:deg)?(?:\s*\/\s*([\d.]+%?))?\s*\)/i
+        );
+
+        if (!match) return value;
+
+        const L = parseFloat(match[1]) / (match[1].includes('%') ? 100 : 1);
+        const C = parseFloat(match[2]) / (match[2].includes('%') ? 100 : 1);
+        const H = parseFloat(match[3]) * Math.PI / 180;
+
+        const a = C * Math.cos(H);
+        const b = C * Math.sin(H);
+
+        let l = L + 0.3963377774 * a + 0.2158037573 * b;
+        let m = L - 0.1055613458 * a - 0.0638541728 * b;
+        let s = L - 0.0894841775 * a - 1.291485548 * b;
+
+        l = l ** 3;
+        m = m ** 3;
+        s = s ** 3;
+
+        const convert = value => {
+            value = Math.max(0, Math.min(1, value));
+
+            return Math.round(
+                (value <= 0.0031308
+                    ? value * 12.92
+                    : 1.055 * Math.pow(value, 1 / 2.4) - 0.055) * 255
+            );
+        };
+
+        const r = convert(
+            4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s
+        );
+
+        const g = convert(
+            -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s
+        );
+
+        const blue = convert(
+            -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s
+        );
+
+        const alpha = match[4];
+
+        if (alpha) {
+            const opacity = alpha.includes('%')
+                ? parseFloat(alpha) / 100
+                : parseFloat(alpha);
+
+            return `rgba(${r}, ${g}, ${blue}, ${opacity})`;
+        }
+
+        return `rgb(${r}, ${g}, ${blue})`;
+    }
+
     async function unduhInvoiceGambar() {
         const tombol = document.querySelector('[onclick="unduhInvoiceGambar()"]');
         const invoice = document.getElementById('invoice-capture');
 
         try {
+            if (!invoice || typeof html2canvas !== 'function') {
+                throw new Error('Elemen invoice atau library html2canvas tidak ditemukan.');
+            }
+
             tombol.disabled = true;
             tombol.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuat Gambar...';
 
@@ -186,6 +249,7 @@ require_once __DIR__ . '/../layouts/header.php';
                 height: invoice.scrollHeight,
                 windowWidth: lebar,
                 windowHeight: invoice.scrollHeight,
+
                 onclone: clonedDocument => {
                     const clonedInvoice = clonedDocument.getElementById('invoice-capture');
 
@@ -197,24 +261,48 @@ require_once __DIR__ . '/../layouts/header.php';
                     clonedInvoice.querySelectorAll('.overflow-x-auto').forEach(element => {
                         element.style.overflow = 'visible';
                     });
+
+                    const semuaElemen = [
+                        clonedInvoice,
+                        ...clonedInvoice.querySelectorAll('*')
+                    ];
+
+                    semuaElemen.forEach(element => {
+                        const computedStyle = clonedDocument.defaultView.getComputedStyle(element);
+
+                        for (let i = 0; i < computedStyle.length; i++) {
+                            const property = computedStyle[i];
+                            const value = computedStyle.getPropertyValue(property);
+
+                            if (value.includes('oklch')) {
+                                element.style.setProperty(
+                                    property,
+                                    oklchKeRgb(value)
+                                );
+                            }
+                        }
+                    });
                 }
             });
 
             const link = document.createElement('a');
+
             link.download = 'Invoice-<?= htmlspecialchars($pesanan['kode_pesanan'], ENT_QUOTES, 'UTF-8') ?>-' + Date.now() + '-KickDropShoe.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
 
             return true;
+
         } catch (error) {
             console.error('Gagal membuat invoice:', error);
-            alert('Gagal membuat gambar invoice. Silakan coba kembali.');
+            alert('Gagal membuat gambar invoice: ' + error.message);
+
             return false;
+
         } finally {
             tombol.disabled = false;
             tombol.innerHTML = '<i class="fas fa-image"></i> Unduh PNG';
         }
-
     }
 
     async function kirimInvoiceWhatsApp() {
@@ -270,4 +358,5 @@ require_once __DIR__ . '/../layouts/header.php';
         });
     }
 </script>
+
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

@@ -1,15 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-    
 
-/* KickDropShoe Custom Stylesheet */
+@import "tailwindcss";
+
+@source "../../../app";
+@source "../../../routes";
+@source "../js";
+
+@theme {
+    --font-sans: "Plus Jakarta Sans", sans-serif;
+
+    --color-brand-navy: #0B1325;
+    --color-brand-darkCard: #0F172A;
+    --color-brand-darkInput: #1E293B;
+    --color-brand-yellow: #FFFF00;
+    --color-brand-yellowHover: #CCCC00;
+    --color-brand-slateBg: #F8FAFC;
+}
+
 :root {
     --brand-navy: #0B1325;
     --brand-dark-card: #0F172A;
     --brand-dark-input: #1E293B;
     --brand-yellow: #FFFF00;
-    --brand-yellow-hover: #EAB308;
+    --brand-yellow-hover: #CCCC00;
     --brand-slate-bg: #F8FAFC;
 }
 
@@ -19,23 +31,24 @@ body {
     color: #1e293b;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
+
 ::-webkit-scrollbar-track {
     background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
 
-/* Button & Card Micro-interactions */
 .btn-yellow {
     background-color: var(--brand-yellow);
     color: #0f172a;
@@ -60,10 +73,16 @@ body {
     color: #ffffff;
 }
 
-/* Animations */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .animate-fade-in {

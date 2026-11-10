@@ -313,7 +313,7 @@ require_once __DIR__ . '/../layouts/header.php';
                         <?= htmlspecialchars($pesanan['metode_bayar'] ?? '-') ?>
                     </span>
                 </div>
-                <a href="pesanan.php" class="px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs transition inline-flex items-center">Batal</a>
+                <a href="/pesanan" class="px-4 md:px-6 py-2.5 md:py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold rounded-xl text-xs transition inline-flex items-center">Batal</a>
                 <button type="submit" class="flex-1 sm:flex-none justify-center px-4 md:px-6 py-2.5 md:py-3 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 font-extrabold rounded-xl text-xs transition shadow-lg shadow-brand-yellow/30 flex items-center gap-2">
                     <i class="fas fa-check-circle"></i> <span class="whitespace-nowrap">Simpan Perubahan</span>
                 </button>
