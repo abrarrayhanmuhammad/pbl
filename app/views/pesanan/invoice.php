@@ -109,10 +109,13 @@ require_once __DIR__ . '/../layouts/header.php';
                                 <div class="px-5 py-4 border-b border-slate-200 flex text-sm">
                                     <div class="flex-1 space-y-1">
                                         <p class="font-extrabold text-slate-900"><?= htmlspecialchars($item['nama_barang']) ?> • <?= htmlspecialchars($item['warna']) ?></p>
-                                        <p class="text-xs font-medium text-slate-500"><?= htmlspecialchars($item['nama_layanan']) ?>: Rp <?= htmlspecialchars(number_format(($item['harga_satuan'] ?? 0), 0, ',', '.')) ?><br>Unyellowing: Rp 30.000<br>Express (1-2 Hari): Rp 10.000</p>
+                                        <p class="text-xs font-medium text-slate-500"><?= htmlspecialchars($item['nama_layanan']) ?>: Rp <?= htmlspecialchars(number_format(($item['harga_satuan'] ?? 0), 0, ',', '.')) ?>
+                                        <?php foreach ($treatmentByDetail[$item['id_detail_pesanan']] as $treatment): ?>
+                                            <br><?= htmlspecialchars($treatment['nama_treatment']) ?>: Rp <?= htmlspecialchars(number_format(($treatment['harga'] ?? 0), 0, ',', '.')) ?>
+                                        <?php endforeach; ?>
                                     </div>
                                     <div class="w-20 text-center font-medium text-slate-700">1</div>
-                                    <div class="w-32 text-right font-medium text-slate-700">Rp <?= htmlspecialchars(number_format(($item['harga_satuan'] ?? 0), 0, ',', '.')) ?></div>
+                                    <div class="w-32 text-right font-medium text-slate-700">Rp <?= htmlspecialchars(number_format(($item['subtotal'] ?? 0), 0, ',', '.')) ?></div>
                                     <div class="w-32 text-right font-extrabold text-slate-900">Rp <?= htmlspecialchars(number_format(($item['subtotal'] ?? 0), 0, ',', '.')) ?></div>
                                 </div>
                             <?php endforeach; ?>

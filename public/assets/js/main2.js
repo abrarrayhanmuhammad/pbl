@@ -1373,7 +1373,7 @@ function initMasterDetailOrders() {
 
         return new URL(
             '/' + path.replace(/^\/+/, ''),
-            'https://newer-enable-wheels-marc.trycloudflare.com'
+            'https://combination-maintains-rush-wisdom.trycloudflare.com'
         ).href;
     }
 
@@ -1992,7 +1992,7 @@ function generateExtraTreatments(itemId, selectedTreatmentIds = [], savedPrices 
                         class="extra-check-${itemId} w-4 h-4 rounded text-brand-yellow bg-slate-900 border-slate-600 focus:ring-brand-yellow"
                     >
                     <span class="text-xs font-bold text-white">
-                        ${item.nama_treatment} (${min}–${max} Hari)
+                        ${item.nama_treatment} (${item.nama_treatment.toLowerCase() === 'pipis hewan' ? max : `${min}–${max}`} Hari)
                     </span>
                 </div>
                 <span class="text-xs font-bold text-brand-yellow">

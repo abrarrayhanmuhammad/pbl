@@ -312,7 +312,7 @@ require_once __DIR__ . '/../layouts/header.php';
 </script>
 
 <script>
-    const BASE_URL = 'https://newer-enable-wheels-marc.trycloudflare.com';
+    const BASE_URL = 'https://combination-maintains-rush-wisdom.trycloudflare.com';
     
     const dataDokumentasi = {
         kodePesanan: <?= json_encode($pesanan['kode_pesanan']) ?>,
