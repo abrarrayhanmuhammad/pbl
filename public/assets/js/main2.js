@@ -1350,31 +1350,14 @@ function initMasterDetailOrders() {
         return hasil;
     }
 
-    // function buatUrlFoto(foto) {
-    //     if (!foto) return '';
-
-    //     const path = String(foto);
-
-    //     if (/^https?:\/\//i.test(path)) {
-    //         return path;
-    //     }
-
-    //     return new URL('/' + path.replace(/^\/+/, ''), window.location.origin).href;
-    // }
-
     function buatUrlFoto(foto) {
         if (!foto) return '';
 
-        const path = String(foto);
+        const namaFile = String(foto).split('/').pop();
 
-        if (/^https?:\/\//i.test(path)) {
-            return path;
-        }
-
-        return new URL(
-            '/' + path.replace(/^\/+/, ''),
-            'https://combination-maintains-rush-wisdom.trycloudflare.com'
-        ).href;
+        return window.location.origin +
+            '/dokumentasi/' +
+            encodeURIComponent(namaFile);
     }
 
     function aturTombolDokumentasi(pesanan, barang) {

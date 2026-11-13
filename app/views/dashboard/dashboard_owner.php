@@ -46,21 +46,28 @@ require_once __DIR__ . '/../layouts/header.php';
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-wider group-hover:text-slate-600 transition-colors">TOTAL PESANAN</p>
                         <i class="fas fa-info-circle text-xs text-slate-300 lg:hidden group-hover:text-slate-500"></i>
                     </div>
-                    <h3 class="text-2xl sm:text-3xl lg:text-5xl font-black text-slate-900">148</h3>
+                    <h3 class="text-2xl sm:text-3xl lg:text-5xl font-black text-slate-900"><?= (int) $ringkasan['totalPesanan'] ?></h3>
                 </div>
                 <div onclick="bukaSheetMetrik('aktif')" class="col-span-1 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-5 sm:p-6 lg:p-8 shadow-sm cursor-pointer lg:cursor-default active:scale-[0.97] transition-all hover:border-slate-300 group">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-wider group-hover:text-slate-600 transition-colors">AKTIF</p>
                         <i class="fas fa-spinner text-xs text-emerald-400 lg:hidden group-hover:text-emerald-600"></i>
                     </div>
-                    <h3 class="text-2xl sm:text-3xl lg:text-5xl font-black text-emerald-500">32</h3>
+                    <h3 class="text-2xl sm:text-3xl lg:text-5xl font-black text-emerald-500"><?= (int) $ringkasan['pesananAktif'] ?></h3>
                 </div>
                 <div onclick="bukaSheetMetrik('pendapatan')" class="col-span-2 sm:col-span-1 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-5 sm:p-6 lg:p-8 shadow-sm cursor-pointer lg:cursor-default active:scale-[0.97] transition-all hover:border-slate-300 group">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-xs font-extrabold text-slate-400 uppercase tracking-wider group-hover:text-slate-600 transition-colors">PENDAPATAN</p>
                         <i class="fas fa-wallet text-xs text-slate-300 lg:hidden group-hover:text-slate-500"></i>
                     </div>
-                    <h3 class="text-2xl sm:text-3xl lg:text-5xl font-black text-slate-900">Rp 4.5M</h3>
+                    <h3 class="text-2xl sm:text-3xl lg:text-5xl font-black text-slate-900">
+                    <?php
+                    $pendapatan = (int) $ringkasan['pendapatan'];
+                    echo $pendapatan >= 1000000
+                        ? 'Rp ' . rtrim(rtrim(number_format($pendapatan / 1000000, 1), '0'), '.') . 'M'
+                        : 'Rp ' . number_format($pendapatan, 0, ',', '.');
+                    ?>
+                    </h3>
                 </div>
             </div>
 
@@ -83,12 +90,9 @@ require_once __DIR__ . '/../layouts/header.php';
                         <div class="flex gap-2 sm:gap-3 items-end h-52 sm:h-56 pb-2">
                             <!-- Kolom Sumbu Y Khusus di Kiri -->
                             <div class="flex flex-col justify-between h-full text-[10px] font-bold text-slate-400 shrink-0 select-none text-right w-5 sm:w-6 pb-6">
-                                <span>50</span>
-                                <span>40</span>
-                                <span>30</span>
-                                <span>20</span>
-                                <span>10</span>
-                                <span>0</span>
+                                <?php for ($i = 5; $i >= 0; $i--): ?>
+                                    <span><?= $skalaMaks / 5 * $i ?></span>
+                                <?php endfor; ?>
                             </div>
 
                             <!-- Area Batang & Garis Putus-putus -->
@@ -106,54 +110,20 @@ require_once __DIR__ . '/../layouts/header.php';
                                 <!-- 7 Batang Mingguan dengan Persentase Tinggi Presisi -->
                                 <div class="relative z-10 h-full flex items-end justify-between px-1.5 sm:px-4 pb-6">
                                     
-                                    <!-- Sen: 28 (56%) -->
-                                    <div class="flex flex-col items-center justify-end h-full group cursor-pointer relative" onclick="pilihBatang(this, 'Senin', 28, 'Rp 840.000', '20 Reguler • 8 Express')">
-                                        <span class="text-[10px] font-extrabold text-slate-600 mb-1 transition-colors group-hover:text-amber-600">28</span>
-                                        <div class="chart-bar w-4 sm:w-6 lg:w-8 bg-brand-yellow hover:bg-amber-400 border border-yellow-400 rounded-t-md sm:rounded-t-lg transition-all shadow-sm active:scale-95" style="height: 56%;"></div>
-                                        <span class="text-[10px] font-bold text-slate-400 absolute -bottom-5">Sen</span>
+                                    <?php foreach ($dataMingguan as $baris):
+                                        $jumlah  = (int) $baris['jumlahPesanan'];
+                                        $tinggi  = round($jumlah / $skalaMaks * 100);
+                                        $nomor   = (int) date('N', strtotime($baris['tanggal']));
+                                        $omset   = 'Rp ' . number_format((int) $baris['omset'], 0, ',', '.');
+                                        $rincian = (int) $baris['jumlahLunas'] . ' Lunas • ' . ($jumlah - (int) $baris['jumlahLunas']) . ' Belum Bayar';
+                                    ?>
+                                    <div class="flex flex-col items-center justify-end h-full group cursor-pointer relative"
+                                         onclick="pilihBatang(this, <?= htmlspecialchars(json_encode($namaHari[$nomor]), ENT_QUOTES) ?>, <?= $jumlah ?>, <?= htmlspecialchars(json_encode($omset), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($rincian), ENT_QUOTES) ?>)">
+                                        <span class="text-[10px] font-extrabold text-slate-600 mb-1 transition-colors group-hover:text-amber-600"><?= $jumlah ?></span>
+                                        <div class="chart-bar w-4 sm:w-6 lg:w-8 bg-brand-yellow hover:bg-amber-400 border border-yellow-400 rounded-t-md sm:rounded-t-lg transition-all shadow-sm active:scale-95" style="height: <?= $tinggi ?>%;"></div>
+                                        <span class="text-[10px] font-bold text-slate-400 absolute -bottom-5"><?= substr($namaHari[$nomor], 0, 3) ?></span>
                                     </div>
-
-                                    <!-- Sel: 40 (80%) -->
-                                    <div class="flex flex-col items-center justify-end h-full group cursor-pointer relative" onclick="pilihBatang(this, 'Selasa', 40, 'Rp 1.200.000', '28 Reguler • 12 Prioritas')">
-                                        <span class="text-[10px] font-extrabold text-slate-600 mb-1 transition-colors group-hover:text-amber-600">40</span>
-                                        <div class="chart-bar w-4 sm:w-6 lg:w-8 bg-brand-yellow hover:bg-amber-400 border border-yellow-400 rounded-t-md sm:rounded-t-lg transition-all shadow-sm active:scale-95" style="height: 80%;"></div>
-                                        <span class="text-[10px] font-bold text-slate-400 absolute -bottom-5">Sel</span>
-                                    </div>
-
-                                    <!-- Rab: 48 (96%) -->
-                                    <div class="flex flex-col items-center justify-end h-full group cursor-pointer relative" onclick="pilihBatang(this, 'Rabu', 48, 'Rp 1.450.000', '35 Reguler • 10 Express • 3 Deep Clean')">
-                                        <span class="text-[10px] font-extrabold text-slate-600 mb-1 transition-colors group-hover:text-amber-600">48</span>
-                                        <div class="chart-bar w-4 sm:w-6 lg:w-8 bg-brand-yellow hover:bg-amber-400 border border-yellow-400 rounded-t-md sm:rounded-t-lg transition-all shadow-sm active:scale-95" style="height: 96%;"></div>
-                                        <span class="text-[10px] font-bold text-slate-400 absolute -bottom-5">Rab</span>
-                                    </div>
-
-                                    <!-- Kam: 36 (72%) -->
-                                    <div class="flex flex-col items-center justify-end h-full group cursor-pointer relative" onclick="pilihBatang(this, 'Kamis', 36, 'Rp 1.080.000', '26 Reguler • 10 Express')">
-                                        <span class="text-[10px] font-extrabold text-slate-600 mb-1 transition-colors group-hover:text-amber-600">36</span>
-                                        <div class="chart-bar w-4 sm:w-6 lg:w-8 bg-brand-yellow hover:bg-amber-400 border border-yellow-400 rounded-t-md sm:rounded-t-lg transition-all shadow-sm active:scale-95" style="height: 72%;"></div>
-                                        <span class="text-[10px] font-bold text-slate-400 absolute -bottom-5">Kam</span>
-                                    </div>
-
-                                    <!-- Jum: 20 (40%) -->
-                                    <div class="flex flex-col items-center justify-end h-full group cursor-pointer relative" onclick="pilihBatang(this, 'Jumat', 20, 'Rp 650.000', '15 Reguler • 5 Treatment')">
-                                        <span class="text-[10px] font-extrabold text-slate-600 mb-1 transition-colors group-hover:text-amber-600">20</span>
-                                        <div class="chart-bar w-4 sm:w-6 lg:w-8 bg-brand-yellow hover:bg-amber-400 border border-yellow-400 rounded-t-md sm:rounded-t-lg transition-all shadow-sm active:scale-95" style="height: 40%;"></div>
-                                        <span class="text-[10px] font-bold text-slate-400 absolute -bottom-5">Jum</span>
-                                    </div>
-
-                                    <!-- Sab: 44 (88%) -->
-                                    <div class="flex flex-col items-center justify-end h-full group cursor-pointer relative" onclick="pilihBatang(this, 'Sabtu', 44, 'Rp 1.380.000', '30 Reguler • 14 Express')">
-                                        <span class="text-[10px] font-extrabold text-slate-600 mb-1 transition-colors group-hover:text-amber-600">44</span>
-                                        <div class="chart-bar w-4 sm:w-6 lg:w-8 bg-brand-yellow hover:bg-amber-400 border border-yellow-400 rounded-t-md sm:rounded-t-lg transition-all shadow-sm active:scale-95" style="height: 88%;"></div>
-                                        <span class="text-[10px] font-bold text-slate-400 absolute -bottom-5">Sab</span>
-                                    </div>
-
-                                    <!-- Min: 24 (48%) -->
-                                    <div class="flex flex-col items-center justify-end h-full group cursor-pointer relative" onclick="pilihBatang(this, 'Minggu', 24, 'Rp 750.000', '18 Reguler • 6 Express')">
-                                        <span class="text-[10px] font-extrabold text-slate-600 mb-1 transition-colors group-hover:text-amber-600">24</span>
-                                        <div class="chart-bar w-4 sm:w-6 lg:w-8 bg-brand-yellow hover:bg-amber-400 border border-yellow-400 rounded-t-md sm:rounded-t-lg transition-all shadow-sm active:scale-95" style="height: 48%;"></div>
-                                        <span class="text-[10px] font-bold text-slate-400 absolute -bottom-5">Min</span>
-                                    </div>
+                                    <?php endforeach; ?>
 
                                 </div>
                             </div>
@@ -164,15 +134,15 @@ require_once __DIR__ . '/../layouts/header.php';
                     <div class="mt-6 pt-4 border-t border-slate-100 grid grid-cols-3 gap-1 sm:gap-2 text-center">
                         <div class="border-r border-slate-100 px-1">
                             <span class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Masuk</span>
-                            <span class="text-xs sm:text-sm font-black text-slate-900 mt-0.5 block">240 Pesanan</span>
+                            <span class="text-xs sm:text-sm font-black text-slate-900 mt-0.5 block"><?= $totalMasuk ?> Pesanan</span>
                         </div>
                         <div class="border-r border-slate-100 px-1">
                             <span class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Rata-Rata</span>
-                            <span class="text-xs sm:text-sm font-black text-slate-900 mt-0.5 block">34 / Hari</span>
+                            <span class="text-xs sm:text-sm font-black text-slate-900 mt-0.5 block"><?= $rataRata ?> / Hari</span>
                         </div>
                         <div class="px-1">
                             <span class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tersibuk</span>
-                            <span class="text-xs sm:text-sm font-black text-slate-900 mt-0.5 block">Rabu (48)</span>
+                            <span class="text-xs sm:text-sm font-black text-slate-900 mt-0.5 block"><?= $hariTersibuk ?><?= $maksHarian > 0 ? " ($maksHarian)" : '' ?></span>
                         </div>
                     </div>
                 </div>
@@ -181,20 +151,23 @@ require_once __DIR__ . '/../layouts/header.php';
                 <div class="col-span-1 lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-5 sm:p-6 lg:p-8 shadow-sm">
                     <h3 class="text-sm font-extrabold text-slate-800 tracking-tight mb-4 sm:mb-6">Pesanan Perlu Perhatian</h3>
                     <div class="space-y-3 sm:space-y-4">
-                        <div class="flex justify-between items-center p-4 sm:p-5 bg-slate-50/80 rounded-2xl border border-slate-100 hover:border-slate-200 transition">
-                            <div>
-                                <h4 class="font-extrabold text-slate-900 text-sm">#0881 – Budi</h4>
-                                <p class="text-xs font-semibold text-slate-400 mt-0.5">Express (Sisa 1 Hari)</p>
+                            <?php if (empty($perluPerhatian)): ?>
+                                <p class="text-xs font-semibold text-slate-400">Tidak ada pesanan mendesak.</p>
+                            <?php endif; ?>
+                            <?php foreach ($perluPerhatian as $item):
+                                $sisa = (int) $item['sisaHari'];
+                                $teksSisa = $sisa < 0 ? 'Terlambat ' . abs($sisa) . ' Hari' : 'Sisa ' . $sisa . ' Hari';
+                            ?>
+                            <div class="flex justify-between items-center p-4 sm:p-5 bg-slate-50/80 rounded-2xl border border-slate-100 hover:border-slate-200 transition">
+                                <div>
+                                    <h4 class="font-extrabold text-slate-900 text-sm"><?= htmlspecialchars($item['kodePesanan']) ?> – <?= htmlspecialchars($item['namaCustomer']) ?></h4>
+                                    <p class="text-xs font-semibold mt-0.5 <?= $sisa < 0 ? 'text-red-500' : 'text-slate-400' ?>">
+                                        <?= htmlspecialchars($item['namaTreatment']) ?> (<?= $teksSisa ?>)
+                                    </p>
+                                </div>
+                                <a href="/pesanan/detail?id=<?= (int) $item['idPesanan'] ?>" class="text-xs font-extrabold text-yellow-700 hover:underline">Cek</a>
                             </div>
-                            <a href="/pesanan" class="text-xs font-extrabold text-yellow-700 hover:underline">Cek</a>
-                        </div>
-                        <div class="flex justify-between items-center p-4 sm:p-5 bg-slate-50/80 rounded-2xl border border-slate-100 hover:border-slate-200 transition">
-                            <div>
-                                <h4 class="font-extrabold text-slate-900 text-sm">#0872 – Andi</h4>
-                                <p class="text-xs font-semibold text-slate-400 mt-0.5">Prioritas (Sisa 2 Hari)</p>
-                            </div>
-                            <a href="/pesanan" class="text-xs font-extrabold text-yellow-700 hover:underline">Cek</a>
-                        </div>
+                            <?php endforeach; ?>
                     </div>
                 </div>
             </div>
@@ -229,83 +202,6 @@ require_once __DIR__ . '/../layouts/header.php';
 </div>
 
 <script>
-// Data Popup Pesanan
-const orderPopupData = {
-    '0881': {
-        tag: '⚡ Express • Sisa 1 Hari',
-        tagClass: 'bg-amber-100 text-amber-800',
-        title: '#0881 – Budi Santoso',
-        subtitle: '0812-3456-7890 • Drop Point Oro-oro Dowo',
-        bodyHtml: `
-            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-                <div class="flex justify-between items-center text-xs font-bold text-slate-700">
-                    <span>Sepatu Nike Air Max (Putih)</span>
-                    <span class="text-slate-900 font-extrabold">Rp 70.000</span>
-                </div>
-                <p class="text-[11px] text-slate-400 font-medium">Basic & White Shoes + Unyellowing + Express</p>
-            </div>
-            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-                <div class="flex justify-between items-center text-xs font-bold text-slate-700">
-                    <span>Tas Coach (Hitam)</span>
-                    <span class="text-slate-900 font-extrabold">Rp 35.000</span>
-                </div>
-                <p class="text-[11px] text-slate-400 font-medium">Deep Clean Tas M + Reguler</p>
-            </div>
-            <div class="flex justify-between items-center px-1 pt-1 text-xs">
-                <span class="font-extrabold text-slate-500">Total Biaya:</span>
-                <span class="font-black text-slate-900 text-base">Rp 105.000 <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full ml-1">LUNAS</span></span>
-            </div>
-        `,
-        btnDetail: '/pesanan',
-        waNumber: '628123456789',
-        waMessage: 'Halo Kak Budi Santoso, update status pesanan sepatu Anda di KickDropShoe #0881 siap kami percepat pengerjaannya.'
-    },
-    '0872': {
-        tag: '🔥 Prioritas • Sisa 2 Hari',
-        tagClass: 'bg-blue-100 text-blue-800',
-        title: '#0872 – Andi Wijaya',
-        subtitle: '0856-1234-5678 • Drop Point Dieng',
-        bodyHtml: `
-            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-                <div class="flex justify-between items-center text-xs font-bold text-slate-700">
-                    <span>Sepatu Converse Chuck Taylor (Hitam)</span>
-                    <span class="text-slate-900 font-extrabold">Rp 55.000</span>
-                </div>
-                <p class="text-[11px] text-slate-400 font-medium">Premium Deep Clean + Prioritas</p>
-            </div>
-            <div class="flex justify-between items-center px-1 pt-1 text-xs">
-                <span class="font-extrabold text-slate-500">Total Biaya:</span>
-                <span class="font-black text-slate-900 text-base">Rp 55.000 <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full ml-1">LUNAS</span></span>
-            </div>
-        `,
-        btnDetail: '/pesanan',
-        waNumber: '628561234567',
-        waMessage: 'Halo Kak Andi, update pesanan KickDropShoe #0872 saat ini sedang tahap treatment pengeringan.'
-    }
-};
-
-function bukaSheetPesanan(orderId) {
-    const data = orderPopupData[orderId];
-    if (!data) return;
-
-    setSheetContent({
-        tag: data.tag,
-        tagClass: data.tagClass,
-        title: data.title,
-        subtitle: data.subtitle,
-        bodyHtml: data.bodyHtml,
-        buttonsHtml: `
-            <a href="${data.btnDetail}" class="w-full py-3.5 px-4 bg-brand-yellow hover:bg-yellow-400 text-slate-900 font-extrabold rounded-2xl flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition text-sm">
-                <i class="fas fa-arrow-right"></i> Buka di Daftar Pesanan
-            </a>
-            <a href="https://wa.me/${data.waNumber}?text=${encodeURIComponent(data.waMessage)}" target="_blank" class="w-full py-3 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold rounded-2xl flex items-center justify-center gap-2 border border-emerald-200 active:scale-[0.98] transition text-xs">
-                <i class="fab fa-whatsapp text-sm text-emerald-600"></i> Hubungi via WhatsApp
-            </a>
-        `
-    });
-    tampilSheet();
-}
-
 function bukaSheetMetrik(tipe) {
     // Di desktop biarkan normal, di mobile buka interaktif
     if (window.innerWidth >= 1024) return;
@@ -314,24 +210,9 @@ function bukaSheetMetrik(tipe) {
         setSheetContent({
             tag: 'Statistik Pesanan',
             tagClass: 'bg-slate-100 text-slate-800',
-            title: 'Total 148 Pesanan',
+            title: <?= json_encode('Total ' . (int) $ringkasan['totalPesanan'] . ' Pesanan') ?>,
             subtitle: 'Rekapitulasi pesanan bulan berjalan',
-            bodyHtml: `
-                <div class="space-y-2.5">
-                    <div class="flex justify-between items-center text-xs font-bold p-3 bg-slate-50 rounded-xl">
-                        <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Selesai & Diambil</span>
-                        <span class="font-extrabold text-slate-900">116 (78%)</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs font-bold p-3 bg-slate-50 rounded-xl">
-                        <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Sedang Dikerjakan</span>
-                        <span class="font-extrabold text-slate-900">32 (22%)</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs font-bold p-3 bg-slate-50 rounded-xl">
-                        <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span> Dibatalkan</span>
-                        <span class="font-extrabold text-slate-900">0 (0%)</span>
-                    </div>
-                </div>
-            `,
+            bodyHtml: ``,
             buttonsHtml: `
                 <a href="/pesanan" class="w-full py-3.5 px-4 bg-brand-yellow hover:bg-yellow-400 text-slate-900 font-extrabold rounded-2xl flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition text-sm">
                     Lihat Semua Pesanan
@@ -342,24 +223,9 @@ function bukaSheetMetrik(tipe) {
         setSheetContent({
             tag: 'Antrean Operasional',
             tagClass: 'bg-emerald-100 text-emerald-800',
-            title: '32 Pesanan Aktif',
+            title: <?= json_encode((int) $ringkasan['pesananAktif'] . ' Pesanan Aktif') ?>,
             subtitle: 'Status sepatu di workshop saat ini',
-            bodyHtml: `
-                <div class="space-y-2.5">
-                    <div class="flex justify-between items-center text-xs font-bold p-3 bg-slate-50 rounded-xl">
-                        <span class="flex items-center gap-2"><i class="fas fa-soap text-blue-500 w-4"></i> Cuci & Deep Clean</span>
-                        <span class="font-extrabold text-slate-900">18 Pasang</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs font-bold p-3 bg-slate-50 rounded-xl">
-                        <span class="flex items-center gap-2"><i class="fas fa-wind text-amber-500 w-4"></i> Pengeringan & Treatment</span>
-                        <span class="font-extrabold text-slate-900">10 Pasang</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs font-bold p-3 bg-slate-50 rounded-xl">
-                        <span class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-500 w-4"></i> Quality Control / Siap Diambil</span>
-                        <span class="font-extrabold text-slate-900">4 Pasang</span>
-                    </div>
-                </div>
-            `,
+            bodyHtml: ``,
             buttonsHtml: `
                 <a href="/pesanan" class="w-full py-3.5 px-4 bg-brand-yellow hover:bg-yellow-400 text-slate-900 font-extrabold rounded-2xl flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition text-sm">
                     Cek Antrean di Pesanan
@@ -370,24 +236,9 @@ function bukaSheetMetrik(tipe) {
         setSheetContent({
             tag: 'Laporan Keuangan',
             tagClass: 'bg-amber-100 text-amber-800',
-            title: 'Omset Rp 4.500.000',
+            title: <?= json_encode('Omset Rp ' . number_format((int) $ringkasan['pendapatan'], 0, ',', '.')) ?>,
             subtitle: 'Total pendapatan terverifikasi bulan ini',
-            bodyHtml: `
-                <div class="space-y-2.5">
-                    <div class="flex justify-between items-center text-xs font-bold p-3 bg-slate-50 rounded-xl">
-                        <span>Rata-rata Transaksi</span>
-                        <span class="font-extrabold text-slate-900">Rp 30.400 / order</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs font-bold p-3 bg-slate-50 rounded-xl">
-                        <span>QRIS vs Tunai</span>
-                        <span class="font-extrabold text-slate-900">QRIS 68% • Tunai 32%</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs font-bold p-3 bg-slate-50 rounded-xl">
-                        <span>Target Bulanan (Rp 6M)</span>
-                        <span class="font-extrabold text-emerald-600">75% Tercapai</span>
-                    </div>
-                </div>
-            `,
+            bodyHtml: ``,
             buttonsHtml: `
                 <a href="/laporan" class="w-full py-3.5 px-4 bg-brand-yellow hover:bg-yellow-400 text-slate-900 font-extrabold rounded-2xl flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition text-sm">
                     Buka Laporan Keuangan

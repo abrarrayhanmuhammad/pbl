@@ -13,9 +13,9 @@ require_once __DIR__ . '/../layouts/header.php';
     <main class="flex-1 flex flex-col h-full overflow-y-auto print:overflow-visible">
         <!-- Header (Hilang hanya saat dicetak) -->
         <?php
-            $header_title = 'Invoice';
-            $header_subtitle = $pesanan['kode_pesanan'];
-            require_once __DIR__ . '/../layouts/topbar.php';
+        $header_title = 'Invoice';
+        $header_subtitle = $pesanan['kode_pesanan'];
+        require_once __DIR__ . '/../layouts/topbar.php';
         ?>
 
         <div class="p-4 md:p-8 flex flex-col items-center gap-6 print:p-0">
@@ -110,9 +110,18 @@ require_once __DIR__ . '/../layouts/header.php';
                                     <div class="flex-1 space-y-1">
                                         <p class="font-extrabold text-slate-900"><?= htmlspecialchars($item['nama_barang']) ?> • <?= htmlspecialchars($item['warna']) ?></p>
                                         <p class="text-xs font-medium text-slate-500"><?= htmlspecialchars($item['nama_layanan']) ?>: Rp <?= htmlspecialchars(number_format(($item['harga_satuan'] ?? 0), 0, ',', '.')) ?>
-                                        <?php foreach ($treatmentByDetail[$item['id_detail_pesanan']] as $treatment): ?>
-                                            <br><?= htmlspecialchars($treatment['nama_treatment']) ?>: Rp <?= htmlspecialchars(number_format(($treatment['harga'] ?? 0), 0, ',', '.')) ?>
-                                        <?php endforeach; ?>
+                                            <?php
+                                            $idDetail = $item['id_detail_pesanan'] ?? null;
+                                            $treatments = ($idDetail !== null) ? ($treatmentByDetail[$idDetail] ?? []): [];
+                                            ?>
+
+                                            <?php if (!empty($treatments)): ?>
+                                                <?php foreach ($treatments as $treatment): ?>
+                                                    <br>
+                                                    <?= htmlspecialchars($treatment['nama_treatment'] ?? '-') ?>:
+                                                    Rp <?= htmlspecialchars(number_format((float)($treatment['harga'] ?? 0), 0, ',', '.')) ?>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                     </div>
                                     <div class="w-20 text-center font-medium text-slate-700">1</div>
                                     <div class="w-32 text-right font-medium text-slate-700">Rp <?= htmlspecialchars(number_format(($item['subtotal'] ?? 0), 0, ',', '.')) ?></div>

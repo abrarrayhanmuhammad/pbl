@@ -14,7 +14,7 @@ require_once __DIR__ . '/../layouts/header.php';
 
         <div class="p-4 md:p-8 max-w-4xl mx-auto w-full pb-36 lg:pb-8">
             <div class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-6">
-                
+
                 <!-- Pengaturan Profil -->
                 <div class="space-y-4 pb-6 border-b border-slate-100">
                     <h3 class="text-xs font-black text-slate-400 uppercase tracking-wider">Pengaturan Profil</h3>
@@ -31,10 +31,12 @@ require_once __DIR__ . '/../layouts/header.php';
                     </div>
                 </div>
 
+
                 <?php if ($user_role === 'superadmin'): ?>
-                    <!-- Menu Manajemen Akun (Clean Duolingo Row Style) -->
+                    <!-- Menu Manajemen Akun -->
                     <div class="space-y-3 pb-6 border-b border-slate-100">
                         <p class="text-xs font-black text-slate-400 uppercase tracking-wider">Akses Manajemen</p>
+
                         <div class="border-2 border-slate-100 rounded-2xl divide-y divide-slate-100 bg-white overflow-hidden shadow-sm">
                             <a href="/tambah/karyawan" class="flex items-center justify-between p-4 hover:bg-slate-50/80 active:bg-slate-100 transition-all group">
                                 <div class="flex items-center gap-3">
@@ -49,6 +51,7 @@ require_once __DIR__ . '/../layouts/header.php';
                                     <i class="fas fa-chevron-right text-[10px]"></i>
                                 </div>
                             </a>
+
                             <a href="/log" class="flex items-center justify-between p-4 hover:bg-slate-50/80 active:bg-slate-100 transition-all group">
                                 <div class="flex items-center gap-3">
                                     <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0"></span>
@@ -69,42 +72,56 @@ require_once __DIR__ . '/../layouts/header.php';
                 <!-- Ganti Password -->
                 <div class="space-y-4">
                     <h3 class="text-xs font-black text-slate-400 uppercase tracking-wider">Ganti Password</h3>
-                    <form action="/akun/updatePassword" method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
 
-                        <div class="space-y-4 max-w-lg">
-                            <div>
-                                <label class="block text-xs font-extrabold text-slate-700 mb-2">Password Lama</label>
-                                <input type="password" name="password_lama" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow focus:bg-white transition" placeholder="Masukkan password lama..." required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-extrabold text-slate-700 mb-2">Password Baru</label>
-                                <input type="password" name="password_baru" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow focus:bg-white transition" placeholder="Masukkan password baru..." minlength="8" required>
-                                <p class="text-[10px] text-slate-400 mt-1.5 font-medium">Password baru minimal 8 karakter.</p>
-                            </div>
-                            <button type="submit" class="px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 active:scale-95 text-white text-xs font-extrabold rounded-xl transition shadow-md">Simpan Perubahan</button>
-                        </div>
-                    </form>
+                    <div class="w-full border-2 border-slate-100 rounded-2xl bg-white shadow-sm p-4">
+                        <form action="/akun/updatePassword" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
 
-                    <?php if (isset($_GET['status'])): ?>
-                        <?php
-                        $pesan = [
-                            'kosong' => 'Password lama dan password baru wajib diisi.',
-                            'password_pendek' => 'Password baru minimal 8 karakter.',
-                            'password_salah' => 'Password lama yang kamu masukkan salah.',
-                            'password_berhasil' => 'Password berhasil diperbarui.'
-                        ];
-                        ?>
-                        <?php if (isset($pesan[$_GET['status']])): ?>
-                            <div class="mt-4 p-3.5 rounded-xl bg-slate-100 text-xs font-semibold text-slate-700 border border-slate-200">
-                                <?= htmlspecialchars($pesan[$_GET['status']]) ?>
+                            <div class="space-y-4 w-full">
+                                <div>
+                                    <label class="block text-xs font-extrabold text-slate-700 mb-2">Password Lama</label>
+                                    <input type="password" name="password_lama"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow focus:bg-white transition"
+                                        placeholder="Masukkan password lama..." required>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-extrabold text-slate-700 mb-2">Password Baru</label>
+                                    <input type="password" name="password_baru"
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-brand-yellow focus:bg-white transition"
+                                        placeholder="Masukkan password baru..." minlength="8" required>
+                                    <p class="text-[10px] text-slate-400 mt-1.5 font-medium">Password baru minimal 8 karakter.</p>
+                                </div>
+
+                                <button type="submit"
+                                    class="w-full sm:w-auto px-6 py-3.5 bg-brand-darkCard hover:bg-slate-800 active:scale-95 text-white text-xs font-extrabold rounded-xl transition shadow-md">
+                                    Simpan Perubahan
+                                </button>
                             </div>
-                        <?php endif; ?>
-                    <?php endif; ?>
+                        </form>
+                    </div>
                 </div>
 
+
+                <?php if (isset($_GET['status'])): ?>
+                    <?php
+                    $pesan = [
+                        'kosong' => 'Password lama dan password baru wajib diisi.',
+                        'password_pendek' => 'Password baru minimal 8 karakter.',
+                        'password_salah' => 'Password lama yang kamu masukkan salah.',
+                        'password_berhasil' => 'Password berhasil diperbarui.'
+                    ];
+                    ?>
+                    <?php if (isset($pesan[$_GET['status']])): ?>
+                        <div class="mt-4 p-3.5 rounded-xl bg-slate-100 text-xs font-semibold text-slate-700 border border-slate-200">
+                            <?= htmlspecialchars($pesan[$_GET['status']]) ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
             </div>
+
         </div>
-    </main>
+</div>
+</main>
 </div>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

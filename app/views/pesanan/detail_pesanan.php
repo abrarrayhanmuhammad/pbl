@@ -312,16 +312,27 @@ require_once __DIR__ . '/../layouts/header.php';
 </script>
 
 <script>
-    const BASE_URL = 'https://combination-maintains-rush-wisdom.trycloudflare.com';
-    
+    const BASE_URL = 'https://kickdropshoe.web.id';
+
     const dataDokumentasi = {
         kodePesanan: <?= json_encode($pesanan['kode_pesanan']) ?>,
         namaCustomer: <?= json_encode($pesanan['nama_customer']) ?>,
         noHp: <?= json_encode($pesanan['no_hp']) ?>,
         barang: <?= json_encode(array_map(function ($item) {
-                    return ['nama_barang' => $item['nama_barang'], 'foto_sesudah' => $item['foto_sesudah'] ?? ''];
+                    return [
+                        'nama_barang' => $item['nama_barang'],
+                        'foto_sesudah' => $item['foto_sesudah'] ?? ''
+                    ];
                 }, $detailBarang), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>
     };
+
+    function buatUrlFoto(foto) {
+        if (!foto) return '';
+
+        const namaFile = String(foto).split('/').pop();
+
+        return BASE_URL + '/dokumentasi/' + encodeURIComponent(namaFile);
+    }
 
     function kirimDokumentasi() {
         let nomor = String(dataDokumentasi.noHp || '').replace(/\D/g, '');
@@ -338,6 +349,7 @@ require_once __DIR__ . '/../layouts/header.php';
                 title: 'Nomor Tidak Valid',
                 text: 'Nomor WhatsApp pelanggan tidak valid.'
             });
+
             return;
         }
 
@@ -349,21 +361,14 @@ require_once __DIR__ . '/../layouts/header.php';
                 title: 'Foto Belum Lengkap',
                 text: 'Pastikan semua foto after sudah diunggah sebelum mengirim dokumentasi.'
             });
+
             return;
         }
 
-        // const daftarFoto = barang.map((item, index) => {
-        //     const pathFoto = String(item.foto_sesudah).replace(/^\/+/, '');
-        //     const urlFoto = `${window.location.origin}/${pathFoto}`;
-
-        //     return `${index + 1}. ${item.nama_barang}\n${urlFoto}`;
-        // }).join('\n\n');
-
         const daftarFoto = barang.map((item, index) => {
-            const pathFoto = String(item.foto_sesudah).replace(/^\/+/, '');
-            const urlFoto = new URL('/' + pathFoto, BASE_URL).href;
+            const urlFoto = buatUrlFoto(item.foto_sesudah);
 
-            return `${index + 1}. ${item.nama_barang}\n${urlFoto}`;
+            return `${index + 1}. ${item.nama_barang || 'Barang'}\n${urlFoto}`;
         }).join('\n\n');
 
         const pesan = [
@@ -391,7 +396,7 @@ require_once __DIR__ . '/../layouts/header.php';
 
         const urlWhatsApp = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
 
-        window.open(urlWhatsApp, '_blank');
+        window.open(urlWhatsApp, '_blank', 'noopener,noreferrer');
     }
 </script>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
