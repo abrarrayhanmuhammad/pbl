@@ -70,10 +70,11 @@ function metodeStyle(string $metode): array {
                         </a>
                     <?php endif; ?>
                 </div>
-                <button type="button"
-                        class="px-6 py-3 bg-brand-darkCard hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                <a href="/laporan/export-pdf?start_date=<?= urlencode($_GET['start_date'] ?? '') ?>&end_date=<?= urlencode($_GET['end_date'] ?? '') ?>"
+                   target="_blank"
+                   class="px-6 py-3 bg-brand-darkCard hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition shadow-md flex items-center justify-center gap-2">
                     <i class="fas fa-file-pdf"></i> Export PDF
-                </button>
+                </a>
             </form>
 
             <!-- ============ CARD STATISTIK ============ -->
