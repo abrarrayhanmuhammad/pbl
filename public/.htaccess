@@ -14,3 +14,6 @@ ErrorDocument 503 /maintenance.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
+
+# Alias URL dokumentasi foto
+RewriteRule ^dokumentasi/([a-fA-F0-9]+\.(jpg|jpeg|png|webp))$ uploads/pesanan/after/$1 [L,NC]
