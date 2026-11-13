@@ -8,7 +8,6 @@ require_once __DIR__ . '/../layouts/header.php';
         'Pesanan'     => 'bg-blue-50 text-blue-700 border-blue-200',
         'Autentikasi' => 'bg-slate-100 text-slate-700 border-slate-200',
         'Laporan'     => 'bg-purple-50 text-purple-700 border-purple-200',
-        'Pembayaran'  => 'bg-emerald-50 text-emerald-700 border-emerald-200',
         'Pegawai'     => 'bg-amber-50 text-amber-800 border-amber-200',
     ];
     $namaBulan = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -82,7 +81,6 @@ require_once __DIR__ . '/../layouts/header.php';
                     <div class="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
                         <button type="button" onclick="setCategoryFilter('Semua', this)" class="log-filter-btn px-4 py-2 bg-brand-darkCard text-white rounded-xl text-xs font-extrabold shadow-sm shrink-0">Semua</button>
                         <button type="button" onclick="setCategoryFilter('Pesanan', this)" class="log-filter-btn px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-bold shrink-0">Pesanan</button>
-                        <button type="button" onclick="setCategoryFilter('Pembayaran', this)" class="log-filter-btn px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-bold shrink-0">Pembayaran</button>
                         <button type="button" onclick="setCategoryFilter('Autentikasi', this)" class="log-filter-btn px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-bold shrink-0">Auth</button>
                     </div>
                 </div>

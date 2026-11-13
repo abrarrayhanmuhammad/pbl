@@ -160,7 +160,7 @@ require_once __DIR__ . '/../layouts/header.php';
                             ?>
                             <div class="flex justify-between items-center p-4 sm:p-5 bg-slate-50/80 rounded-2xl border border-slate-100 hover:border-slate-200 transition">
                                 <div>
-                                    <h4 class="font-extrabold text-slate-900 text-sm">#<?= htmlspecialchars($item['kodePesanan']) ?> – <?= htmlspecialchars($item['namaCustomer']) ?></h4>
+                                    <h4 class="font-extrabold text-slate-900 text-sm"><?= htmlspecialchars($item['kodePesanan']) ?> – <?= htmlspecialchars($item['namaCustomer']) ?></h4>
                                     <p class="text-xs font-semibold mt-0.5 <?= $sisa < 0 ? 'text-red-500' : 'text-slate-400' ?>">
                                         <?= htmlspecialchars($item['namaTreatment']) ?> (<?= $teksSisa ?>)
                                     </p>

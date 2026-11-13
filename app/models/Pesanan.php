@@ -98,6 +98,7 @@ class Pesanan
     {
         $sql = "
             SELECT DISTINCT
+                pesanan.id_pesanan AS \"idPesanan\",
                 pesanan.kode_pesanan AS \"kodePesanan\",
                 customer.nama AS \"namaCustomer\",
                 treatment_tambahan.nama_treatment AS \"namaTreatment\",

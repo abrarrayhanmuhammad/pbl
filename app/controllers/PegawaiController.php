@@ -59,10 +59,11 @@ class PegawaiController
         }
 
         $stmt = $this->db->prepare("
-        SELECT password
-        FROM pegawai
-        WHERE id_pegawai = :id
-    ");
+            SELECT password
+            FROM pegawai
+            WHERE id_pegawai = :id
+        ");
+
         $stmt->execute(['id' => $idPegawai]);
         $pegawai = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -72,7 +73,8 @@ class PegawaiController
                 'Pegawai',
                 'Ganti Password Gagal',
                 'USER-PASSWORD-GAGAL',
-                ($_SESSION['nama'] ?? 'Pegawai') . ' salah memasukkan password lama saat mengganti password.'
+                ($_SESSION['nama'] ?? 'Pegawai') .
+                    ' salah memasukkan password lama saat mengganti password.'
             );
 
             header('Location: /akun?status=password_salah');
@@ -82,10 +84,10 @@ class PegawaiController
         $passwordHash = password_hash($passwordBaru, PASSWORD_DEFAULT);
 
         $stmt = $this->db->prepare("
-        UPDATE pegawai
-        SET password = :password
-        WHERE id_pegawai = :id
-    ");
+            UPDATE pegawai
+            SET password = :password
+            WHERE id_pegawai = :id
+        ");
 
         $stmt->execute([
             'password' => $passwordHash,
@@ -97,11 +99,27 @@ class PegawaiController
             'Pegawai',
             'Ganti Password',
             'USER-PASSWORD',
-            ($_SESSION['nama'] ?? 'Pegawai') . ' mengganti password akunnya.'
+            ($_SESSION['nama'] ?? 'Pegawai') .
+                ' mengganti password akunnya.'
         );
 
-
         header('Location: /akun?status=password_berhasil');
+        exit;
+    }
+
+    private function gagalTambahKaryawan(string $pesan, array $input = []): void
+    {
+        $_SESSION['old_input'] = [
+            'nama' => trim((string) ($input['nama'] ?? '')),
+            'uname' => trim((string) ($input['uname'] ?? '')),
+            'role' => trim((string) ($input['role'] ?? 'karyawan')),
+            'email' => trim((string) ($input['email'] ?? '')),
+        ];
+
+        $_SESSION['buka_modal_tambah'] = true;
+        $_SESSION['error'] = $pesan;
+
+        header('Location: /tambah/karyawan');
         exit;
     }
 
@@ -113,6 +131,12 @@ class PegawaiController
         }
 
         $dataPegawai = $this->pegawaiModel->getAllPegawai();
+
+        $oldInput = $_SESSION['old_input'] ?? [];
+        $bukaModalTambah = !empty($_SESSION['buka_modal_tambah']);
+
+        unset($_SESSION['old_input']);
+        unset($_SESSION['buka_modal_tambah']);
 
         require_once __DIR__ . '/../views/karyawan/karyawan.php';
     }
@@ -140,77 +164,138 @@ class PegawaiController
 
         $nama = trim($_POST['nama'] ?? '');
         $uname = trim($_POST['uname'] ?? '');
-        $role = trim($_POST['role'] ?? '');
+        $role = trim($_POST['role'] ?? 'karyawan');
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
         $konfirmasiPassword = $_POST['password_konfirmasi'] ?? '';
 
+        $oldInput = [
+            'nama' => $nama,
+            'uname' => $uname,
+            'role' => $role,
+            'email' => $email,
+        ];
+
         if ($nama === '' || $uname === '' || $password === '') {
-            $_SESSION['error'] = 'Nama lengkap, username, dan password wajib diisi.';
-            header('Location: /tambah/karyawan');
-            exit;
+            $this->gagalTambahKaryawan(
+                'Nama lengkap, username, dan password wajib diisi.',
+                $oldInput
+            );
+        }
+
+        if (!in_array($role, ['karyawan', 'superadmin'], true)) {
+            $this->gagalTambahKaryawan(
+                'Peran karyawan tidak valid.',
+                $oldInput
+            );
         }
 
         if (strlen($password) < 8) {
-            $_SESSION['error'] = 'Password minimal 8 karakter.';
-            header('Location: /tambah/karyawan');
-            exit;
+            $this->gagalTambahKaryawan(
+                'Password minimal 8 karakter.',
+                $oldInput
+            );
         }
 
         if ($password !== $konfirmasiPassword) {
-            $_SESSION['error'] = 'Konfirmasi password tidak cocok.';
-            header('Location: /tambah/karyawan');
-            exit;
+            $this->gagalTambahKaryawan(
+                'Konfirmasi password tidak cocok.',
+                $oldInput
+            );
         }
 
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $_SESSION['error'] = 'Format email tidak valid.';
-            header('Location: /tambah/karyawan');
-            exit;
+            $this->gagalTambahKaryawan(
+                'Format email tidak valid.',
+                $oldInput
+            );
         }
 
-        $stmt = $this->db->prepare("SELECT id_pegawai FROM pegawai WHERE uname = ?");
-        $stmt->execute([$uname]);
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id_pegawai
+                FROM pegawai
+                WHERE uname = ?
+            ");
 
-        if ($stmt->fetch()) {
-            $_SESSION['error'] = 'Username sudah digunakan, silakan pilih yang lain.';
-            header('Location: /tambah/karyawan');
-            exit;
-        }
+            $stmt->execute([$uname]);
 
-        if ($email !== '') {
-            $stmt = $this->db->prepare("SELECT id_pegawai FROM pegawai WHERE email = ?");
-            $stmt->execute([$email]);
-
-            if ($stmt->fetch()) {
-                $_SESSION['error'] = 'Email sudah terdaftar.';
-                header('Location: /tambah/karyawan');
-                exit;
+            if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+                $this->gagalTambahKaryawan(
+                    'Username sudah digunakan, silakan pilih yang lain.',
+                    $oldInput
+                );
             }
-        }
 
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            if ($email !== '') {
+                $stmt = $this->db->prepare("
+                    SELECT id_pegawai
+                    FROM pegawai
+                    WHERE email = ?
+                ");
 
-        $stmt = $this->db->prepare("INSERT INTO pegawai (nama, uname, role, email, password) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$email]);
 
-        $berhasil = $stmt->execute([
-            $nama,
-            $uname,
-            $role,
-            $email !== '' ? $email : null,
-            $passwordHash
-        ]);
+                if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $this->gagalTambahKaryawan(
+                        'Email sudah terdaftar.',
+                        $oldInput
+                    );
+                }
+            }
 
-        if ($berhasil) {
+            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+            $stmt = $this->db->prepare("
+                INSERT INTO pegawai
+                    (nama, uname, role, email, password)
+                VALUES
+                    (?, ?, ?, ?, ?)
+            ");
+
+            $berhasil = $stmt->execute([
+                $nama,
+                $uname,
+                $role,
+                $email !== '' ? $email : null,
+                $passwordHash
+            ]);
+
+            if (!$berhasil) {
+                $this->gagalTambahKaryawan(
+                    'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.',
+                    $oldInput
+                );
+            }
+
+            $idBaru = (int) $this->db->lastInsertId();
+
+            catatLog(
+                $this->db,
+                'Pegawai',
+                'Tambah Karyawan',
+                'USER-CREATE',
+                ($_SESSION['nama'] ?? 'Superadmin') .
+                    ' menambahkan karyawan baru: ' . $nama .
+                    ' (Username: ' . $uname .
+                    ', Role: ' . $role .
+                    ', ID: ' . $idBaru . ').'
+            );
+
+            unset($_SESSION['old_input']);
+            unset($_SESSION['buka_modal_tambah']);
+
             $_SESSION['success'] = 'Karyawan baru berhasil ditambahkan.';
-        } else {
-            $_SESSION['error'] = 'Terjadi kesalahan, silakan coba lagi.';
+        } catch (PDOException $e) {
+            $this->gagalTambahKaryawan(
+                'Karyawan gagal ditambahkan. Periksa kembali data yang dimasukkan atau coba lagi.',
+                $oldInput
+            );
         }
 
         header('Location: /tambah/karyawan');
         exit;
     }
-
 
     public function updateKaryawan(): void
     {
@@ -266,9 +351,11 @@ class PegawaiController
         }
 
         $stmt = $this->db->prepare("
-        SELECT id_pegawai FROM pegawai
-        WHERE id_pegawai = ?
-    ");
+            SELECT id_pegawai
+            FROM pegawai
+            WHERE id_pegawai = ?
+        ");
+
         $stmt->execute([$idPegawai]);
 
         if (!$stmt->fetch()) {
@@ -278,9 +365,11 @@ class PegawaiController
         }
 
         $stmt = $this->db->prepare("
-        SELECT id_pegawai FROM pegawai
-        WHERE uname = ? AND id_pegawai != ?
-    ");
+            SELECT id_pegawai
+            FROM pegawai
+            WHERE uname = ? AND id_pegawai != ?
+        ");
+
         $stmt->execute([$uname, $idPegawai]);
 
         if ($stmt->fetch()) {
@@ -291,9 +380,11 @@ class PegawaiController
 
         if ($email !== '') {
             $stmt = $this->db->prepare("
-            SELECT id_pegawai FROM pegawai
-            WHERE email = ? AND id_pegawai != ?
-        ");
+                SELECT id_pegawai
+                FROM pegawai
+                WHERE email = ? AND id_pegawai != ?
+            ");
+
             $stmt->execute([$email, $idPegawai]);
 
             if ($stmt->fetch()) {
@@ -319,10 +410,10 @@ class PegawaiController
             $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
             $stmt = $this->db->prepare("
-            UPDATE pegawai
-            SET nama = ?, uname = ?, role = ?, email = ?, password = ?
-            WHERE id_pegawai = ?
-        ");
+                UPDATE pegawai
+                SET nama = ?, uname = ?, role = ?, email = ?, password = ?
+                WHERE id_pegawai = ?
+            ");
 
             $berhasil = $stmt->execute([
                 $nama,
@@ -334,10 +425,10 @@ class PegawaiController
             ]);
         } else {
             $stmt = $this->db->prepare("
-            UPDATE pegawai
-            SET nama = ?, uname = ?, role = ?, email = ?
-            WHERE id_pegawai = ?
-        ");
+                UPDATE pegawai
+                SET nama = ?, uname = ?, role = ?, email = ?
+                WHERE id_pegawai = ?
+            ");
 
             $berhasil = $stmt->execute([
                 $nama,
@@ -349,9 +440,112 @@ class PegawaiController
         }
 
         if ($berhasil) {
+            catatLog(
+                $this->db,
+                'Pegawai',
+                'Update Karyawan',
+                'USER-UPDATE',
+                ($_SESSION['nama'] ?? 'Superadmin') .
+                    ' memperbarui data karyawan ' . $nama .
+                    ' (Username: ' . $uname .
+                    ', Role: ' . $role .
+                    ', ID: ' . $idPegawai . ').' .
+                    ($password !== '' ? ' Password akun juga diperbarui.' : '')
+            );
+
             $_SESSION['success'] = 'Data karyawan berhasil diperbarui.';
         } else {
             $_SESSION['error'] = 'Terjadi kesalahan, silakan coba lagi.';
+        }
+
+        header('Location: /tambah/karyawan');
+        exit;
+    }
+
+    public function hapusKaryawan(): void
+    {
+        if (!isset($_SESSION['id_pegawai'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        if (($_SESSION['role'] ?? '') !== 'superadmin') {
+            http_response_code(403);
+            exit('Anda tidak memiliki akses untuk menghapus karyawan.');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit('Metode tidak diizinkan.');
+        }
+
+        if (
+            empty($_SESSION['csrf_token']) ||
+            !is_string($_POST['csrf_token'] ?? null) ||
+            !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
+        ) {
+            http_response_code(403);
+            exit('Token keamanan tidak valid.');
+        }
+
+        $idPegawai = $_POST['id_pegawai'] ?? '';
+
+        if (!ctype_digit((string) $idPegawai) || (int) $idPegawai < 1) {
+            $_SESSION['error'] = 'Data karyawan tidak valid.';
+            header('Location: /tambah/karyawan');
+            exit;
+        }
+
+        $idPegawai = (int) $idPegawai;
+        $currentUserId = (int) $_SESSION['id_pegawai'];
+
+        if ($idPegawai === $currentUserId) {
+            $_SESSION['error'] = 'Anda tidak dapat menghapus akun sendiri.';
+            header('Location: /tambah/karyawan');
+            exit;
+        }
+
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id_pegawai, nama, role
+                FROM pegawai
+                WHERE id_pegawai = ?
+            ");
+
+            $stmt->execute([$idPegawai]);
+            $pegawai = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$pegawai) {
+                $_SESSION['error'] = 'Data karyawan tidak ditemukan.';
+                header('Location: /tambah/karyawan');
+                exit;
+            }
+
+            $stmt = $this->db->prepare("
+                DELETE FROM pegawai
+                WHERE id_pegawai = ?
+            ");
+
+            $berhasil = $stmt->execute([$idPegawai]);
+
+            if ($berhasil && $stmt->rowCount() > 0) {
+                $_SESSION['success'] = 'Karyawan ' . $pegawai['nama'] . ' berhasil dihapus.';
+
+                catatLog(
+                    $this->db,
+                    'Pegawai',
+                    'Hapus Karyawan',
+                    'USER-DELETE',
+                    ($_SESSION['nama'] ?? 'Superadmin') .
+                        ' menghapus akun karyawan ' . $pegawai['nama'] .
+                        ' (Role: ' . $pegawai['role'] .
+                        ', ID: ' . $idPegawai . ').'
+                );
+            } else {
+                $_SESSION['error'] = 'Karyawan gagal dihapus.';
+            }
+        } catch (PDOException $e) {
+            $_SESSION['error'] = 'Karyawan gagal dihapus karena masih memiliki data yang terhubung atau terjadi kesalahan database.';
         }
 
         header('Location: /tambah/karyawan');
