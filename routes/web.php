@@ -5,6 +5,7 @@ require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/PesananController.php';
 require_once __DIR__ . '/../app/controllers/LaporanController.php';
 require_once __DIR__ . '/../app/controllers/PegawaiController.php';
+require_once __DIR__ . '/../app/controllers/LogAktivitasController.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
@@ -67,7 +68,8 @@ if ($uri === '/' && $method === 'GET') {
 } elseif ($uri === '/karyawan/hapus' && $method === 'POST') {
     $pegawaiController->hapusKaryawan();
 } elseif ($uri === '/log' && $method === 'GET') {
-    require_once __DIR__ . '/../app/views/dashboard/log_aktivitas.php';
+    $logController = new LogAktivitasController($pdo);
+    $logController->index();
 } elseif ($uri === '/laporan/export-pdf' && $method === 'GET') {
     $laporanController->exportPdf();
 } else {
