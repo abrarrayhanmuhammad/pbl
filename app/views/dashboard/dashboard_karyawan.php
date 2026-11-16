@@ -1,14 +1,4 @@
 <?php
-// if (session_status() === PHP_SESSION_NONE) {
-//     session_start();
-// }
-// $_SESSION['user_role'] = 'KARYAWAN';
-// $_SESSION['user_name'] = 'Bagas (Karyawan)';
-// $_SESSION['user_initials'] = 'BK';
-
-// $user_role = 'KARYAWAN';
-// $user_initials = 'BK';
-// $user_name = 'Bagas (Karyawan)';
 $page_title = 'Dashboard Operasional - KickDropShoe';
 $current_page = 'dashboard';
 require_once __DIR__ . '/../layouts/header.php';

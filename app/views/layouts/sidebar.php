@@ -3,9 +3,6 @@
  * Sidebar Component - KickDropShoe MIS (Mobile Responsive Off-Canvas & Desktop Fixed)
  */
 $current_page = $current_page ?? '';
-$user_role = $user_role ?? ($_SESSION['role'] ?? 'superadmin'); // 'OWNER' or 'KARYAWAN'
-$user_name = $user_name ?? ($_SESSION['nama'] ?? ($user_role === 'karyawan' ? 'Bagas (Karyawan)' : 'Super Admin'));
-$user_initials = $user_initials ?? ($_SESSION['user_initials'] ?? ($user_role === 'karyawan' ? 'BK' : 'SA'));
 $is_print_hidden = !empty($is_invoice) ? 'print:hidden' : '';
 
 // $dashboard_link = ($user_role === 'karyawan') ? 'dashboard_karyawan.php' : 'dashboard_owner.php';

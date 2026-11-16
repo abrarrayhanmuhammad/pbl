@@ -1,41 +1,4 @@
 <?php
-// if (session_status() === PHP_SESSION_NONE) {
-//     session_start();
-// }
-
-// // Handle Logout Action
-// if (isset($_GET['action']) && $_GET['action'] === 'logout') {
-//     $_SESSION = [];
-//     if (ini_get("session.use_cookies")) {
-//         $params = session_get_cookie_params();
-//         setcookie(session_name(), '', time() - 42000,
-//             $params["path"], $params["domain"],
-//             $params["secure"], $params["httponly"]
-//         );
-//     }
-//     session_destroy();
-//     header('Location: login.php');
-//     exit;
-// }
-
-// // Handle Login Form POST
-// if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-//     $username = strtolower(trim($_POST['username'] ?? ''));
-//     if (strpos($username, 'karyawan') !== false || strpos($username, 'bagas') !== false) {
-//         $_SESSION['user_role'] = 'KARYAWAN';
-//         $_SESSION['user_name'] = 'Bagas (Karyawan)';
-//         $_SESSION['user_initials'] = 'BK';
-//         header('Location: dashboard_karyawan.php');
-//         exit;
-//     } else {
-//         $_SESSION['user_role'] = 'OWNER';
-//         $_SESSION['user_name'] = 'Super Admin';
-//         $_SESSION['user_initials'] = 'SA';
-//         header('Location: dashboard_owner.php');
-//         exit;
-//     }
-// }
-
 $page_title = 'Login - KickDropShoe';
 $body_class = 'bg-brand-navy min-h-screen flex items-center justify-center p-4 font-sans antialiased';
 require_once __DIR__ . '/../layouts/header.php';

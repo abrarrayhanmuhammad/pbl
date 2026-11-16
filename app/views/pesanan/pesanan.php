@@ -60,7 +60,13 @@ require_once __DIR__ . '/../layouts/header.php';
                                 <p class="text-xs font-medium text-slate-500">
                                     <?= htmlspecialchars($pesanan['jumlah_barang'] ?? '0') ?> Barang
                                     •
-                                    <?= htmlspecialchars($pesanan['nama_layanan'] ?? '-') ?>
+                                    <?php if ($pesanan['nama_layanan'] && $pesanan['nama_paket']): ?>
+                                        <?= htmlspecialchars($pesanan['nama_layanan'] ?? '-') ?>, <?= htmlspecialchars($pesanan['nama_paket'] ?? '-') ?>
+                                    <?php elseif ($pesanan['nama_layanan']): ?>
+                                        <?= htmlspecialchars($pesanan['nama_layanan'] ?? '-') ?>
+                                    <?php elseif ($pesanan['nama_paket']): ?>
+                                        <?= htmlspecialchars($pesanan['nama_paket'] ?? '-') ?>
+                                    <?php endif; ?>
                                 </p>
 
                                 <div class="flex justify-between items-center mt-2">
@@ -95,7 +101,7 @@ require_once __DIR__ . '/../layouts/header.php';
                         </a>
                         <?php if ($user_role === 'superadmin'): ?>
                             <?php
-                                $pesananAda = !empty($pesanan) && !empty($pesanan['id_pesanan']);
+                            $pesananAda = !empty($pesanan) && !empty($pesanan['id_pesanan']);
                             ?>
                             <form action="/pesanan/hapus" method="POST" id="form-hapus-pesanan">
                                 <input type="hidden" name="id_pesanan" value="<?= $pesananAda ? (int) $pesanan['id_pesanan'] : '' ?>">
@@ -108,7 +114,7 @@ require_once __DIR__ . '/../layouts/header.php';
                         <?php endif; ?>
                     </div>
                 </div>
-           <!-- Merapihkan -->   
+                <!-- Merapihkan -->
                 <div class="flex-1 overflow-y-auto p-6 space-y-6">
                     <div class="grid grid-cols-2 gap-6">
                         <div class="bg-slate-50/80 p-5 rounded-2xl border border-slate-100 space-y-3 text-xs font-medium">

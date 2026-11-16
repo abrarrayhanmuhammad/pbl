@@ -24,7 +24,8 @@ class Pesanan
             p.total_bayar,
             COUNT(DISTINCT dp.id_detail_pesanan) AS jumlah_barang,
             STRING_AGG(DISTINCT jb.nama_jenis, ', ') AS jenis_barang,
-            STRING_AGG(DISTINCT l.nama_layanan, ', ') AS nama_layanan
+            STRING_AGG(DISTINCT l.nama_layanan, ', ') AS nama_layanan,
+            STRING_AGG(DISTINCT pk.nama_paket, ', ') AS nama_paket
         FROM pesanan p
         JOIN customer c
             ON c.id_customer = p.id_customer
@@ -34,6 +35,8 @@ class Pesanan
             ON l.id_layanan = dp.id_layanan
         LEFT JOIN jenis_barang jb
             ON jb.id_jenis = l.id_jenis
+        LEFT JOIN paket pk
+            ON pk.id_paket = dp.id_paket
         GROUP BY
             p.id_pesanan,
             p.kode_pesanan,
@@ -73,7 +76,7 @@ class Pesanan
         ";
         return $this->db->query($sql)->fetch(PDO::FETCH_ASSOC);
     }
-    
+
     public function getPesananMingguan(): array
     {
         $sql = "
@@ -93,7 +96,7 @@ class Pesanan
         ";
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
     public function getPerluPerhatian(): array
     {
         $sql = "
