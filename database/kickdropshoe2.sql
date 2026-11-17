@@ -310,7 +310,9 @@ CREATE TABLE log_aktivitas (
     referensi VARCHAR(50),
     keterangan TEXT,
     ip_address VARCHAR(45),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    user_agent VARCHAR(255),
+    device_hash CHAR(64);
 );
 
 -- Indeks untuk pencarian pesanan dan relasi yang sering digunakan
@@ -320,5 +322,6 @@ CREATE INDEX idx_pesanan_tanggal_masuk ON pesanan(tanggal_masuk);
 CREATE INDEX idx_detail_pesanan_pesanan ON detail_pesanan(id_pesanan);
 CREATE INDEX idx_layanan_kategori ON layanan(kategori);
 CREATE INDEX idx_log_created_at ON log_aktivitas(created_at DESC);
+CREATE INDEX idx_log_pegawai_aksi_device ON log_aktivitas (id_pegawai, aksi, device_hash);
 
 COMMIT;
