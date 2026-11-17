@@ -10,16 +10,30 @@ class LogAktivitas
     }
 
     // Mengambil semua log
-    public function getAllLogs(): array
+    public function getAllLogs(int $limit = 200): array
     {
-        $sql = "
-            SELECT l.*, p.nama AS nama_pegawai 
-            FROM log_aktivitas l
-            LEFT JOIN pegawai p ON p.id_pegawai = l.id_pegawai
-            ORDER BY l.created_at DESC
-        ";
-        
-        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        $sql = '
+            SELECT
+                log_aktivitas.created_at AS "createdAt",
+                pegawai.nama AS "namaPegawai",
+                pegawai.role AS "rolePegawai",
+                log_aktivitas.kategori AS "kategori",
+                log_aktivitas.referensi AS "referensi",
+                log_aktivitas.aksi AS "aksi",
+                log_aktivitas.keterangan AS "keterangan",
+                log_aktivitas.ip_address AS "ipAddress"
+            FROM log_aktivitas
+            LEFT JOIN pegawai
+                ON log_aktivitas.id_pegawai = pegawai.id_pegawai
+            ORDER BY log_aktivitas.created_at DESC
+            LIMIT :limit
+        ';
+    
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+    
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Fungsi untuk mencatat log (bisa dipanggil dari controller lain nanti)

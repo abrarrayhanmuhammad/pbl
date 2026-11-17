@@ -68,6 +68,26 @@ class AuthController
         $_SESSION['nama'] = $pegawai['nama'];
         $_SESSION['role'] = $pegawai['role'];
 
+        terbitkanDeviceToken();
+        $deviceHash = ambilDeviceHash();
+        
+        $stmt = $this->db->prepare(
+            'SELECT
+                COUNT(log_aktivitas.device_hash) AS "jumlahBerHash",
+                COUNT(*) FILTER (WHERE log_aktivitas.device_hash = :deviceHash) AS "jumlahCocok"
+            FROM log_aktivitas
+            WHERE log_aktivitas.id_pegawai = :idPegawai
+            AND log_aktivitas.aksi = \'Login Berhasil\''
+        );
+        $stmt->execute([
+            'deviceHash' => $deviceHash,
+            'idPegawai'  => (int) $pegawai['id_pegawai'],
+        ]);
+        $hasil = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $perangkatBaru = (int) $hasil['jumlahBerHash'] > 0
+            && (int) $hasil['jumlahCocok'] === 0;
+        
         catatLog(
             $this->db,
             'Autentikasi',
@@ -76,6 +96,16 @@ class AuthController
             $pegawai['nama'] . ' berhasil login ke sistem.'
         );
 
+        if ($perangkatBaru) {
+            catatLog(
+                $this->db,
+                'Autentikasi',
+                'Login Perangkat Baru',
+                'AUTH-PERANGKAT-BARU',
+                $pegawai['nama'] . ' login dari perangkat yang belum pernah dipakai sebelumnya.'
+            );
+        }
+        
         header('Location: /dashboard');
 
         exit;

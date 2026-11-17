@@ -17,46 +17,22 @@ $roleMap = [
 ];
 $zonaJakarta = new DateTimeZone('Asia/Jakarta');
 
-$system_logs = [];
+$system_logs = array_map(function ($row) use ($badgeMap, $namaBulan, $roleMap, $zonaJakarta) {
+    $dt = new DateTime($row['createdAt']);
+    $dt->setTimezone($zonaJakarta);
+    return [
+        'time'     => $dt->format('d') . ' ' . $namaBulan[(int) $dt->format('n')] . ' ' . $dt->format('Y, H:i') . ' WIB',
+        'user'     => $row['namaPegawai'] ?? 'Sistem',
+        'role'     => $roleMap[$row['rolePegawai']] ?? '-',
+        'category' => $row['kategori'],
+        'badge'    => $badgeMap[$row['kategori']] ?? 'bg-slate-100 text-slate-700 border-slate-200',
+        'ref'      => $row['referensi'] ?? '-',
+        'action'   => $row['aksi'],
+        'desc'     => $row['keterangan'] ?? '',
+        'ip'       => $row['ipAddress'] ?? '-',
+    ];
+}, $logs ?? []);
 
-if (isset($pdo)) {
-    try {
-        $stmt = $pdo->query(
-            'SELECT
-                log_aktivitas.created_at AS "createdAt",
-                pegawai.nama AS "namaPegawai",
-                pegawai.role AS "rolePegawai",
-                log_aktivitas.kategori AS "kategori",
-                log_aktivitas.referensi AS "referensi",
-                log_aktivitas.aksi AS "aksi",
-                log_aktivitas.keterangan AS "keterangan",
-                log_aktivitas.ip_address AS "ipAddress"
-            FROM log_aktivitas
-            LEFT JOIN pegawai
-                ON log_aktivitas.id_pegawai = pegawai.id_pegawai
-            ORDER BY log_aktivitas.created_at DESC
-            LIMIT 200'
-        );
-
-        $system_logs = array_map(function ($row) use ($badgeMap, $namaBulan, $roleMap, $zonaJakarta) {
-            $dt = new DateTime($row['createdAt']);
-            $dt->setTimezone($zonaJakarta);
-            return [
-                'time'     => $dt->format('d') . ' ' . $namaBulan[(int) $dt->format('n')] . ' ' . $dt->format('Y, H:i') . ' WIB',
-                'user'     => $row['namaPegawai'] ?? 'Sistem',
-                'role'     => $roleMap[$row['rolePegawai']] ?? '-',
-                'category' => $row['kategori'],
-                'badge'    => $badgeMap[$row['kategori']] ?? 'bg-slate-100 text-slate-700 border-slate-200',
-                'ref'      => $row['referensi'] ?? '-',
-                'action'   => $row['aksi'],
-                'desc'     => $row['keterangan'] ?? '',
-                'ip'       => $row['ipAddress'] ?? '-',
-            ];
-        }, $stmt->fetchAll(PDO::FETCH_ASSOC));
-    } catch (Throwable $e) {
-        $system_logs = [];
-    }
-}
 ?>
 <div class="flex h-screen overflow-hidden bg-brand-slateBg">
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
