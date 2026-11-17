@@ -49,7 +49,7 @@ WHERE layanan.nama_layanan IN ('Dark Shoes', 'Leather/Suede/Bludru');
 
 -- Revisi 2: harga Noda Berat diisi kasir
 ALTER TABLE treatment_tambahan
-ADD COLUMN harga_manual BOOLEAN NOT NULL DEFAULT FALSE;
+ADD COLUMN IF NOT EXISTS harga_manual BOOLEAN NOT NULL DEFAULT FALSE;
 
 UPDATE treatment_tambahan
 SET harga_manual = TRUE
