@@ -312,7 +312,7 @@ CREATE TABLE log_aktivitas (
     ip_address VARCHAR(45),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     user_agent VARCHAR(255),
-    device_hash CHAR(64);
+    device_hash CHAR(64)
 );
 
 -- Indeks untuk pencarian pesanan dan relasi yang sering digunakan
