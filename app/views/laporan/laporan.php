@@ -6,7 +6,7 @@ $user_role = $_SESSION['role'] ?? 'superadmin';
 
 // Proteksi Hak Akses: Laporan hanya untuk OWNER
 if ($user_role !== 'superadmin') {
-    header('Location: dashboard_karyawan.php');
+    header('Location: /login');
     exit;
 }
 
@@ -19,7 +19,8 @@ $statistik          = $statistik          ?? ['total_pesanan' => 0, 'total_baran
 $rincianPembayaran  = $rincianPembayaran  ?? [];
 
 // Helper: pilih icon & warna berdasarkan metode
-function metodeStyle(string $metode): array {
+function metodeStyle(string $metode): array
+{
     $m = strtolower(trim($metode));
     if (str_contains($m, 'cash') || str_contains($m, 'tunai')) {
         return ['icon' => 'fa-money-bill-wave', 'bg' => 'bg-blue-50',   'text' => 'text-blue-600',   'label' => 'Cash (Tunai)'];
@@ -46,33 +47,33 @@ function metodeStyle(string $metode): array {
 
             <!-- ============ FILTER TANGGAL ============ -->
             <form method="GET" action="/laporan"
-                  class="bg-white rounded-3xl border border-slate-200 p-4 md:p-6 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
+                class="bg-white rounded-3xl border border-slate-200 p-4 md:p-6 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
                     <div class="relative">
                         <input type="date" name="start_date"
-                               value="<?= htmlspecialchars($_GET['start_date'] ?? '') ?>"
-                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-600 outline-none">
+                            value="<?= htmlspecialchars($_GET['start_date'] ?? '') ?>"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-600 outline-none">
                     </div>
                     <span class="text-xs font-semibold text-slate-400 text-center sm:text-left">sampai</span>
                     <div class="relative">
                         <input type="date" name="end_date"
-                               value="<?= htmlspecialchars($_GET['end_date'] ?? '') ?>"
-                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-600 outline-none">
+                            value="<?= htmlspecialchars($_GET['end_date'] ?? '') ?>"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-600 outline-none">
                     </div>
                     <button type="submit"
-                            class="px-6 py-3 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 text-xs font-extrabold rounded-xl transition shadow-md shadow-brand-yellow/20">
+                        class="px-6 py-3 bg-brand-yellow hover:bg-brand-yellowHover text-slate-900 text-xs font-extrabold rounded-xl transition shadow-md shadow-brand-yellow/20">
                         Filter Data
                     </button>
                     <?php if (!empty($_GET['start_date']) || !empty($_GET['end_date'])): ?>
                         <a href="/laporan"
-                           class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-extrabold rounded-xl transition text-center">
+                            class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-extrabold rounded-xl transition text-center">
                             Reset
                         </a>
                     <?php endif; ?>
                 </div>
                 <a href="/laporan/export-pdf?start_date=<?= urlencode($_GET['start_date'] ?? '') ?>&end_date=<?= urlencode($_GET['end_date'] ?? '') ?>"
-                   target="_blank"
-                   class="px-6 py-3 bg-brand-darkCard hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                    target="_blank"
+                    class="px-6 py-3 bg-brand-darkCard hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition shadow-md flex items-center justify-center gap-2">
                     <i class="fas fa-file-pdf"></i> Export PDF
                 </a>
             </form>

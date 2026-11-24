@@ -125,7 +125,7 @@ class PegawaiController
 
     public function tambahKaryawan(): void
     {
-        if (!isset($_SESSION['id_pegawai'])) {
+        if (!isset($_SESSION['id_pegawai'], $_SESSION['role']) || $_SESSION['role'] !== 'superadmin') {
             header('Location: /login');
             exit;
         }
