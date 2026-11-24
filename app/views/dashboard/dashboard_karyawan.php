@@ -62,7 +62,7 @@ require_once __DIR__ . '/../layouts/header.php';
                                 <div class="flex justify-between items-center p-4 sm:p-5 bg-slate-50/80 rounded-2xl border border-slate-100 hover:border-slate-200 transition">
                                     <div>
                                         <h4 class="font-extrabold text-slate-900 text-sm">
-                                            #<?= htmlspecialchars($p['kodePesanan']) ?> – <?= htmlspecialchars($p['namaCustomer']) ?>
+                                            <?= htmlspecialchars($p['kodePesanan']) ?> – <?= htmlspecialchars($p['namaCustomer']) ?>
                                         </h4>
                                         <p class="text-xs font-semibold text-slate-400 mt-0.5">
                                             <?= htmlspecialchars($p['namaTreatment']) ?> (Sisa <?= htmlspecialchars($p['sisaHari']) ?> Hari)

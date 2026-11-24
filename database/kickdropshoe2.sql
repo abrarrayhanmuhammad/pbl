@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS log_aktivitas CASCADE;
 DROP TABLE IF EXISTS password_resets CASCADE;
 
 -- =========================================================
--- 1. PEGAWAI / LOGIN
+-- 1. PEGAWAI / LOGINS
 -- =========================================================
 CREATE TABLE pegawai (
     id_pegawai SERIAL PRIMARY KEY,
@@ -64,7 +64,7 @@ CREATE TABLE drop_point (
 );
 
 INSERT INTO drop_point (nama, alamat_lokasi) VALUES
-('Surkun', 'Jl. Rlayatan GG 11 No 19 (Surkun)'),
+('Surkun', 'Jl. Klayatan GG 11 No 19 (Sukun)'),
 ('Jetis', 'Jl. Margobasuki GG IV No 5 Jetis'),
 ('Kopi Satu Arah', 'Oro-Oro Dowo');
 
