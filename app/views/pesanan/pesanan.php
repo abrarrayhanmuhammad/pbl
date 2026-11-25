@@ -27,6 +27,7 @@ require_once __DIR__ . '/../layouts/header.php';
                             <option>Menunggu</option>
                             <option>Diproses</option>
                             <option>Selesai</option>
+                            <option>Diambil</option>
                         </select>
                         <button class="w-10 h-10 bg-brand-darkCard text-white rounded-xl flex items-center justify-center text-xs font-bold shadow-sm">
                             <i class="fas fa-filter"></i>
@@ -96,6 +97,9 @@ require_once __DIR__ . '/../layouts/header.php';
                         <p id="detail-subtitle" class="text-xs font-semibold text-slate-500 mt-1 detail-subtitle">Pilih pesanan</p>
                     </div>
                     <div class="flex items-center gap-3">
+                        <a id="aktivitas-link" class="px-4 py-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
+                            <i class="fas fa-edit"></i> Aktivitas Pesanan
+                        </a>
                         <a id="detail-edit-link" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
                             <i class="fas fa-edit"></i> Edit Pesanan
                         </a>

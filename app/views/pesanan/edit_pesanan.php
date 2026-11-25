@@ -1,5 +1,5 @@
 <?php
-$page_title = 'Edit Pesanan' .  $pesanan['kode_pesanan'] . '- KickDropShoe';
+$page_title = 'Edit Pesanan ' .  $pesanan['kode_pesanan'] . '- KickDropShoe';
 $current_page = 'edit_pesanan';
 require_once __DIR__ . '/../layouts/header.php';
 ?>

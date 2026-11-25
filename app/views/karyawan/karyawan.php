@@ -1,4 +1,3 @@
-
 <?php
 $page_title = 'Kelola Karyawan - KickDropShoe';
 $current_page = 'karyawan';
@@ -191,6 +190,50 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 </div>
 
                 <div id="empty-search-message" class="hidden py-12 text-center text-slate-400 font-medium text-xs">Tidak ditemukan karyawan yang sesuai.</div>
+
+
+                <?php if ($totalData > 0): ?>
+                    <div class="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p class="text-xs font-semibold text-slate-400">
+                            Menampilkan
+                            <span class="text-slate-700"><?= $offset + 1 ?></span>
+                            -
+                            <span class="text-slate-700"><?= $offset + count($dataPegawai) ?></span>
+                            dari
+                            <span class="text-slate-700"><?= $totalData ?></span>
+                            karyawan
+                        </p>
+
+                        <div class="flex items-center gap-1.5">
+                            <?php if ($halamanAktif > 1): ?>
+                                <a href="?halaman=<?= $halamanAktif - 1 ?>"
+                                    class="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                                    <i class="fas fa-chevron-left text-[10px] mr-1"></i>
+                                    Sebelumnya
+                                </a>
+                            <?php endif; ?>
+
+                            <?php for ($i = 1; $i <= $totalHalaman; $i++): ?>
+                                <a href="?halaman=<?= $i ?>"
+                                    class="min-w-9 h-9 flex items-center justify-center rounded-lg text-xs font-bold transition
+                    <?= $i === $halamanAktif
+                                    ? 'bg-slate-900 text-brand-yellow'
+                                    : 'border border-slate-200 text-slate-600 hover:bg-slate-50' ?>">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
+
+                            <?php if ($halamanAktif < $totalHalaman): ?>
+                                <a href="?halaman=<?= $halamanAktif + 1 ?>"
+                                    class="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                                    Selanjutnya
+                                    <i class="fas fa-chevron-right text-[10px] ml-1"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
             </div>
         </div>
     </main>

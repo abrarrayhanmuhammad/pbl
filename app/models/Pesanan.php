@@ -47,7 +47,14 @@ class Pesanan
             p.status,
             p.status_bayar,
             p.total_bayar
-        ORDER BY p.id_pesanan DESC
+        ORDER BY
+            CASE status
+                WHEN 'Menunggu' THEN 1
+                WHEN 'Diproses' THEN 2
+                WHEN 'Selesai' THEN 3
+                WHEN 'Diambil' THEN 4
+            END ASC,
+        tanggal_masuk DESC;
     ";
 
         $stmt = $this->db->prepare($sql);

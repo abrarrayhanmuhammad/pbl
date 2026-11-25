@@ -16,6 +16,26 @@ class Pegawai
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getPegawaiPaginated(int $limit, int $offset): array
+    {
+        $query = "SELECT * FROM pegawai
+              ORDER BY id_pegawai DESC
+              LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countAllPegawai(): int
+    {
+        $query = "SELECT COUNT(*) FROM pegawai";
+        return (int) $this->db->query($query)->fetchColumn();
+    }
+
     public function findByUsername(string $username): ?array
     {
         $sql = "SELECT * FROM pegawai WHERE uname = :username LIMIT 1";

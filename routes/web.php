@@ -72,6 +72,8 @@ if ($uri === '/' && $method === 'GET') {
     $logController->index();
 } elseif ($uri === '/laporan/export-pdf' && $method === 'GET') {
     $laporanController->exportPdf();
+} elseif ($uri === '/pesanan/aktivitas' && $method === 'GET') {
+    $pesananController->aktivitasPesanan();
 } else {
     http_response_code(404);
     require_once __DIR__ . '/../app/views/errors/404.php';

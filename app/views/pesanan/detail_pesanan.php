@@ -23,6 +23,9 @@ require_once __DIR__ . '/../layouts/header.php';
                     <a href="/pesanan/edit?id=<?= htmlspecialchars($pesanan['id_pesanan']) ?>" id="detail-edit-link" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
                         <i class="fas fa-edit"></i> Edit Pesanan
                     </a>
+                    <a href="/pesanan/aktivitas?id=<?= htmlspecialchars($pesanan['id_pesanan']) ?>" id="aktivitas-link" class="px-4 py-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-600 rounded-xl text-xs font-extrabold transition flex items-center gap-2">
+                        <i class="fas fa-edit"></i> Aktivitas Pesanan
+                    </a>
                     <?php if ($user_role === 'superadmin'): ?>
                         <?php
                         $pesananAda = !empty($pesanan) && !empty($pesanan['id_pesanan']);
