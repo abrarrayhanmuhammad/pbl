@@ -130,7 +130,16 @@ class PegawaiController
             exit;
         }
 
-        $dataPegawai = $this->pegawaiModel->getAllPegawai();
+        $limit = 5;
+        $totalData = $this->pegawaiModel->countAllPegawai();
+        $totalHalaman = max(1, (int) ceil($totalData / $limit));
+
+        $halamanAktif = isset($_GET['halaman']) ? (int) $_GET['halaman'] : 1;
+        $halamanAktif = max(1, min($halamanAktif, $totalHalaman));
+
+        $offset = ($halamanAktif - 1) * $limit;
+
+        $dataPegawai = $this->pegawaiModel->getPegawaiPaginated($limit, $offset);
 
         $oldInput = $_SESSION['old_input'] ?? [];
         $bukaModalTambah = !empty($_SESSION['buka_modal_tambah']);

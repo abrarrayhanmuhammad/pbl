@@ -5,6 +5,7 @@ require_once __DIR__ . '/../models/DropPoint.php';
 require_once __DIR__ . '/../models/Layanan.php';
 require_once __DIR__ . '/../models/TreatmentTambahan.php';
 require_once __DIR__ . '/../models/Customer.php';
+require_once __DIR__ . '/../models/LogAktivitas.php';
 
 class PesananController
 {
@@ -14,6 +15,7 @@ class PesananController
     private Layanan $layananModel;
     private TreatmentTambahan $treatmentTambahanModel;
     private Customer $customerModel;
+    private LogAktivitas $logModel;
 
     public function __construct(PDO $db)
     {
@@ -23,6 +25,7 @@ class PesananController
         $this->layananModel = new Layanan($db);
         $this->treatmentTambahanModel = new TreatmentTambahan($db);
         $this->customerModel = new Customer($db);
+        $this->logModel = new LogAktivitas($db);
     }
 
     public function index(): void
@@ -1365,26 +1368,26 @@ class PesananController
             $this->db->commit();
 
             $kode = ambilKodePesanan($this->db, (int) $idPesanan);
-            
+
             $perubahan = [];
-            
+
             if ($status !== null && $status !== $pesananLama['status']) {
                 $perubahan[] = 'status ' . $pesananLama['status'] . ' menjadi ' . $status;
             }
-            
+
             if ($statusBayar !== null && $statusBayar !== $pesananLama['status_bayar']) {
                 $perubahan[] = 'status bayar ' . $pesananLama['status_bayar'] . ' menjadi ' . $statusBayar;
             }
-            
+
             if ((int) $pesananLama['total_bayar'] !== (int) $totalBayar) {
                 $perubahan[] = 'total Rp ' . number_format((int) $pesananLama['total_bayar'], 0, ',', '.')
-                . ' menjadi Rp ' . number_format((int) $totalBayar, 0, ',', '.');
+                    . ' menjadi Rp ' . number_format((int) $totalBayar, 0, ',', '.');
             }
-            
+
             $keterangan = $perubahan
                 ? 'Memperbarui pesanan ' . $kode . ': ' . implode('; ', $perubahan) . '.'
                 : 'Memperbarui data pesanan ' . $kode . ' (status, status bayar, dan total tidak berubah).';
-            
+
             catatLog(
                 $this->db,
                 'Pesanan',
@@ -1392,7 +1395,7 @@ class PesananController
                 $kode,
                 $keterangan
             );
-            
+
             $folderBefore = realpath(
                 dirname(__DIR__, 2) . '/public/uploads/pesanan/before'
             );
@@ -2208,26 +2211,45 @@ class PesananController
     {
         $hargaMin = (int) $row['harga_min'];
         $isManual = in_array($row['harga_manual'] ?? false, [true, 't', '1', 1], true);
-    
+
         if (!$isManual) {
             return $hargaMin;
         }
-    
+
         $angka = is_scalar($hargaInput)
             ? preg_replace('/[^0-9]/', '', (string) $hargaInput)
             : '';
-    
+
         if ($angka === '') {
             throw new RuntimeException('Harga ' . $row['nama_treatment'] . ' wajib diisi.');
         }
-    
+
         $harga = (int) $angka;
         $hargaMax = $row['harga_max'] !== null ? (int) $row['harga_max'] : null;
-    
+
         if ($harga < $hargaMin || ($hargaMax !== null && $harga > $hargaMax)) {
             throw new RuntimeException('Harga ' . $row['nama_treatment'] . ' di luar rentang yang diizinkan.');
         }
-    
+
         return $harga;
+    }
+
+    public function aktivitasPesanan(): void
+    {
+        if (!isset($_SESSION['id_pegawai'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+        if (!$id || $id <= 0) {
+            header('Location: /pesanan');
+            exit;
+        }
+
+        $logs = $this->logModel->getAllLogsById(10, $id);
+
+        require_once __DIR__ . '/../views/pesanan/aktivitas_pesanan.php';
     }
 }

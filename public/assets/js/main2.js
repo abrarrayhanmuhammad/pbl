@@ -1315,6 +1315,7 @@ function initMasterDetailOrders() {
         total: document.getElementById('detail-total'),
         whatsappCustomer: document.getElementById('detail-whatsapp-customer'),
         edit: document.getElementById('detail-edit-link'),
+        aktivitas: document.getElementById('aktivitas-link'),
         invoice: document.getElementById('detail-invoice-link'),
         sendDocumentation: document.getElementById('btn-kirim-dokumentasi')
     };
@@ -1718,6 +1719,11 @@ function initMasterDetailOrders() {
             if (el.edit) {
                 el.edit.href =
                     '/pesanan/edit?id=' + encodeURIComponent(p.id_pesanan);
+            }
+            
+            if (el.aktivitas) {
+                el.aktivitas.href =
+                    '/pesanan/aktivitas?id=' + encodeURIComponent(p.id_pesanan);
             }
 
             aturTombolDokumentasi(p, barang);
