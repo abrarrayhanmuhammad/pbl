@@ -204,10 +204,10 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                             karyawan
                         </p>
 
-                        <div class="flex items-center gap-1.5">
+                        <div class="flex items-center gap-1.5 shrink-0">
                             <?php if ($halamanAktif > 1): ?>
                                 <a href="?halaman=<?= $halamanAktif - 1 ?>"
-                                    class="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                                    class="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition whitespace-nowrap shrink-0">
                                     <i class="fas fa-chevron-left text-[10px] mr-1"></i>
                                     Sebelumnya
                                 </a>
@@ -215,8 +215,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
 
                             <?php for ($i = 1; $i <= $totalHalaman; $i++): ?>
                                 <a href="?halaman=<?= $i ?>"
-                                    class="min-w-9 h-9 flex items-center justify-center rounded-lg text-xs font-bold transition
-                    <?= $i === $halamanAktif
+                                    class="w-9 h-9 shrink-0 flex items-center justify-center rounded-lg text-xs font-bold transition
+            <?= $i === $halamanAktif
                                     ? 'bg-slate-900 text-brand-yellow'
                                     : 'border border-slate-200 text-slate-600 hover:bg-slate-50' ?>">
                                     <?= $i ?>
@@ -225,7 +225,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
 
                             <?php if ($halamanAktif < $totalHalaman): ?>
                                 <a href="?halaman=<?= $halamanAktif + 1 ?>"
-                                    class="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition">
+                                    class="px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition whitespace-nowrap shrink-0">
                                     Selanjutnya
                                     <i class="fas fa-chevron-right text-[10px] ml-1"></i>
                                 </a>
